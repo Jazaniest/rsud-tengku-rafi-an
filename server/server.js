@@ -15,6 +15,7 @@ const kegiatanRoutes = require('./routes/kegiatanRoutes');
 const subKegiatanRoutes = require('./routes/subKegiatanRoutes');
 const logbookRoutes = require('./routes/logbookRoutes');
 const exportRoutes = require('./routes/exportRoutes');
+const switchRoutes = require('./routes/switchRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -41,6 +42,7 @@ app.use('/api/subkegiatan', subKegiatanRoutes);
 app.use('/api/logbook', logbookRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/workflow', workflowRoutes);
+app.use('/api/switch', switchRoutes);
 
 app.use('/exports', express.static('exports'));
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));

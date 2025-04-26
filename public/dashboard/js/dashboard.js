@@ -31,13 +31,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         <li class="nav-item"><a class="nav-link" href="profile/profile.html">Profil</a></li>
         <li class="nav-item"><a class="nav-link" href="user.html">Data pengguna</a></li>
         <li class="nav-item"><a class="nav-link" href="../login-form/register.html">Register User</a></li>
-        <li class="nav-item"><a class="nav-link" href="">
-          <!-- From Uiverse.io by Shoh2008 --> 
-          <div class="checkbox-wrapper-8">
-            <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
-            <label for="cb3-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
-          </div>
-        </a></li>
         <li class="nav-item"><a class="nav-link" href="../index.html" id="logoutLink">Logout</a></li>
       `;
     } else {
@@ -46,9 +39,78 @@ document.addEventListener('DOMContentLoaded', async () => {
         <li class="nav-item"><a class="nav-link" href="../index.html" id="logoutLink">Logout</a></li>
       `;
     }
+
+    const registerButton = document.getElementById('register');
+    if (profile.role === 'super admin') {
+      registerButton.innerHTML = `
+      <h4>Formulir Register</h4>
+      <div class="checkbox-wrapper-8">
+        <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
+        <label for="cb3-8" data-tg-on="AKTIF" data-tg-off="MATI" class="tgl-btn"></label>
+      </div>
+      `;
+    }
+
+    const switchButton = document.getElementById('cb3-8');
+    if (switchButton) {
+      initSwitchButton(switchButton);
+    } else {
+      console.error('Switch button tidak ditemukan.');
+    }
+
+    switchButton.addEventListener('change', function() {
+      const isChecked = switchButton.checked;
+      console.log("ini isi switch button", isChecked);
+    });
+
   } catch (error) {
     console.error('Error fetching profile:', error);
   }
+
+
+
+  async function initSwitchButton(switchButton) {  
+    try {
+      // Ambil status awal dari server
+      const response = await fetch('http://localhost:3000/api/switch/status');
+      if (!response.ok) throw new Error('Gagal mengambil status switch dari server');
+      
+      const data = await response.json();
+      console.log('Status awal dari server:', data.status);
+  
+      // Set posisi awal switch (ON/OFF)
+      switchButton.checked = data.status;
+  
+      // Event listener untuk perubahan switch
+      switchButton.addEventListener('change', async function () {
+        const isChecked = switchButton.checked;
+        console.log('Status switch berubah:', isChecked);
+  
+        try {
+          const saveResponse = await fetch('http://localhost:3000/api/switch/status', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: isChecked })
+          });
+  
+          if (!saveResponse.ok) throw new Error('Gagal menyimpan status switch');
+  
+          const result = await saveResponse.json();
+          console.log('Berhasil menyimpan status:', result);
+  
+        } catch (saveError) {
+          console.error('Error saat menyimpan status:', saveError);
+        }
+      });
+  
+  
+    } catch (error) {
+      console.error('Error saat inisialisasi switch:', error);
+    }
+  }
+  
 
   // Logout
   document.getElementById('logoutLink').addEventListener('click', () => {
@@ -446,6 +508,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Panggil fungsi untuk mengambil data tugas dan template
+  initSwitchButton();
   fetchTasks();
   fetchAvailableTemplates();
 });

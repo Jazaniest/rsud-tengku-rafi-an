@@ -375,10 +375,10 @@ ul {
 .feature-section {
   background: url(../img/banner/pattern_bg.jpg) no-repeat center;
   background-size: cover;
-  padding: 60px 0; }
+  padding: 15px 0; }
   @media (max-width: 767px) {
     .feature-section {
-      padding: 60px 0 30px; } }
+      padding: 15px 0 30px; } }
 
 .card-feature {
   padding: 40px 35px;
