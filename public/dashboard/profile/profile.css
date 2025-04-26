@@ -1,0 +1,242 @@
+/* Reset dasar dan body */
+body {
+    font-family: 'Arial', sans-serif;
+    background: #f5f5f5;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Kontainer Profil */
+  .profile-container {
+    background: #ffffff;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 800px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    transition: transform 0.3s ease;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Navigation Bar (Back & Settings) */
+  .profile-nav {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .btn-icon {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px;
+    transition: color 0.3s ease;
+  }
+  
+  .btn-icon:hover {
+    color: #4CAF50;
+  }
+  
+  /* Header Profil */
+  .profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+  
+  .profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #fff;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+  
+  .profile-info {
+    margin-left: 20px;
+    text-align: left;
+  }
+  
+  .profile-name {
+    margin: 0;
+    font-size: 2em;
+    color: #333;
+  }
+  
+  .profile-username {
+    margin: 5px 0 0;
+    font-size: 1.2em;
+    color: #777;
+  }
+  
+  .profile-nip {
+    margin: 5px 0 0;
+    font-size: 1em;
+    color: #999;
+  }
+  
+  /* Detail Profil */
+  .profile-details {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .profile-detail {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+    transition: background 0.3s ease;
+  }
+  
+  .detail-label {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .detail-value {
+    color: #777;
+  }
+  
+  /* Tabel Responsif */
+  .table-container {
+    width: 90%;
+    max-width: 800px;
+    overflow-x: auto;
+  }
+  
+  .table-container table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .table-container th {
+    background-color: #f4f4f4;
+  }
+  
+  /* Media Query untuk Responsivitas */
+  @media (max-width: 768px) {
+    .profile-container {
+      padding: 30px;
+    }
+  
+    .profile-photo {
+      width: 120px;
+      height: 120px;
+    }
+  
+    .profile-name {
+      font-size: 1.8em;
+    }
+  
+    .profile-username {
+      font-size: 1em;
+    }
+  
+    .profile-nip {
+      font-size: 0.9em;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .profile-container {
+      padding: 20px;
+    }
+  
+    .profile-photo {
+      width: 100px;
+      height: 100px;
+    }
+  
+    .profile-name {
+      font-size: 1.6em;
+    }
+  
+    .profile-username {
+      font-size: 0.9em;
+    }
+  
+    .profile-nip {
+      font-size: 0.8em;
+    }
+  }
+  
+  /* Modal Pengaturan */
+  .settings-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .settings-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 300px;
+    text-align: center;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+    max-width: 285px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  button {
+    padding: 10px 15px;
+    margin-top: 10px;
+    background-color: #ffffff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button[type="button"] {
+    background-color: #f44336;
+  }
+
+  .submitBtn {
+    background-color: #4CAF50;
+  }
+  

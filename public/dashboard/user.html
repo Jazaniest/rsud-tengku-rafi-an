@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Pengguna</title>
+    <link rel="stylesheet" href="css/user.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Daftar Pengguna</h1>
+
+        <!-- Input untuk pencarian -->
+        <div class="search-container">
+            <label for="searchInput">Cari Pengguna:</label>
+            <input type="text" id="searchInput" placeholder="Cari berdasarkan nama atau username...">
+        </div>
+        <div style="display: none;">sebagai : <span id="role">Loading...</span></div>
+
+        <div class="table-responsive">
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Username</th>
+                        <th>Nama Lengkap</th>
+                        <th>Jabatan</th>
+                        <th>Tempat Tanggal Lahir</th>
+                        <th>Alamat</th>
+                        <th>NIK</th>
+                        <th>NIP</th>
+                        <th>Pangkat</th>
+                        <th>Ruang</th>
+                        <th>Level PK</th>
+                        <th>Unit Kerja</th>
+                        <th>Pendidikan</th>
+                        <th>No STR</th>
+                        <th>No SIPP</th>
+                        <th>Kredensial</th>
+                        <th>Jenis Ketenagaan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <!-- Data pengguna akan dimuat di sini -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal Edit User -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>Edit Pengguna</h2>
+                <form id="editForm">
+                <label class="form-label">Username</label>
+                <input type="text" id="editUsername" class="form-input">
+
+                <label class="form-label">Nama Lengkap</label>
+                <input type="text" id="editNamaLengkap" class="form-input">
+
+                <label class="form-label">Tempat Tanggal Lahir</label>
+                <input type="text" id="editTtl" class="form-input">
+
+                <label class="form-label">Alamat</label>
+                <input type="text" id="editAlamat" class="form-input">
+
+                <label class="form-label">NIK</label>
+                <input type="text" id="editNik" class="form-input">
+
+                <label class="form-label">NIP</label>
+                <input type="text" id="editNip" class="form-input">
+
+                <label class="form-label">Pangkat</label>
+                <input type="text" id="editPangkat" class="form-input">
+
+                <label class="form-label">Ruang</label>
+                <input type="text" id="editRuang" class="form-input">
+
+                <label class="form-label">Level PK</label>
+                <input type="text" id="editLevelPk" class="form-input">
+
+                <label class="form-label">Unit Kerja</label>
+                <input type="text" id="editUnitKerja" class="form-input">
+
+                <label class="form-label">Pendidikan</label>
+                <input type="text" id="editPendidikan" class="form-input">
+
+                <label class="form-label">No STR</label>
+                <input type="text" id="editNoStr" class="form-input">
+
+                <label class="form-label">No SIPP</label>
+                <input type="text" id="editNoSipp" class="form-input">
+
+                <label class="form-label">Kredensial</label>
+                <input type="text" id="editKredensial" class="form-input">
+
+                <label class="form-label">Jenis Ketenagaan</label>
+                <input type="text" id="editJenisKetenagaan" class="form-input">
+
+                <button type="submit" class="edit-btn">Simpan Perubahan</button>
+                <button type="button" class="edit-btn" onclick="closeModal()">Batal</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/user.js"></script>
+</body>
+</html>

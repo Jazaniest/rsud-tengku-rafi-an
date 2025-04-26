@@ -1,0 +1,213 @@
+// server/models/User.js
+const pool = require('../config/db');
+
+class User {
+  static async findByUsername(username) {
+    const [rows] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+    return rows[0];
+  }
+
+  static async findById(id) {
+    const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+    return rows[0];
+  }
+
+  static async findAll() {
+    const [rows] = await pool.query('SELECT * FROM users');
+    return rows; // Mengembalikan semua pengguna dalam bentuk array
+  }
+  
+  // server/models/User.js
+  static async delete(id) {
+    try {
+        const [result] = await pool.query('DELETE FROM users WHERE id = ?', [id]);
+        return result;
+    } catch (err) {
+        console.error('Error during delete operation:', err); // Log error SQL
+        throw new Error('Database delete failed');
+    }
+  }
+
+
+  static async create(data) {
+    const {
+      username,
+      password_hash,
+      role,
+      nama_lengkap,
+      tempat_tanggal_lahir,
+      alamat,
+      nik,
+      nip,
+      pangkat,
+      ruang,
+      level_pk,
+      unit_kerja,
+      pendidikan,
+      no_str,
+      no_sipp,
+      kredensial,
+      jenis_ketenagaan
+    } = data;
+  
+    // Pastikan jenis_ketenagaan tidak undefined
+    const finalJenisKetenagaan = (typeof jenis_ketenagaan === 'undefined' || jenis_ketenagaan === "") ? null : jenis_ketenagaan;
+  
+    const [result] = await pool.query(
+      'INSERT INTO users (username, password_hash, role, created_at, nama_lengkap, tempat_tanggal_lahir, alamat, nik, nip, pangkat, ruang, level_pk, unit_kerja, pendidikan, no_str, no_sipp, kredensial, jenis_ketenagaan) VALUES (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        username,
+        password_hash,
+        role,
+        nama_lengkap,
+        tempat_tanggal_lahir,
+        alamat,
+        nik,
+        nip,
+        pangkat,
+        ruang,
+        level_pk,
+        unit_kerja,
+        pendidikan,
+        no_str,
+        no_sipp,
+        kredensial,
+        finalJenisKetenagaan
+      ]
+    );
+    return { id: result.insertId, username, role, nama_lengkap, tempat_tanggal_lahir, alamat, nik, nip, pangkat, ruang, level_pk, unit_kerja, pendidikan, no_str, no_sipp, kredensial, jenis_ketenagaan: finalJenisKetenagaan };
+  }
+  
+
+  static async updateProfile(id, data) {
+    const {
+      username,
+      nama_lengkap, // Sesuaikan dengan parameter yang diterima oleh model
+      password_hash,
+      foto_profile,
+      tempat_tanggal_lahir,
+      alamat,
+      nik,
+      nip,
+      pangkat,
+      ruang,
+      level_pk,
+      unit_kerja,
+      pendidikan,
+      no_str,
+      no_sipp,
+      kredensial,
+      jenis_ketenagaan
+    } = data;
+  
+    let query = 'UPDATE users SET username = ?, nama_lengkap = ?';
+    let params = [username, nama_lengkap];
+  
+    // Proses penambahan kolom lain seperti sebelumnya
+    if (password_hash) {
+      query += ', password_hash = ?';
+      params.push(password_hash);
+    }
+  
+    if (foto_profile) {
+      query += ', foto_profile = ?';
+      params.push(foto_profile);
+    }
+  
+    if (tempat_tanggal_lahir) {
+      query += ', tempat_tanggal_lahir = ?';
+      params.push(tempat_tanggal_lahir);
+    }
+  
+    if (alamat) {
+      query += ', alamat = ?';
+      params.push(alamat);
+    }
+  
+    if (nik) {
+      query += ', nik = ?';
+      params.push(nik);
+    }
+  
+    if (nip) {
+      query += ', nip = ?';
+      params.push(nip);
+    }
+  
+    if (pangkat) {
+      query += ', pangkat = ?';
+      params.push(pangkat);
+    }
+  
+    if (ruang) {
+      query += ', ruang = ?';
+      params.push(ruang);
+    }
+  
+    if (level_pk) {
+      query += ', level_pk = ?';
+      params.push(level_pk);
+    }
+  
+    if (unit_kerja) {
+      query += ', unit_kerja = ?';
+      params.push(unit_kerja);
+    }
+  
+    if (pendidikan) {
+      query += ', pendidikan = ?';
+      params.push(pendidikan);
+    }
+  
+    if (no_str) {
+      query += ', no_str = ?';
+      params.push(no_str);
+    }
+  
+    if (no_sipp) {
+      query += ', no_sipp = ?';
+      params.push(no_sipp);
+    }
+  
+    if (kredensial) {
+      query += ', kredensial = ?';
+      params.push(kredensial);
+    }
+  
+    if (jenis_ketenagaan) {
+      query += ', jenis_ketenagaan = ?';
+      params.push(jenis_ketenagaan);
+    }
+  
+    query += ' WHERE id = ?';
+    params.push(id);
+  
+    const [result] = await pool.query(query, params);
+    if (result.affectedRows === 0) {
+      throw new Error('User not found');
+    }
+  
+    return {
+      id,
+      username,
+      nama_lengkap, // Sesuaikan dengan nama parameter yang digunakan
+      foto_profile,
+      tempat_tanggal_lahir,
+      alamat,
+      nik,
+      nip,
+      pangkat,
+      ruang,
+      level_pk,
+      unit_kerja,
+      pendidikan,
+      no_str,
+      no_sipp,
+      kredensial,
+      jenis_ketenagaan
+    };
+  }
+  
+}
+
+module.exports = User;

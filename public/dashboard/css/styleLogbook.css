@@ -1,0 +1,124 @@
+/* Pengaturan Umum */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7fa;
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+h2, h3 {
+  color: #333;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+ul#kegiatanList {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+ul#kegiatanList li {
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 5px;
+}
+
+ul#kegiatanList li:hover {
+  background-color: #e9ecef;
+}
+
+/* Tabel Ringkasan */
+.table-container {
+  overflow-x: auto;
+  margin-top: 30px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+.col-butir {
+  width: 150px;
+  word-wrap: break-word;
+}
+
+.col-angka {
+  width: 50px;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+@media (max-width: 767px) {
+  .col-md-8, .col-md-4 {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .btn-lg {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+
+  .col-angka {
+    font-size: 12px;
+    width: 40px;
+  }
+}
+
+/* Styling untuk tombol export dan download */
+.export-buttons {
+  margin-top: 20px;
+}
+
+.btn-warning, .btn-primary, .btn-success {
+  font-size: 16px;
+  padding: 10px 30px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-warning:hover, .btn-primary:hover, .btn-success:hover {
+  background-color: #0056b3;
+}
+
+/* Form Styling */
+.form-control {
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  font-weight: bold;
+}
+
+.btn-primary {
+  width: 100%;
+}
+
+.text-center {
+  text-align: center;
+}

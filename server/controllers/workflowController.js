@@ -1,0 +1,351 @@
+// server/controllers/workflowController.js
+
+const pool = require('../config/db');
+const eventEmitter = require('../notification-handler/eventEmitter')
+
+exports.updateWorkflowStep = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const instanceId = req.params.id; // Pastikan instanceId dideklarasikan
+    const { action } = req.body; // 'approve', 'reject', atau 'stop'
+
+    // Ambil nilai assigned_user_name dari form (jika dikirim)
+    console.log('nama sebelum di ubah : ', req.body.assigned_user_name);
+    const assignedUserName = req.body.assigned_user_name ? req.body.assigned_user_name.trim() : '';
+    console.log('nama nya adalah : ', assignedUserName);
+
+    
+    // Ambil instance workflow
+    const [instances] = await pool.query(
+      'SELECT * FROM workflow_instances WHERE id = ?',
+      [instanceId]
+    );
+    if (instances.length === 0) {
+      return res.status(404).json({ message: 'Workflow instance tidak ditemukan' });
+    }
+    const instance = instances[0];
+    
+    // Ambil detail langkah aktif dari workflow_steps
+    const [steps] = await pool.query(
+      'SELECT * FROM workflow_steps WHERE workflow_id = ? AND step_order = ?',
+      [instance.workflow_id, instance.current_step_order]
+    );
+    if (steps.length === 0) {
+      return res.status(400).json({ message: 'Step tidak valid' });
+    }
+    const currentStep = steps[0];
+    
+    // Validasi: Pastikan user memiliki peran yang sesuai (harus sama dengan to_role)
+    if (userRole !== currentStep.to_role) {
+      return res.status(403).json({ message: 'User tidak berhak memproses langkah ini' });
+    }
+    
+    // Ambil file path jika ada file yang diupload
+    let filePath = null;
+    if (req.file) {
+      filePath = req.file.path;
+    }
+    // Pastikan filePath selalu ada (gunakan string kosong jika tidak ada file)
+    filePath = filePath || '';
+    
+    // Catat aksi ke history, termasuk file jika ada
+    await pool.query(
+      'INSERT INTO workflow_instance_steps (workflow_instance_id, step_order, from_role, to_role, action_taken, acted_by, remarks, file_path, assigned_user_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [instanceId, instance.current_step_order, currentStep.from_role, currentStep.to_role, action, userId, '', filePath, assignedUserName]
+    );    
+    
+    // Variabel untuk menampung data notifikasi
+    let notificationData = {
+      instanceId,
+      workflowId: instance.workflow_id,
+      currentStep: instance.current_step_order,
+      action,
+      assigned_user_name: assignedUserName
+    };
+    
+    // Proses aksi berdasarkan action
+    if (action === 'stop') {
+      await pool.query(
+        'UPDATE workflow_instances SET status = ? WHERE id = ?',
+        ['completed', instanceId]
+      );
+      // Emit event update tugas (misalnya untuk notifikasi bahwa tugas sudah selesai)
+      eventEmitter.emit('taskStepUpdated', { ...notificationData, status: 'completed' });
+      return res.json({ message: 'Tugas telah dihentikan dan selesai.' });
+    }
+    
+    if (action === 'approve') {
+      if (currentStep.next_step_if_approved === null) {
+        await pool.query(
+          'UPDATE workflow_instances SET status = ? WHERE id = ?',
+          ['completed', instanceId]
+        );
+        eventEmitter.emit('taskStepUpdated', { ...notificationData, status: 'completed' });
+        return res.json({ message: 'Tugas selesai (approve).' });
+      } else {
+        // Proses update untuk langkah berikutnya
+        await pool.query(
+          'UPDATE workflow_instances SET current_step_order = ? WHERE id = ?',
+          [currentStep.next_step_if_approved, instanceId]
+        );
+        // Emit event update untuk perpindahan ke langkah berikutnya
+        eventEmitter.emit('taskStepUpdated', { ...notificationData, newStep: currentStep.next_step_if_approved });
+        return res.json({ message: 'Tugas telah berpindah ke langkah berikutnya (approve).' });
+      }
+    }
+    
+    
+    if (action === 'reject') {
+      if (currentStep.next_step_if_rejected === null) {
+        return res.status(400).json({ message: 'Reject tidak tersedia untuk langkah ini.' });
+      } else {
+        await pool.query(
+          'UPDATE workflow_instances SET current_step_order = ? WHERE id = ?',
+          [currentStep.next_step_if_rejected, instanceId]
+        );
+        // Emit event update untuk reject
+        eventEmitter.emit('taskStepUpdated', { ...notificationData, newStep: currentStep.next_step_if_rejected });
+        return res.json({ message: 'Tugas telah berpindah ke langkah berikutnya (reject).' });
+      }
+    }
+    
+    return res.status(400).json({ message: 'Aksi tidak valid.' });
+    
+  } catch (error) {
+    console.error('Error updating workflow step:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
+exports.getUserTasks = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const userName = req.user.namaLengkap;
+
+    console.log('nama lengkap user yang sedang login : ', req.user.namaLengkap)
+    
+    // Tugas yang diinisiasi oleh user (aktif)
+    const [initiatedTasks] = await pool.query(
+      `SELECT wi.*, w.code, w.title, w.description
+       FROM workflow_instances wi
+       JOIN workflows w ON wi.workflow_id = w.id
+       WHERE wi.initiated_by = ?`, // Tugas yang diinisiasi (termasuk yang completed)
+       [userId]
+    );
+
+    // Tugas yang ditugaskan kepada user (aktif)
+    // Ambil tugas yang ditugaskan kepada user (aktif)
+    const [assignedTasks] = await pool.query(
+      `SELECT 
+          wi.*, 
+          w.code, 
+          w.title, 
+          w.description, 
+          ws.action_description,
+          ws.next_step_if_approved, 
+          ws.next_step_if_rejected, 
+          ws.no_need_next_step, 
+          ws.to_role, 
+          ws.from_role, 
+          ws.step_order,
+          (SELECT id FROM workflow_instance_steps 
+            WHERE workflow_instance_id = wi.id AND file_path <> '' 
+            ORDER BY step_order DESC LIMIT 1) AS last_step_id,
+          (SELECT file_path FROM workflow_instance_steps 
+            WHERE workflow_instance_id = wi.id AND file_path <> '' 
+            ORDER BY step_order DESC LIMIT 1) AS file_path,
+          (SELECT wis.assigned_user_name FROM workflow_instance_steps wis
+            WHERE wis.workflow_instance_id = wi.id
+            ORDER BY wis.step_order DESC LIMIT 1) as assigned_user_name
+      FROM workflow_instances wi
+      JOIN workflows w ON wi.workflow_id = w.id
+      JOIN workflow_steps ws ON ws.workflow_id = wi.workflow_id AND ws.step_order = wi.current_step_order
+      WHERE ws.to_role = ?
+        AND wi.status != 'completed'
+        AND (
+              ( (SELECT wis.assigned_user_name 
+                    FROM workflow_instance_steps wis
+                    WHERE wis.workflow_instance_id = wi.id
+                    ORDER BY wis.step_order DESC LIMIT 1) IS NULL 
+                OR (SELECT wis.assigned_user_name 
+                    FROM workflow_instance_steps wis
+                    WHERE wis.workflow_instance_id = wi.id
+                    ORDER BY wis.step_order DESC LIMIT 1) = '' )
+            OR 
+              ( (SELECT wis.assigned_user_name 
+                    FROM workflow_instance_steps wis
+                    WHERE wis.workflow_instance_id = wi.id
+                    ORDER BY wis.step_order DESC LIMIT 1) = ? )
+            )`,
+      [userRole, userName]
+    );
+
+    
+    // Tugas recent: Tampilkan riwayat aksi yang dilakukan oleh semua user dengan role yang sama
+    const [recentTasks] = await pool.query(
+      `SELECT wis.id as step_id, wis.workflow_instance_id, wis.step_order, wis.action_taken, 
+            wis.acted_by, wis.acted_at, wi.status, w.code, w.title, w.description, wis.file_path,
+            u.nama_lengkap, u.username
+      FROM workflow_instance_steps wis
+      JOIN workflow_instances wi ON wis.workflow_instance_id = wi.id
+      JOIN workflows w ON wi.workflow_id = w.id
+      JOIN users u ON wis.acted_by = u.id
+      WHERE u.role = ?
+      ORDER BY wis.acted_at DESC
+      LIMIT 10`, 
+       [userRole]
+    );
+    
+    res.json({
+      initiatedTasks,
+      assignedTasks,
+      recentTasks
+    });
+  } catch (error) {
+    console.error('Error fetching user tasks:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
+
+
+
+
+exports.initiateWorkflow = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { workflow_id } = req.body;
+    
+    // Ambil langkah pertama dari workflow (step_order = 1)
+    const [steps] = await pool.query(
+      'SELECT * FROM workflow_steps WHERE workflow_id = ? AND step_order = 1',
+      [workflow_id]
+    );
+    
+    if (steps.length === 0) {
+      return res.status(400).json({ message: 'Workflow template tidak valid' });
+    }
+    
+    const firstStep = steps[0];
+    
+    // Validasi: Pastikan user memiliki role yang sesuai untuk inisiasi
+    if (req.user.role !== firstStep.from_role) {
+      return res.status(403).json({ message: 'User tidak berhak menginisiasi workflow ini' });
+    }
+    
+    // Buat instance workflow baru dengan current_step_order = 1 dan status 'in-progress'
+    const [result] = await pool.query(
+      'INSERT INTO workflow_instances (workflow_id, initiated_by, current_step_order, status) VALUES (?, ?, 1, ?)',
+      [workflow_id, userId, 'in-progress']
+    );
+    
+    const instanceId = result.insertId;
+    
+    // Jika ada file yang diupload, simpan ke history (workflow_instance_steps)
+    if (req.file) {
+      await pool.query(
+        'INSERT INTO workflow_instance_steps (workflow_instance_id, step_order, from_role, to_role, action_taken, acted_by, remarks, file_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [instanceId, 1, firstStep.from_role, firstStep.to_role, 'initiate', userId, '', req.file.path]
+      );
+    }
+    
+    console.log('Emitting newTaskInitiated event with data:', {
+      instanceId,
+      workflowId: workflow_id,
+      firstStep
+    });
+
+    // Emit event tugas baru diinisiasi
+    eventEmitter.emit('newTaskInitiated', {
+      instanceId,
+      workflowId: workflow_id,
+      firstStep // mengirimkan data step awal jika dibutuhkan handler notifikasi
+    });
+    
+    return res.status(201).json({ message: 'Workflow instance berhasil diinisiasi', instanceId });
+  } catch (error) {
+    console.error('Error initiating workflow:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
+
+exports.getWorkflowTemplatesForInitiation = async (req, res) => {
+  try {
+    const userRole = req.user.role;
+    
+    // Mengambil template workflow yang dapat diinisiasi oleh user berdasarkan role (step 1)
+    const [templates] = await pool.query(
+      `SELECT w.id as workflow_id, w.code, w.title, w.description, ws.action_description
+       FROM workflows w
+       JOIN workflow_steps ws ON w.id = ws.workflow_id
+       WHERE ws.step_order = 1 AND ws.from_role = ?`,
+      [userRole]
+    );
+    
+    return res.json(templates);
+  } catch (error) {
+    console.error('Error fetching workflow templates:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.downloadFile = async (req, res) => {
+  try {
+    const { stepId } = req.params;
+
+    // Ambil informasi file berdasarkan stepId
+    const [rows] = await pool.query(
+      'SELECT file_path FROM workflow_instance_steps WHERE id = ?',
+      [stepId]
+    );
+
+    if (rows.length === 0 || !rows[0].file_path) {
+      return res.status(404).json({ message: 'File tidak ditemukan' });
+    }
+
+    const filePath = rows[0].file_path;
+
+    // Kirim file ke client
+    res.download(filePath, (err) => {
+      if (err) {
+        console.error('Error saat mengirim file:', err);
+        res.status(500).json({ message: 'Gagal mengunduh file' });
+      }
+    });
+
+  } catch (error) {
+    console.error('Error di fungsi downloadFile:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.getWorkflowStep = async (req, res) => {
+  try {
+    const { workflowId, stepOrder } = req.params;
+    const [steps] = await pool.query(
+      'SELECT * FROM workflow_steps WHERE workflow_id = ? AND step_order = ?',
+      [workflowId, stepOrder]
+    );
+    
+    if (steps.length === 0) {
+      return res.status(404).json({ message: 'Step tidak ditemukan' });
+    }
+    
+    return res.json(steps[0]);
+  } catch (error) {
+    console.error('Error fetching workflow step:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+

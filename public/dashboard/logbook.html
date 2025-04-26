@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Logbook</title>
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/styleLogbook.css">
+</head>
+<body>
+  <div class="container py-4">
+    <h2 class="text-center mb-4">Input Logbook</h2>
+
+    <!-- Section A: Input Daftar Kegiatan & Sub Kegiatan -->
+    <div class="section" id="sectionA">
+      <h3>Daftar Kegiatan</h3>
+      <div class="row mb-3">
+        <div class="col-md-8">
+          <input type="text" id="newKegiatan" class="form-control" placeholder="Masukkan kegiatan">
+        </div>
+        <div class="col-md-4">
+          <button id="btnAddKegiatan" class="btn btn-primary w-100">Tambah Kegiatan</button>
+        </div>
+      </div>
+      <ul id="kegiatanList" class="list-group"></ul>
+    </div>
+
+    <!-- Section B: Input Logbook Entries -->
+    <div class="section" id="sectionB">
+      <h3>Input Logbook Entries</h3>
+      <div id="logbookEntriesContainer"></div>
+      <div class="text-center mt-4">
+        <button id="btnSaveLogbook" class="btn btn-success btn-lg">Simpan Logbook</button>
+      </div>
+    </div>
+
+    <!-- Section C: Tampilan Hierarki Logbook -->
+    <div class="section" id="sectionC">
+      <h3>Ringkasan Logbook</h3>
+      <h1 style="display: none;">sebagai <span id="role">Loading</span></h1>
+      <div class="table-container">
+        <table id="ringkasanTable" class="table table-bordered table-striped table-responsive">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th class="col-butir">Kegiatan</th>
+              <th class="col-angka">1</th>
+              <th class="col-angka">2</th>
+              <th class="col-angka">3</th>
+              <th class="col-angka">4</th>
+              <th class="col-angka">5</th>
+              <th class="col-angka">6</th>
+              <th class="col-angka">7</th>
+              <th class="col-angka">8</th>
+              <th class="col-angka">9</th>
+              <th class="col-angka">10</th>
+              <th class="col-angka">11</th>
+              <th class="col-angka">12</th>
+              <th class="col-angka">13</th>
+              <th class="col-angka">14</th>
+              <th class="col-angka">15</th>
+              <th class="col-angka">16</th>
+            </tr>
+          </thead>
+          <tbody id="summaryBody"></tbody>
+        </table>
+      </div>
+
+      <div class="export-buttons text-center mt-4">
+        <button id="btnExport" class="btn btn-warning btn-lg">Export Logbook</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/jquery-3.6.0.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/logbook.js"></script>
+</body>
+</html>

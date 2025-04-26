@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Pengguna</title>
+  <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+  <div class="profile-container">
+    <!-- Navigation Bar: Tombol Back dan Settings -->
+    <div class="profile-nav">
+        <button id="backBtn" onclick="window.history.back()" title="Kembali">
+          <img src="back.png" alt="Kembali" class="icon" style="height: 50px;">
+        </button>
+        <button id="editProfileBtn"  title="Pengaturan">
+          <img src="gear.png" alt="Pengaturan" class="icon"style="height: 39px;">
+        </button>
+      </div>
+
+    <!-- Header Profil -->
+    <div class="profile-header">
+      <img alt="Foto Profil" class="profile-photo">
+      <div class="profile-info">
+        <h1 class="profile-name"><span id="namaLengkap">Nama Lengkap</span></h1>
+        <p class="profile-username">@<span id="username">username</span></p>
+        <p class="profile-nip">NIP/NIPPPK/No. Reg: <span id="nip">Loading...</span></p>
+      </div>
+    </div>
+
+    <!-- Detail Profil -->
+    <div class="profile-details">
+      <div class="profile-detail">
+        <span class="detail-label">Pangkat / Golongan:</span>
+        <span class="detail-value" id="pangkat">Loading...</span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">Jabatan:</span>
+        <span class="detail-value" id="role">Loading...</span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">Level PK/BK:</span>
+        <span class="detail-value" id="levelPk">Loading...</span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">Unit Kerja:</span>
+        <span class="detail-value" id="unitKerja">Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Pengaturan -->
+  <div id="settingsModal" class="settings-modal">
+    <div class="settings-content">
+      <h2>Edit Profil</h2>
+      <form id="editProfileForm">
+        <div class="form-group">
+          <label for="editUsername">Username:</label>
+          <input type="text" id="editUsername" name="username">
+        </div>
+        <div class="form-group">
+          <label for="editNamaLengkap">Nama Lengkap:</label>
+          <input type="text" id="editNamaLengkap" name="namaLengkap">
+        </div>
+        <div class="form-group">
+            <label for="editFotoProfile">Foto Profil:</label>
+            <input type="file" id="editFotoProfile" name="fotoProfile" accept="image/*">
+        </div>          
+        <button type="submit" class="submitBtn">Simpan Perubahan</button>
+        <button type="button" id="cancelBtn">Batal</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PDF Viewer -->
+  <div class="pdf-viewer-container">
+    <div class="pdf-controls">
+      <button id="zoomOutBtn">-</button>
+      <span id="zoomLevel">100%</span>
+      <button id="zoomInBtn">+</button>
+    </div>
+    <canvas id="pdfCanvas"></canvas>
+  </div>
+
+  <div class="pdf-navigation">
+    <button id="prevPage">
+      <img src="previous-button-icon.png" class="icon"style="height: 20px;">
+    </button>
+    <span id="pageInfo">Halaman <span id="currentPage">?</span> dari <span id="totalPages">?</span></span>
+    <button id="nextPage">
+      <img src="next-button-icon.png" class="icon"style="height: 20px;">
+    </button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
+  <script src="profile.js"></script>
+</body>
+</html>
