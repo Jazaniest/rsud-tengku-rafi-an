@@ -60,21 +60,21 @@
             let formData = {
                 username: $('#username').val(),
                 password: $('#password').val(),
-                role: $('#inputRole').val(),
-                namaLengkap: $('#namaLengkap').val(),
-                tempat_tanggal_lahir: $('#tempat_tanggal_lahir').val(),
-                alamat: $('#alamat').val(),
-                nik: $('#nik').val(),
-                nip: $('#nip').val(),
-                pangkat: $('#pangkat').val(),
-                ruang: $('#ruang').val(),
-                level_pk: $('#level_pk').val(),
-                unit_kerja: $('#unit_kerja').val(),
-                pendidikan: $('#pendidikan').val(),
-                no_str: $('#no_str').val(),
-                no_sipp: $('#no_sipp').val(),
-                kredensial: $('#kredensial').val(),
-                jenis_ketenagaan: $('#jenis_ketenagaan').val()
+                namaLengkap: $('#namaLengkap').val()
+                // role: $('#inputRole').val(),
+                // tempat_tanggal_lahir: $('#tempat_tanggal_lahir').val(),
+                // alamat: $('#alamat').val(),
+                // nik: $('#nik').val(),
+                // nip: $('#nip').val(),
+                // pangkat: $('#pangkat').val(),
+                // ruang: $('#ruang').val(),
+                // level_pk: $('#level_pk').val(),
+                // unit_kerja: $('#unit_kerja').val(),
+                // pendidikan: $('#pendidikan').val(),
+                // no_str: $('#no_str').val(),
+                // no_sipp: $('#no_sipp').val(),
+                // kredensial: $('#kredensial').val(),
+                // jenis_ketenagaan: $('#jenis_ketenagaan').val()
             };
             console.log(formData);
 

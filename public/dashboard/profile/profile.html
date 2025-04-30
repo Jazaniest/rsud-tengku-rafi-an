@@ -73,24 +73,13 @@
   </div>
 
   <!-- PDF Viewer -->
-  <div class="pdf-viewer-container">
-    <div class="pdf-controls">
-      <button id="zoomOutBtn">-</button>
-      <span id="zoomLevel">100%</span>
-      <button id="zoomInBtn">+</button>
-    </div>
-    <canvas id="pdfCanvas"></canvas>
+  <div id="controls">
+    <button id="prev-page">Previous</button>
+    <button id="next-page">Next</button>
+    <span>Halaman: <span id="page-num"></span> / <span id="page-count"></span></span>
   </div>
-
-  <div class="pdf-navigation">
-    <button id="prevPage">
-      <img src="previous-button-icon.png" class="icon"style="height: 20px;">
-    </button>
-    <span id="pageInfo">Halaman <span id="currentPage">?</span> dari <span id="totalPages">?</span></span>
-    <button id="nextPage">
-      <img src="next-button-icon.png" class="icon"style="height: 20px;">
-    </button>
-  </div>
+  
+  <canvas id="pdf-canvas"></canvas>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
   <script src="profile.js"></script>

@@ -11,21 +11,21 @@ exports.register = async (req, res) => {
     const {
       username,
       password,
-      role,
-      namaLengkap,
-      tempat_tanggal_lahir,
-      alamat,
-      nik,
-      nip,
-      pangkat,
-      ruang,
-      level_pk,
-      unit_kerja,
-      pendidikan,
-      no_str,
-      no_sipp,
-      kredensial,
-      jenis_ketenagaan
+      namaLengkap
+      // role,
+      // tempat_tanggal_lahir,
+      // alamat,
+      // nik,
+      // nip,
+      // pangkat,
+      // ruang,
+      // level_pk,
+      // unit_kerja,
+      // pendidikan,
+      // no_str,
+      // no_sipp,
+      // kredensial,
+      // jenis_ketenagaan
     } = req.body;
 
     // Cek apakah username sudah ada
@@ -39,27 +39,27 @@ exports.register = async (req, res) => {
     const password_hash = await bcrypt.hash(password, saltRounds);
 
     // Jika jenis_ketenagaan tidak diberikan, tetapkan default null
-    const finalJenisKetenagaan = jenis_ketenagaan || null;
+    // const finalJenisKetenagaan = jenis_ketenagaan || null;
 
     // Simpan user baru ke database, perhatikan mapping namaLengkap ke nama_lengkap
     const newUser = await User.create({ 
       username, 
       password_hash, 
-      role, 
-      nama_lengkap: namaLengkap,
-      tempat_tanggal_lahir,
-      alamat,
-      nik,
-      nip,
-      pangkat,
-      ruang,
-      level_pk,
-      unit_kerja,
-      pendidikan,
-      no_str,
-      no_sipp,
-      kredensial,
-      jenis_ketenagaan: finalJenisKetenagaan
+      nama_lengkap: namaLengkap
+      // role, 
+      // tempat_tanggal_lahir,
+      // alamat,
+      // nik,
+      // nip,
+      // pangkat,
+      // ruang,
+      // level_pk,
+      // unit_kerja,
+      // pendidikan,
+      // no_str,
+      // no_sipp,
+      // kredensial,
+      // jenis_ketenagaan: finalJenisKetenagaan
     });
 
     res.status(201).json({ message: 'Registrasi berhasil', user: newUser });

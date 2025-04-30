@@ -82,77 +82,110 @@ document.addEventListener('DOMContentLoaded', async () => {
   // KODE PDF VIEWER DENGAN PDF.js
   // ------------------------------
   
-  // URL file PDF (asumsi: file bernama document.pdf berada di folder /uploads)
-  const pdfUrl = `/uploads/document.pdf`;
+  let pdfDoc = null,
+      pageNum = 1,
+      pageRendering = false,
+      pageNumPending = null,
+      scale = 1.5,
+      canvas = null,
+      ctx = null;
 
-  // Konfigurasi pdf.js
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.worker.min.js';
+  document.addEventListener('DOMContentLoaded', () => {
+    canvas = document.getElementById('pdf-canvas');
+    ctx = canvas.getContext('2d');
 
-  const canvas = document.getElementById('pdfCanvas');
-  const ctx = canvas.getContext('2d');
+    document.getElementById('prev-page').addEventListener('click', onPrevPage);
+    document.getElementById('next-page').addEventListener('click', onNextPage);
+  });
 
-  let pdfDoc = null;
-  let currentPage = 1;
-  let zoomLevel = 1.0; // Zoom 100%
-  let totalPages = 0;
-
-  // Fungsi untuk render halaman PDF
-  const renderPage = async (num) => {
-    const page = await pdfDoc.getPage(num);
-    const viewport = page.getViewport({ scale: zoomLevel });
-
-    // Sesuaikan ukuran canvas secara responsif
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
-
-    const renderContext = {
-      canvasContext: ctx,
-      viewport: viewport
-    };
-    await page.render(renderContext).promise;
-    document.getElementById('zoomLevel').textContent = Math.round(zoomLevel * 100) + '%';
-    document.getElementById('currentPage').textContent = num;
-  };
-
-  // Fungsi untuk memuat PDF
-  const loadPdf = async () => {
-    try {
-      pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
-      totalPages = pdfDoc.numPages;
-      document.getElementById('totalPages').textContent = totalPages;
-      await renderPage(currentPage);
-    } catch (error) {
-      console.error('Error loading PDF:', error);
+  function convertGoogleDriveLink(link) {
+    const regex = /\/d\/([a-zA-Z0-9_-]+)\//;
+    const match = link.match(regex);
+    
+    if (match && match[1]) {
+      const fileId = match[1];
+      const directLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
+      return directLink;
+    } else {
+      console.error('Link tidak valid');
+      return null;
     }
-  };
+  }
+
+  function loadPdf() {
+    const originalLink = 'https://drive.google.com/file/d/1GbHNgvFNwNEl3LI2_7yp7VR-JnEaepE1/view?usp=sharing';
+    const directLink = convertGoogleDriveLink(originalLink);
+
+    if (!directLink) {
+      alert('Link tidak valid. Pastikan format link benar.');
+      return;
+    }
+
+    pdfjsLib.getDocument(directLink).promise.then(function(pdfDoc_) {
+      pdfDoc = pdfDoc_;
+      document.getElementById('controls').style.display = 'block';
+      document.getElementById('page-count').textContent = pdfDoc.numPages;
+
+      // Mulai dari halaman pertama
+      pageNum = 1;
+      renderPage(pageNum);
+    }).catch(function(error) {
+      console.error('Error saat memuat PDF: ', error);
+      alert('Gagal memuat PDF. Pastikan file bisa diakses publik.');
+    });
+  }
+
+  function renderPage(num) {
+    pageRendering = true;
+
+    pdfDoc.getPage(num).then(function(page) {
+      const viewport = page.getViewport({ scale: scale });
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      const renderContext = {
+        canvasContext: ctx,
+        viewport: viewport
+      };
+      const renderTask = page.render(renderContext);
+
+      renderTask.promise.then(function() {
+        pageRendering = false;
+
+        if (pageNumPending !== null) {
+          renderPage(pageNumPending);
+          pageNumPending = null;
+        }
+      });
+    });
+
+    document.getElementById('page-num').textContent = num;
+  }
+
+  function queueRenderPage(num) {
+    if (pageRendering) {
+      pageNumPending = num;
+    } else {
+      renderPage(num);
+    }
+  }
+
+  function onPrevPage() {
+    if (pageNum <= 1) {
+      return;
+    }
+    pageNum--;
+    queueRenderPage(pageNum);
+  }
+
+  function onNextPage() {
+    if (pageNum >= pdfDoc.numPages) {
+      return;
+    }
+    pageNum++;
+    queueRenderPage(pageNum);
+  }
 
   loadPdf();
-
-  document.getElementById('nextPage').addEventListener('click', async () => {
-    if (currentPage < totalPages) {
-      currentPage++;
-      await renderPage(currentPage);
-    }
-  });
-
-  document.getElementById('prevPage').addEventListener('click', async () => {
-    if (currentPage > 1) {
-      currentPage--;
-      await renderPage(currentPage);
-    }
-  })
-
-  // Event untuk zoom in dan zoom out
-  document.getElementById('zoomInBtn').addEventListener('click', async () => {
-    zoomLevel += 0.1;
-    await renderPage(currentPage);
-  });
-
-  document.getElementById('zoomOutBtn').addEventListener('click', async () => {
-    if (zoomLevel > 0.2) {
-      zoomLevel -= 0.1;
-      await renderPage(currentPage);
-    }
-  });
 
 });
