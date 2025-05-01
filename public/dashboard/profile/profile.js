@@ -82,110 +82,110 @@ document.addEventListener('DOMContentLoaded', async () => {
   // KODE PDF VIEWER DENGAN PDF.js
   // ------------------------------
   
-  let pdfDoc = null,
-      pageNum = 1,
-      pageRendering = false,
-      pageNumPending = null,
-      scale = 1.5,
-      canvas = null,
-      ctx = null;
+//   let pdfDoc = null,
+//       pageNum = 1,
+//       pageRendering = false,
+//       pageNumPending = null,
+//       scale = 1.5,
+//       canvas = null,
+//       ctx = null;
 
-  document.addEventListener('DOMContentLoaded', () => {
-    canvas = document.getElementById('pdf-canvas');
-    ctx = canvas.getContext('2d');
+//   document.addEventListener('DOMContentLoaded', () => {
+//     canvas = document.getElementById('pdf-canvas');
+//     ctx = canvas.getContext('2d');
 
-    document.getElementById('prev-page').addEventListener('click', onPrevPage);
-    document.getElementById('next-page').addEventListener('click', onNextPage);
-  });
+//     document.getElementById('prev-page').addEventListener('click', onPrevPage);
+//     document.getElementById('next-page').addEventListener('click', onNextPage);
+//   });
 
-  function convertGoogleDriveLink(link) {
-    const regex = /\/d\/([a-zA-Z0-9_-]+)\//;
-    const match = link.match(regex);
+//   function convertGoogleDriveLink(link) {
+//     const regex = /\/d\/([a-zA-Z0-9_-]+)\//;
+//     const match = link.match(regex);
     
-    if (match && match[1]) {
-      const fileId = match[1];
-      const directLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
-      return directLink;
-    } else {
-      console.error('Link tidak valid');
-      return null;
-    }
-  }
+//     if (match && match[1]) {
+//       const fileId = match[1];
+//       const directLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
+//       return directLink;
+//     } else {
+//       console.error('Link tidak valid');
+//       return null;
+//     }
+//   }
 
-  function loadPdf() {
-    const originalLink = 'https://drive.google.com/file/d/1GbHNgvFNwNEl3LI2_7yp7VR-JnEaepE1/view?usp=sharing';
-    const directLink = convertGoogleDriveLink(originalLink);
+//   function loadPdf() {
+//     const originalLink = 'https://drive.google.com/file/d/1GbHNgvFNwNEl3LI2_7yp7VR-JnEaepE1/view?usp=sharing';
+//     const directLink = convertGoogleDriveLink(originalLink);
 
-    if (!directLink) {
-      alert('Link tidak valid. Pastikan format link benar.');
-      return;
-    }
+//     if (!directLink) {
+//       alert('Link tidak valid. Pastikan format link benar.');
+//       return;
+//     }
 
-    pdfjsLib.getDocument(directLink).promise.then(function(pdfDoc_) {
-      pdfDoc = pdfDoc_;
-      document.getElementById('controls').style.display = 'block';
-      document.getElementById('page-count').textContent = pdfDoc.numPages;
+//     pdfjsLib.getDocument(directLink).promise.then(function(pdfDoc_) {
+//       pdfDoc = pdfDoc_;
+//       document.getElementById('controls').style.display = 'block';
+//       document.getElementById('page-count').textContent = pdfDoc.numPages;
 
-      // Mulai dari halaman pertama
-      pageNum = 1;
-      renderPage(pageNum);
-    }).catch(function(error) {
-      console.error('Error saat memuat PDF: ', error);
-      alert('Gagal memuat PDF. Pastikan file bisa diakses publik.');
-    });
-  }
+//       // Mulai dari halaman pertama
+//       pageNum = 1;
+//       renderPage(pageNum);
+//     }).catch(function(error) {
+//       console.error('Error saat memuat PDF: ', error);
+//       alert('Gagal memuat PDF. Pastikan file bisa diakses publik.');
+//     });
+//   }
 
-  function renderPage(num) {
-    pageRendering = true;
+//   function renderPage(num) {
+//     pageRendering = true;
 
-    pdfDoc.getPage(num).then(function(page) {
-      const viewport = page.getViewport({ scale: scale });
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
+//     pdfDoc.getPage(num).then(function(page) {
+//       const viewport = page.getViewport({ scale: scale });
+//       canvas.height = viewport.height;
+//       canvas.width = viewport.width;
 
-      const renderContext = {
-        canvasContext: ctx,
-        viewport: viewport
-      };
-      const renderTask = page.render(renderContext);
+//       const renderContext = {
+//         canvasContext: ctx,
+//         viewport: viewport
+//       };
+//       const renderTask = page.render(renderContext);
 
-      renderTask.promise.then(function() {
-        pageRendering = false;
+//       renderTask.promise.then(function() {
+//         pageRendering = false;
 
-        if (pageNumPending !== null) {
-          renderPage(pageNumPending);
-          pageNumPending = null;
-        }
-      });
-    });
+//         if (pageNumPending !== null) {
+//           renderPage(pageNumPending);
+//           pageNumPending = null;
+//         }
+//       });
+//     });
 
-    document.getElementById('page-num').textContent = num;
-  }
+//     document.getElementById('page-num').textContent = num;
+//   }
 
-  function queueRenderPage(num) {
-    if (pageRendering) {
-      pageNumPending = num;
-    } else {
-      renderPage(num);
-    }
-  }
+//   function queueRenderPage(num) {
+//     if (pageRendering) {
+//       pageNumPending = num;
+//     } else {
+//       renderPage(num);
+//     }
+//   }
 
-  function onPrevPage() {
-    if (pageNum <= 1) {
-      return;
-    }
-    pageNum--;
-    queueRenderPage(pageNum);
-  }
+//   function onPrevPage() {
+//     if (pageNum <= 1) {
+//       return;
+//     }
+//     pageNum--;
+//     queueRenderPage(pageNum);
+//   }
 
-  function onNextPage() {
-    if (pageNum >= pdfDoc.numPages) {
-      return;
-    }
-    pageNum++;
-    queueRenderPage(pageNum);
-  }
+//   function onNextPage() {
+//     if (pageNum >= pdfDoc.numPages) {
+//       return;
+//     }
+//     pageNum++;
+//     queueRenderPage(pageNum);
+//   }
 
-  loadPdf();
+//   loadPdf();
 
 });
