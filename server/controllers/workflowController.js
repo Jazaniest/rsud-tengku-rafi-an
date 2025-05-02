@@ -133,12 +133,11 @@ exports.getUserTasks = async (req, res) => {
       `SELECT wi.*, w.code, w.title, w.description
        FROM workflow_instances wi
        JOIN workflows w ON wi.workflow_id = w.id
-       WHERE wi.initiated_by = ?`, // Tugas yang diinisiasi (termasuk yang completed)
+       WHERE wi.initiated_by = ?`,
        [userId]
     );
 
     // Tugas yang ditugaskan kepada user (aktif)
-    // Ambil tugas yang ditugaskan kepada user (aktif)
     const [assignedTasks] = await pool.query(
       `SELECT 
           wi.*, 

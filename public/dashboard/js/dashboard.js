@@ -40,37 +40,33 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
     }
 
-    const registerButton = document.getElementById('register');
     if (profile.role === 'super admin') {
-      registerButton.innerHTML = `
-      <h4>Formulir Register</h4>
-      <div class="checkbox-wrapper-8">
-        <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
-        <label for="cb3-8" data-tg-on="AKTIF" data-tg-off="MATI" class="tgl-btn"></label>
-      </div>
-      `;
+      await initSwitchButton();
     }
 
-    const switchButton = document.getElementById('cb3-8');
-    if (switchButton) {
-      initSwitchButton(switchButton);
-    } else {
-      console.error('Switch button tidak ditemukan.');
-    }
-
-    switchButton.addEventListener('change', function() {
-      const isChecked = switchButton.checked;
-      console.log("ini isi switch button", isChecked);
-    });
-
-  } catch (error) {
+    } catch (error) {
     console.error('Error fetching profile:', error);
   }
 
 
 
-  async function initSwitchButton(switchButton) {  
+  async function initSwitchButton() {
     try {
+      const registerButton = document.getElementById('register');
+      registerButton.innerHTML = `
+        <h4>Formulir Register</h4>
+        <div class="checkbox-wrapper-8">
+          <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
+          <label for="cb3-8" data-tg-on="AKTIF" data-tg-off="MATI" class="tgl-btn"></label>
+        </div>
+      `;
+  
+      const switchButton = document.getElementById('cb3-8');
+      if (!switchButton) {
+        console.error('Switch button tidak ditemukan.');
+        return;
+      }
+  
       // Ambil status awal dari server
       const response = await fetch('http://localhost:3000/api/switch/status');
       if (!response.ok) throw new Error('Gagal mengambil status switch dari server');
@@ -89,22 +85,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
           const saveResponse = await fetch('http://localhost:3000/api/switch/status', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: isChecked })
           });
   
           if (!saveResponse.ok) throw new Error('Gagal menyimpan status switch');
-  
           const result = await saveResponse.json();
           console.log('Berhasil menyimpan status:', result);
-  
         } catch (saveError) {
           console.error('Error saat menyimpan status:', saveError);
         }
       });
-  
   
     } catch (error) {
       console.error('Error saat inisialisasi switch:', error);
@@ -197,10 +188,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Ambil data staff untuk dropdown dari endpoint baru
       const staffProfiles = await fetchStaffProfiles();
-      console.log(staffProfiles);
+      // console.log(staffProfiles);
 
       const karuProfiles = await fetchKaruProfiles();
-      console.log(karuProfiles);
+      // console.log(karuProfiles);
     
       tasks.forEach(task => {
         const taskEl = document.createElement('div');
