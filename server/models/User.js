@@ -47,14 +47,18 @@ class User {
       no_str,
       no_sipp,
       kredensial,
-      jenis_ketenagaan
+      jenis_ketenagaan,
+      akhir_str,
+      akhir_sipp,
+      file_str,
+      file_sipp
     } = data;
   
     // Pastikan jenis_ketenagaan tidak undefined
     const finalJenisKetenagaan = (typeof jenis_ketenagaan === 'undefined' || jenis_ketenagaan === "") ? null : jenis_ketenagaan;
   
     const [result] = await pool.query(
-      'INSERT INTO users (username, password_hash, role, created_at, nama_lengkap, tempat_tanggal_lahir, alamat, nik, nip, pangkat, ruang, level_pk, unit_kerja, pendidikan, no_str, no_sipp, kredensial, jenis_ketenagaan) VALUES (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO users (username, password_hash, role, created_at, nama_lengkap, tempat_tanggal_lahir, alamat, nik, nip, pangkat, ruang, level_pk, unit_kerja, pendidikan, no_str, no_sipp, kredensial, jenis_ketenagaan, akhir_str, akhir_sipp, file_str, file_sipp) VALUES (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         username,
         password_hash,
@@ -72,10 +76,14 @@ class User {
         no_str,
         no_sipp,
         kredensial,
-        finalJenisKetenagaan
+        finalJenisKetenagaan, 
+        akhir_str,
+        akhir_sipp,
+        file_str,
+        file_sipp
       ]
     );
-    return { id: result.insertId, username, role, nama_lengkap, tempat_tanggal_lahir, alamat, nik, nip, pangkat, ruang, level_pk, unit_kerja, pendidikan, no_str, no_sipp, kredensial, jenis_ketenagaan: finalJenisKetenagaan };
+    return { id: result.insertId, username, role, nama_lengkap, tempat_tanggal_lahir, alamat, nik, nip, pangkat, ruang, level_pk, unit_kerja, pendidikan, no_str, no_sipp, kredensial, jenis_ketenagaan: finalJenisKetenagaan, akhir_str, akhir_sipp, file_str, file_sipp };
   }
   
 
@@ -97,7 +105,11 @@ class User {
       no_str,
       no_sipp,
       kredensial,
-      jenis_ketenagaan
+      jenis_ketenagaan, 
+      akhir_str,
+      akhir_sipp,
+      file_str,
+      file_sipp
     } = data;
   
     let query = 'UPDATE users SET username = ?, nama_lengkap = ?';
@@ -178,6 +190,26 @@ class User {
       query += ', jenis_ketenagaan = ?';
       params.push(jenis_ketenagaan);
     }
+
+    if (akhir_str) {
+      query += ', akhir_str = ?';
+      params.push(akhir_str);
+    }
+
+    if (akhir_sipp) {
+      query += ', akhir_sipp = ?';
+      params.push(akhir_sipp);
+    }
+
+    if (file_str) {
+      query += ', file_str = ?';
+      params.push(file_str);
+    }
+
+    if (file_sipp) {
+      query += ', file_sipp = ?';
+      params.push(file_sipp);
+    }
   
     query += ' WHERE id = ?';
     params.push(id);
@@ -204,7 +236,11 @@ class User {
       no_str,
       no_sipp,
       kredensial,
-      jenis_ketenagaan
+      jenis_ketenagaan,
+      akhir_str,
+      akhir_sipp,
+      file_str,
+      file_sipp
     };
   }
   

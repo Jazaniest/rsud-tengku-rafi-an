@@ -32,6 +32,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Isi form dengan data profil yang ada
     document.getElementById('editUsername').value = profile.username;
     document.getElementById('editNamaLengkap').value = profile.namaLengkap;
+    document.getElementById('editTempatTanggalLahir').value = profile.tempatTanggalLahir;
+    document.getElementById('editAlamat').value = profile.alamat;
+    document.getElementById('editNik').value = profile.nik;
+    document.getElementById('editNip').value = profile.nip;
+    document.getElementById('editPangkat').value = profile.pangkat;
+    document.getElementById('editRuang').value = profile.ruang;
+    document.getElementById('editLevelPk').value = profile.levelPk;
+    document.getElementById('editUnitKerja').value = profile.unitKerja;
+    document.getElementById('editPendidikan').value = profile.pendidikan;
+    document.getElementById('editNoStr').value = profile.noStr;
+    document.getElementById('editExpiredStr').value = profile.expiredStr;
+    document.getElementById('editNoSipp').value = profile.noSipp;
+    document.getElementById('editExprredSipp').value = profile.expiredSipp;
+    document.getElementById('editKredensial').value = profile.kredensial;
+    document.getElementById('editJenisKetenagaan').value = profile.jenisKetenagaan;
+    document.getElementById('editFileStr').value = profile.fileStr;
+    document.getElementById('editFileSipp').value = profile.fileSipp;
+
+
   } catch (error) {
     console.error('Error fetching profile:', error);
   }
@@ -69,12 +88,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('username').textContent = formData.get('username');
       document.getElementById('namaLengkap').textContent = formData.get('namaLengkap');
 
-      // Jika ada foto yang diupload, perbarui tampilan foto profil
-      // Misalnya, Anda bisa me-refresh halaman atau menggunakan URL yang dikembalikan oleh backend
+      // Jika ada foto yang diupload, perbarui tampilan foto profil dengan cara refresh halaman
       document.getElementById('settingsModal').style.display = 'none';
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Terjadi kesalahan saat mengupdate profil.');
+    }
+  });
+
+
+  //fungsi untuk menyembunyikan modal ketika klik di luar jendela modal
+  const modal = document.querySelector('.settings-content');
+  const modalContent = document.querySelector('.settings-modal');
+
+  document.addEventListener('click', (e) => {
+    if (e.target === modal / modalContent) {
+      modal.classList.remove('show');
     }
   });
 

@@ -11,21 +11,21 @@ exports.register = async (req, res) => {
     const {
       username,
       password,
-      namaLengkap
-      // role,
-      // tempat_tanggal_lahir,
-      // alamat,
-      // nik,
-      // nip,
-      // pangkat,
-      // ruang,
-      // level_pk,
-      // unit_kerja,
-      // pendidikan,
-      // no_str,
-      // no_sipp,
-      // kredensial,
-      // jenis_ketenagaan
+      namaLengkap,
+      role,
+      tempat_tanggal_lahir,
+      alamat,
+      nik,
+      nip,
+      pangkat,
+      ruang,
+      level_pk,
+      unit_kerja,
+      pendidikan,
+      no_str,
+      no_sipp,
+      kredensial,
+      jenis_ketenagaan
     } = req.body;
 
     // Cek apakah username sudah ada
@@ -39,27 +39,27 @@ exports.register = async (req, res) => {
     const password_hash = await bcrypt.hash(password, saltRounds);
 
     // Jika jenis_ketenagaan tidak diberikan, tetapkan default null
-    // const finalJenisKetenagaan = jenis_ketenagaan || null;
+    const finalJenisKetenagaan = jenis_ketenagaan || null;
 
     // Simpan user baru ke database, perhatikan mapping namaLengkap ke nama_lengkap
     const newUser = await User.create({ 
       username, 
       password_hash, 
-      nama_lengkap: namaLengkap
-      // role, 
-      // tempat_tanggal_lahir,
-      // alamat,
-      // nik,
-      // nip,
-      // pangkat,
-      // ruang,
-      // level_pk,
-      // unit_kerja,
-      // pendidikan,
-      // no_str,
-      // no_sipp,
-      // kredensial,
-      // jenis_ketenagaan: finalJenisKetenagaan
+      nama_lengkap: namaLengkap,
+      role, 
+      tempat_tanggal_lahir,
+      alamat,
+      nik,
+      nip,
+      pangkat,
+      ruang,
+      level_pk,
+      unit_kerja,
+      pendidikan,
+      no_str,
+      no_sipp,
+      kredensial,
+      jenis_ketenagaan: finalJenisKetenagaan
     });
 
     res.status(201).json({ message: 'Registrasi berhasil', user: newUser });
@@ -121,7 +121,7 @@ exports.getProfile = async (req, res) => {
 // server/controllers/authController.js
 exports.editProfile = async (req, res) => {
   try {
-    const { username, namaLengkap, password } = req.body;
+    const { username, namaLengkap, password, tempatTanggalLahir, alamat, nik, nip, pangkat, ruang, levelPk, unitKerja, pendidikan, noStr, expiredStr, noSipp, expiredSipp, kredensial, jenisKetenagaan, fileStr, fileSipp } = req.body;
     const userId = req.user.id;
 
     // Cek apakah username baru sudah ada
@@ -144,7 +144,28 @@ exports.editProfile = async (req, res) => {
     }
 
     // Gabungkan data pembaruan
-    const updateData = { username, namaLengkap, password_hash };
+    const updateData = {
+      username,
+      nama_lengkap: namaLengkap, 
+      password_hash, 
+      tempat_tanggal_lahir: tempatTanggalLahir, 
+      alamat, 
+      nik, 
+      nip, 
+      pangkat, 
+      ruang, 
+      level_pk: levelPk, 
+      unit_kerja: unitKerja, 
+      pendidikan, 
+      no_str: noStr, 
+      akhir_str: expiredStr, 
+      no_sipp: noSipp, 
+      akhir_sipp: expiredSipp, 
+      kredensial, 
+      jenis_ketenagaan: jenisKetenagaan,
+      file_str: fileStr,
+      file_sipp: fileSipp
+    };
     if (foto_profile) {
       updateData.foto_profile = foto_profile;
     }

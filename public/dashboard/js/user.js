@@ -65,7 +65,10 @@ const fetchUsers = async () => {
                 <td>${getSafeValue(user.unit_kerja)}</td>
                 <td>${getSafeValue(user.pendidikan)}</td>
                 <td>${getSafeValue(user.no_str)}</td>
+                <td>${getSafeValue(user.akhir_str)}</td>
                 <td>${getSafeValue(user.no_sipp)}</td>
+                <td>${getSafeValue(user.akhir_sipp)}</td>
+                <td>${getSafeValue(user.file_sipp)}</td> <!-- untuk sementara dalam bentuk nama file. selanjutnya buat agar file bisa di lihat dari menu ini. --!>
                 <td>${getSafeValue(user.kredensial)}</td>
                 <td>${getSafeValue(user.jenis_ketenagaan)}</td>
                 <td>
