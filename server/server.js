@@ -3,10 +3,8 @@ const express = require('express');
 const path = require('path');
 const http = require('http');
 const bodyParser = require('body-parser');
-const cors = require('cors');
 const workflowRoutes = require('./routes/workflowRoutes');
-
-const { sendNotification } = require('./utils/fcm')
+const { sendNotification } = require('./utils/fcm');
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
@@ -20,21 +18,16 @@ const switchRoutes = require('./routes/switchRoutes');
 const app = express();
 const server = http.createServer(app);
 
-// Middleware
-app.use(cors());
-// app.use(express.static('public'));
-app.use(bodyParser.json());
-app.use(express.static('public'));
-// app.get('*', (req, res) => {
-//   res.sendFile(path.resolve(__dirname, '../public/index.html'));
-//   console.log('ini path direktorinya : ', path.resolve(__dirname, '../public/index.html'));
-// });
-// app.use(express.json());
+// ✅ Serve frontend (static files) dari folder public
+app.use(express.static(path.join(__dirname, '../public')));
 
-// Notification handler
+// ✅ Middleware
+app.use(bodyParser.json());
+
+// ✅ Notification handler
 require('./notification-handler/notificationHandler');
 
-// Routes
+// ✅ API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/kegiatan', kegiatanRoutes);
@@ -44,10 +37,11 @@ app.use('/api/export', exportRoutes);
 app.use('/api/workflow', workflowRoutes);
 app.use('/api/switch', switchRoutes);
 
-app.use('/exports', express.static('exports'));
+// ✅ Static folders
+app.use('/exports', express.static(path.resolve(__dirname, '..', 'exports')));
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
-// Endpoint untuk mengirim notifikasi
+// ✅ Endpoint kirim notifikasi
 app.post('/api/send-notification', async (req, res) => {
   const { token, title, body } = req.body;
   if (!token || !title || !body) {
@@ -55,25 +49,11 @@ app.post('/api/send-notification', async (req, res) => {
   }
 
   const payload = {
-    notification: {
-      title: title,
-      body: body,
-    },
-    android: {
-      priority: 'high'
-    },
-    apns: {
-      headers: {
-        'apns-priority': '10'
-      }
-    },
-    webpush: {
-      headers: {
-        Urgency: 'high'
-      }
-    }
+    notification: { title, body },
+    android: { priority: 'high' },
+    apns: { headers: { 'apns-priority': '10' } },
+    webpush: { headers: { Urgency: 'high' } }
   };
-  
 
   try {
     const response = await sendNotification(token, payload);
@@ -84,13 +64,12 @@ app.post('/api/send-notification', async (req, res) => {
   }
 });
 
-// Untuk menangani route yang tidak dikenali agar mengembalikan index.html
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, '../public', 'index.html'));
-//   console.log('ini direktorinya : ', path.join(__dirname, 'public', 'index.html'));
-// });
+// ✅ Catch-all route: untuk menangani SPA routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

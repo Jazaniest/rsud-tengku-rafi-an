@@ -8,7 +8,7 @@ const fetchUser = async () => {
   }
 
   try {
-    const profileRes = await fetch('http://localhost:3000/api/auth/profile', {
+    const profileRes = await fetch('/api/auth/profile', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
@@ -33,7 +33,7 @@ $(document).ready(function(){
 
   function loadKegiatan() {
     $.ajax({
-      url: 'http://localhost:3000/api/kegiatan',
+      url: '/api/kegiatan',
       method: 'GET',
       headers: { Authorization: 'Bearer ' + token },
       success: function(data) {
@@ -92,7 +92,7 @@ $(document).ready(function(){
       return;
     }
     $.ajax({
-      url: 'http://localhost:3000/api/kegiatan',
+      url: '/api/kegiatan',
       method: 'POST',
       headers: { Authorization: 'Bearer ' + token },
       contentType: 'application/json',
@@ -123,7 +123,7 @@ $(document).ready(function(){
     if (!valid) return;
     const log_date = new Date().toISOString().split('T')[0];
     $.ajax({
-      url: 'http://localhost:3000/api/logbook',
+      url: '/api/logbook',
       method: 'POST',
       headers: { Authorization: 'Bearer ' + token },
       contentType: 'application/json',
@@ -136,7 +136,7 @@ $(document).ready(function(){
   function loadLogbookSummary() {
     const log_date = new Date().toISOString().split('T')[0];
     $.ajax({
-      url: `http://localhost:3000/api/logbook?log_date=${log_date}`,
+      url: `/api/logbook?log_date=${log_date}`,
       method: 'GET',
       headers: { Authorization: 'Bearer ' + token },
       success: function(data) {
@@ -182,7 +182,7 @@ $(document).ready(function(){
 
   $('#btnExport').click(function() {
     $.ajax({
-      url: 'http://localhost:3000/api/export/logbook',
+      url: '/api/export/logbook',
       method: 'GET',
       headers: { Authorization: 'Bearer ' + token },
       success: function(data) {

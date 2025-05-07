@@ -1,5 +1,5 @@
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/public/fcm-sw.js')
+  navigator.serviceWorker.register('../fcm-sw.js')
     .then((registration) => {
       console.log('Service Worker terdaftar:', registration);
       firebase.initializeApp(firebaseConfig);
@@ -60,7 +60,7 @@ const token = localStorage.getItem('token');
 
 // Fungsi untuk mengirim token ke server
 function updateTokenOnServer(fcmToken) {
-  fetch('http://localhost:3000/api/users/update-fcm-token', {
+  fetch('/api/users/update-fcm-token', {
     method: 'POST',
     headers: {
       'Authorization': 'Bearer ' + token,

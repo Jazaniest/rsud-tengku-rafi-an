@@ -8,7 +8,7 @@
         // }
         
         // try {
-        //     const profileRes = await fetch('http://localhost:3000/api/auth/profile', {
+        //     const profileRes = await fetch('/api/auth/profile', {
         //         headers: { 'Authorization': 'Bearer ' + token }
         //     });
 
@@ -80,7 +80,7 @@
 
             // Kirim data ke endpoint register
             $.ajax({
-                url: 'http://localhost:3000/api/auth/register',
+                url: '/api/auth/register',
                 method: 'POST',
                 data: JSON.stringify(formData),
                 contentType: 'application/json',

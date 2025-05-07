@@ -12,7 +12,7 @@ const fetchUsers = async () => {
     }
 
     try {
-        const profileRes = await fetch('http://localhost:3000/api/auth/profile', {
+        const profileRes = await fetch('/api/auth/profile', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
         if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
@@ -34,7 +34,7 @@ const fetchUsers = async () => {
     }
 
     try {
-        const response = await fetch('http://localhost:3000/api/users', {
+        const response = await fetch('/api/users', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`, // Menambahkan header Authorization
@@ -105,7 +105,7 @@ const fetchUsers = async () => {
 const editUser = (id) => {
     currentUserId = id;
     // Ambil data pengguna berdasarkan ID
-    fetch(`http://localhost:3000/api/users/${id}`, {
+    fetch(`/api/users/${id}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -163,7 +163,7 @@ document.getElementById('editForm').addEventListener('submit', async (event) => 
     };
 
     try {
-        const response = await fetch(`http://localhost:3000/api/users/${currentUserId}`, {
+        const response = await fetch(`/api/users/${currentUserId}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,

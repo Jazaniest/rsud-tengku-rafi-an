@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Ambil data profil user
   try {
-    const profileRes = await fetch('http://localhost:3000/api/auth/profile', {
+    const profileRes = await fetch('/api/auth/profile', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Perbarui foto profil jika ada, jika tidak kosong
     const profilePhotoEl = document.querySelector('.profile-photo');
     if (profile.foto_profile) {
-      profilePhotoEl.src = 'http://localhost:3000/uploads/' + profile.foto_profile;
+      profilePhotoEl.src = '/uploads/' + profile.foto_profile;
     } else {
       profilePhotoEl.src = ''; // atau set ke default placeholder
     }
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('editNoStr').value = profile.noStr;
     document.getElementById('editExpiredStr').value = profile.expiredStr;
     document.getElementById('editNoSipp').value = profile.noSipp;
-    document.getElementById('editExprredSipp').value = profile.expiredSipp;
+    document.getElementById('editExpiredSipp').value = profile.expiredSipp;
     document.getElementById('editKredensial').value = profile.kredensial;
     document.getElementById('editJenisKetenagaan').value = profile.jenisKetenagaan;
     document.getElementById('editFileStr').value = profile.fileStr;
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const formData = new FormData(form);
 
     try {
-      const updateRes = await fetch('http://localhost:3000/api/auth/editProfile', {
+      const updateRes = await fetch('/api/auth/editProfile', {
         method: 'PUT',
         headers: {
           'Authorization': 'Bearer ' + token,

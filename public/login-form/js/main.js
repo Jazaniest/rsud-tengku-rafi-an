@@ -63,42 +63,42 @@
     /*==================================================================
     [ Tambahan: Cek status switch dan tampilkan konten dummy ]
     */
-    async function checkSwitchAndDisplay() {
-        try {
-            const response = await fetch('http://localhost:3000/api/switch/status');
-            if (!response.ok) throw new Error('Gagal mengambil status switch');
+    // async function checkSwitchAndDisplay() {
+    //     try {
+    //         const response = await fetch('/api/switch/status');
+    //         if (!response.ok) throw new Error('Gagal mengambil status switch');
 
-            const data = await response.json();
-            console.log('Status switch untuk tampilkan konten:', data.status);
+    //         const data = await response.json();
+    //         console.log('Status switch untuk tampilkan konten:', data.status);
 
-            var targetElement = document.getElementById('registerButton'); // Pastikan ada elemen ini di HTML
+    //         var targetElement = document.getElementById('registerButton'); // Pastikan ada elemen ini di HTML
 
-            if (!targetElement) {
-                console.error('Element registerButton tidak ditemukan.');
-                return;
-            }
+    //         if (!targetElement) {
+    //             console.error('Element registerButton tidak ditemukan.');
+    //             return;
+    //         }
 
-            if (data.status === true) {
-                targetElement.innerHTML = `
-                    <p style="font-style: italic;">Belum memiliki akun?</p>
-                	<a class="txt2" href="register.html">
-						Buat akun anda
-						<i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
-					</a>
-                `;
-            } else {
-                targetElement.innerHTML = "";
-                targetElement.style.display = "none";
-            }
+    //         if (data.status === true) {
+    //             targetElement.innerHTML = `
+    //                 <p style="font-style: italic;">Belum memiliki akun?</p>
+    //             	<a class="txt2" href="register.html">
+	// 					Buat akun anda
+	// 					<i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
+	// 				</a>
+    //             `;
+    //         } else {
+    //             targetElement.innerHTML = "";
+    //             targetElement.style.display = "none";
+    //         }
 
-        } catch (error) {
-            console.error('Error saat mengambil status switch:', error);
-        }
-    }
+    //     } catch (error) {
+    //         console.error('Error saat mengambil status switch:', error);
+    //     }
+    // }
 
     // Panggil fungsi ini setelah halaman siap
-    document.addEventListener('DOMContentLoaded', function () {
-        checkSwitchAndDisplay();
-    });
+    // document.addEventListener('DOMContentLoaded', function () {
+    //     checkSwitchAndDisplay();
+    // });
 
 })(jQuery);
