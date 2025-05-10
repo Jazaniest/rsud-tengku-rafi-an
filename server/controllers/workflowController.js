@@ -5,17 +5,19 @@ const eventEmitter = require('../notification-handler/eventEmitter')
 
 exports.updateWorkflowStep = async (req, res) => {
   try {
+    console.log("==== UPDATE WORKFLOW STEP ====");
+    console.log("ID Instance:", req.params.id);
+    console.log("Body:", req.body);
+    console.log("User:", req.user);
+
     const userId = req.user.id;
     const userRole = req.user.role;
-    const instanceId = req.params.id; // Pastikan instanceId dideklarasikan
+    const instanceId = req.params.id; 
     const { action } = req.body; // 'approve', 'reject', atau 'stop'
 
     // Ambil nilai assigned_user_name dari form (jika dikirim)
-    console.log('nama sebelum di ubah : ', req.body.assigned_user_name);
     const assignedUserName = req.body.assigned_user_name ? req.body.assigned_user_name.trim() : '';
-    console.log('nama nya adalah : ', assignedUserName);
 
-    
     // Ambil instance workflow
     const [instances] = await pool.query(
       'SELECT * FROM workflow_instances WHERE id = ?',
@@ -26,18 +28,87 @@ exports.updateWorkflowStep = async (req, res) => {
     }
     const instance = instances[0];
     
-    // Ambil detail langkah aktif dari workflow_steps
-    const [steps] = await pool.query(
-      'SELECT * FROM workflow_steps WHERE workflow_id = ? AND step_order = ?',
-      [instance.workflow_id, instance.current_step_order]
-    );
-    if (steps.length === 0) {
-      return res.status(400).json({ message: 'Step tidak valid' });
+
+    // **Bypass untuk setuju/tolak** (langung proses tanpa cek steps)
+    if (action === 'setuju' || action === 'tolak') {
+      const notificationData = {
+        instanceId,
+        workflowId: instance.workflow_id,
+        currentStep: instance.current_step_order,
+        action
+      };
+
+      if (action === 'setuju') {
+
+      const fieldMap = {
+        username: 'username',
+        namaLengkap: 'nama_lengkap',
+        alamat: 'alamat',
+        nik: 'nik',
+        nip: 'nip',
+        pangkat: 'pangkat',
+        ruang: 'ruang',
+        pendidikan: 'pendidikan',
+        kredensial: 'kredensial',
+        tempatTanggalLahir: 'tempat_tanggal_lahir',
+        levelPk: 'level_pk',
+        unitKerja: 'unit_kerja',
+        noStr: 'no_str',
+        akhirStr: 'akhir_str',
+        fileStr: 'file_str',
+        noSipp: 'no_sipp',
+        akhirSipp: 'akhir_sipp',
+        fileSipp: 'file_sipp',
+        jenisKetenagaan: 'jenis_ketenagaan',
+      };
+
+      const payload = JSON.parse(instance.payload || '{}');
+      console.log('isi payload: ', payload);
+
+      const entriesToUpdate = Object.entries(payload)
+        .filter(([key, value]) => key !== 'username' && fieldMap[key] && value !== undefined && value !== '');
+
+      if (entriesToUpdate.length === 0) {
+        return res.status(400).json({ message: 'Tidak ada data valid untuk diupdate.' });
+      }
+
+      const setClauses = [];
+      const values = [];
+      for (const [key, value] of entriesToUpdate) {
+        const column = fieldMap[key];
+        setClauses.push(`${column} = ?`);
+        values.push(value);
+      }
+
+      values.push(payload.username);
+
+      const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE username = ?`;
+      console.log('EXECUTE SQL:', sql, 'VALUES:', values);
+
+      const [result] = await pool.query(sql, values);
+      console.log('Rows affected:', result.affectedRows);
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'User tidak ditemukan atau data sama dengan sebelumnya.' });
+      }
+
+      await pool.query('UPDATE workflow_instances SET status = ? WHERE id = ?', ['completed', instanceId]);
+
+      eventEmitter.emit('taskStepUpdated', { instanceId, workflowId: instance.workflow_id, action: 'setuju', status: 'completed' });
+      return res.json({ message: 'Data berhasil disetujui dan disimpan ke tabel users' });
+
+      }
+
+    
+    if (action === 'tolak') {
+      eventEmitter.emit('taskStepUpdated', { ...notificationData, status: 'rejected' });
+      return res.json({ message: 'Data ditolak dan tidak disimpan ke tabel users' });
     }
-    const currentStep = steps[0];
+    }
+    const currentStep = steps[0] || {};
     
     // Validasi: Pastikan user memiliki peran yang sesuai (harus sama dengan to_role)
-    if (userRole !== currentStep.to_role) {
+    if (userRole !== currentStep.to_role && userRole !== 'super admin') {
       return res.status(403).json({ message: 'User tidak berhak memproses langkah ini' });
     }
     
@@ -53,7 +124,7 @@ exports.updateWorkflowStep = async (req, res) => {
     await pool.query(
       'INSERT INTO workflow_instance_steps (workflow_instance_id, step_order, from_role, to_role, action_taken, acted_by, remarks, file_path, assigned_user_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [instanceId, instance.current_step_order, currentStep.from_role, currentStep.to_role, action, userId, '', filePath, assignedUserName]
-    );    
+    );
     
     // Variabel untuk menampung data notifikasi
     let notificationData = {
@@ -63,6 +134,62 @@ exports.updateWorkflowStep = async (req, res) => {
       action,
       assigned_user_name: assignedUserName
     };
+
+    //untuk memvalidasi data user
+    if (action === 'setuju') {
+      // Ambil payload dari instance
+    console.log(">> Proses SETUJU dimulai <<");
+    const payload = JSON.parse(instance.payload || '{}');
+    console.log("Payload:", payload);
+
+      // Pastikan ada username untuk dicocokkan ke tabel users
+      if (!payload.username) {
+        return res.status(400).json({ message: 'Username tidak ditemukan dalam payload' });
+      }
+
+      const fieldMap = {
+        namaLengkap: 'nama_lengkap',
+        tempatTanggalLahir: 'tempat_tanggal_lahir',
+        levelPk: 'level_pk',
+        unitKerja: 'unit_kerja',
+        noStr: 'no_str',
+        noSipp: 'no_sipp',
+        jenisKetenagaan: 'jenis_ketenagaan',
+        akhirStr: 'akhir_str',
+        akhirSipp: 'akhir_sipp',
+        fileStr: 'file_str',
+        fileSipp: 'file_sipp'
+      }
+
+      // Buat query UPDATE ke tabel users berdasarkan field-field dari payload
+      const fieldsToUpdate = Object.keys(payload).filter(key => key !== 'username' && fieldMap[key]); // username untuk WHERE
+      console.log('isi fieldstoupdate: ', fieldsToUpdate);
+      const values = fieldsToUpdate.map(key => payload[key]);
+      console.log('nilainya: ', values);
+
+      // Buat query dinamis
+      const setClause = fieldsToUpdate.map(key => `${fieldMap[key]} = ?`).join(', ');
+      const sql = `UPDATE users SET ${setClause} WHERE username = ?`;
+      values.push(payload.username); // untuk WHERE username = ?
+
+      // Eksekusi update
+      await pool.query(sql, values);
+
+      // Update status instance jadi completed
+      await pool.query(
+        'UPDATE workflow_instances SET status = ? WHERE id = ?',
+        ['completed', instanceId]
+      );
+
+      eventEmitter.emit('taskStepUpdated', { ...notificationData, status: 'completed' });
+      return res.json({ message: 'Data berhasil disetujui dan disimpan ke tabel users' });
+    }
+
+    
+    if (action === 'tolak') {
+      eventEmitter.emit('taskStepUpdated', { ...notificationData, status: 'rejected' });
+      return res.json({ message: 'Data ditolak dan tidak disimpan ke tabel users' });
+    }
     
     // Proses aksi berdasarkan action
     if (action === 'stop') {
@@ -76,6 +203,7 @@ exports.updateWorkflowStep = async (req, res) => {
     }
     
     if (action === 'approve') {
+      console.log('masuk ke approve')
       if (currentStep.next_step_if_approved === null) {
         await pool.query(
           'UPDATE workflow_instances SET status = ? WHERE id = ?',
@@ -109,7 +237,9 @@ exports.updateWorkflowStep = async (req, res) => {
         return res.json({ message: 'Tugas telah berpindah ke langkah berikutnya (reject).' });
       }
     }
+
     
+
     return res.status(400).json({ message: 'Aksi tidak valid.' });
     
   } catch (error) {
@@ -198,6 +328,9 @@ exports.getUserTasks = async (req, res) => {
       LIMIT 10`, 
        [userRole]
     );
+
+    // percobaan dipindah kesini
+    
     
     res.json({
       initiatedTasks,
@@ -347,4 +480,62 @@ exports.getWorkflowStep = async (req, res) => {
 };
 
 
+exports.getInstances = async (req, res) => {
+  const userId = req.user.id;
+  const userRole = req.user.role; // 'super admin', 'staff', dst.
 
+  // 1. Semua instance yang user inisiasi
+  const [initiatedRows] = await pool.query(
+    `SELECT wi.*, w.code, w.title
+       FROM workflow_instances wi
+       JOIN workflows w ON wi.workflow_id = w.id
+      WHERE wi.initiated_by = ?`,
+    [userId]
+  );
+
+  // 2. Semua instance yang perlu user review
+  //    Di sini kita anggap: any in-progress instance where workflow_id=10 goes to 'super admin'
+  let assignedRows = [];
+  if (userRole === 'super admin') {
+    const [rows] = await pool.query(
+      `SELECT wi.*, wi.payload, w.code, w.title, w.description, ui.username AS initiator_username
+         FROM workflow_instances wi
+         JOIN workflows w ON wi.workflow_id = w.id
+         JOIN users ui ON wi.initiated_by = ui.id
+        WHERE wi.status = 'in-progress'
+          AND wi.workflow_id = 10`
+    );
+
+    
+    assignedRows = rows.map(row => {
+      let parsedPayload = null;
+      try {
+        parsedPayload = row.payload ? JSON.parse(row.payload) : null;
+      } catch (error) {
+        console.error("Invalid JSON in payload:", row.payload);
+      }
+      return {
+        ...row,
+        payload: parsedPayload
+      };
+    });
+    
+  }
+
+  // 3. Recent tasks yang sudah completed
+  const [recentRows] = await pool.query(
+    `SELECT wi.*, w.code, w.title, ui.username AS initiator_username, wi.reviewed_at
+       FROM workflow_instances wi
+       JOIN workflows w ON wi.workflow_id = w.id
+       JOIN users ui ON wi.initiated_by = ui.id
+      WHERE wi.status = 'completed'
+        AND (wi.initiated_by = ? OR ? = 'super admin')`,
+    [userId, userRole]
+  );
+
+  res.json({
+    initiatedRows,
+    assignedRows,
+    recentRows
+  });
+};

@@ -125,10 +125,81 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  async function verifUser() {
+    try {
+      const res = await fetch('/api/workflow/verification', {
+        headers : { 'Authorization': 'Bearer ' + token}
+      });
+      if (!res.ok) throw new Error('Gagal memuat data verifikasi');
+      const data = await res.json();
+      displayVerificationUser(data.assignedRows);
+    } catch (error) {
+      console.error('Error fetching verif tasks: ', error);
+    }
+  }
+
+  async function displayVerificationUser(tasks) {
+    const container = document.getElementById('verifList')
+    container.innerHTML = '';
+    if (tasks.length === 0) {
+      container.innerHTML = '<p>Tidak ada user yang perlu di Verifikasi</p>'
+    }
+
+    tasks.forEach(task => {
+      const taskEl = document.createElement('div');
+      taskEl.className = 'col-md-4 task-item';
+
+      const fieldLabels = {
+        username: 'Username',
+        namaLengkap: 'Nama Lengkap',
+        tempatTanggalLahir: 'Tempat Tanggal Lahir',
+        alamat: 'Alamat',
+        nik: 'NIK',
+        nip: 'NIP',
+        pangkat: 'Pangkat',
+        Ruang: 'Ruang',
+        levelPk: 'Level PK',
+        unitKerja: 'Unit Kerja',
+        pendidikan: 'Pendidikan',
+        noStr: 'Nomor STR',
+        akhirStr: 'Expired STR',
+        fileStr: 'File STR',
+        noSipp: 'Nomor SIPP',
+        akhirSipp: 'Expired SIPP',
+        fileSipp: 'File SIPP',
+        kredensial: 'Kredensial',
+        jenisKetenagaan: 'Jenis Ketenagaan'
+      };
+      
+      
+      taskEl.innerHTML = `
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">${task.title} (${task.code})</h5>
+            <p class="card-text">${task.description}</p>
+            <p class="card-text" style="margin-bottom: 0;">
+              <small>Data User:</small>
+              <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 8px; border-radius: 4px; background-color: #f8f9fa;">
+                <ul style="padding-left: 1.2em; margin-bottom: 0;">
+                  ${Object.entries(task.payload).map(([key, value]) => `
+                    <li><strong>${fieldLabels[key] || key}</strong>: ${value || '-'}</li>
+                  `).join('')}
+                </ul>
+              </div>
+            </p>
+            <button class="btn btn-success btn-sm" onclick="processValid(${task.id}, 'setuju')">Setuju</button>
+            <button class="btn btn-danger btn-sm" onclick="processValid(${task.id}, 'tolak')">Tolak</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(taskEl);
+    });
+  }
+
   // Render tugas yang diinisiasi oleh user (aktif)
   function displayInitiatedTasks(tasks) {
     const tableBody = document.querySelector('#initiatedTasksTable tbody');
-    tableBody.innerHTML = ''; // Clear existing rows
+    tableBody.innerHTML = '';
     tasks.forEach((task, index) => {
       const row = document.createElement('tr');
       row.innerHTML = `
@@ -272,7 +343,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                   <p class="card-text">${task.description}</p>
                   <p class="card-text" style="margin-bottom: 0;"><small>Status: ${task.status}</small></p>
                   <p class="card-text" style="margin-bottom: 0;"><small>Langkah: ${task.current_step_order}</small></p>
-                  <p class="card-text"><small>Aksi: ${task.action_description || '-'}</small></p>
+                  <p class="card-text"><small>Aksis: ${task.action_description || '-'}</small></p>
                   <form class="mb-2" id="task-form-${task.id}" enctype="multipart/form-data">
                     <input type="hidden" name="instanceId" value="${task.id}">
                     ${dropdownHTML}
@@ -415,7 +486,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + token
-          // Jangan set Content-Type; browser akan mengatur boundary secara otomatis
         },
         body: formData
       });
@@ -427,6 +497,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('Terjadi kesalahan saat memproses tugas.');
     }
   };
+
+  window.processValid = async function(taskId, action) {
+    try {
+      const res = await fetch(`/api/workflow/tasks/${taskId}/step`, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: action })
+      });
+
+      if (!res.ok) throw new Error('Gagal memproses tugas');
+      const result = await res.json();
+      console.log('Tugas berhasil diproses:', result);
+      await verifUser();
+    } catch (error) {
+      console.error('Error processing task:', error);
+    }
+  };
+
 
   // Render template workflow untuk inisiasi tugas
   function displayAvailableTemplates(templates) {
@@ -463,7 +554,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const formElement = document.getElementById(`template-form-${workflow_id}`);
       const formData = new FormData(formElement);
-      // Jangan menambahkan lagi workflow_id, karena sudah ada dalam form
       const res = await fetch('/api/workflow/instances', {
         method: 'POST',
         headers: {
@@ -501,5 +591,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Panggil fungsi untuk mengambil data tugas dan template
   initSwitchButton();
   fetchTasks();
+  verifUser();
   fetchAvailableTemplates();
 });

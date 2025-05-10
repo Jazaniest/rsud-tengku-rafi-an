@@ -2,6 +2,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const pool = require('../config/db')
 
 const secret = 'mysecretkey'; // Pastikan untuk menggunakan environment variable untuk produksi
 
@@ -107,7 +108,20 @@ exports.getProfile = async (req, res) => {
       pangkat: user.pangkat,
       levelPk: user.level_pk,
       unitKerja: user.unit_kerja,
-      foto_profile: user.foto_profile || "" 
+      foto_profile: user.foto_profile || "" ,
+      tempatTanggalLahir: user.tempat_tanggal_lahir,
+      alamat: user.alamat,
+      nik: user.nik,
+      ruang: user.ruang,
+      pendidikan: user.pendidikan,
+      noStr: user.no_str,
+      expiredStr: user.akhir_str,
+      fileStr: user.file_str,
+      noSipp: user.no_sipp,
+      expiredSipp: user.akhir_sipp,
+      fileSipp: user.file_sipp,
+      kredensial: user.kredensial,
+      jenisKetenagaan: user.jenis_ketenagaan
     });
   } catch (error) {
     console.error('Get profile error:', error);
@@ -121,59 +135,37 @@ exports.getProfile = async (req, res) => {
 // server/controllers/authController.js
 exports.editProfile = async (req, res) => {
   try {
-    const { username, namaLengkap, password, tempatTanggalLahir, alamat, nik, nip, pangkat, ruang, levelPk, unitKerja, pendidikan, noStr, expiredStr, noSipp, expiredSipp, kredensial, jenisKetenagaan, fileStr, fileSipp } = req.body;
     const userId = req.user.id;
 
-    // Cek apakah username baru sudah ada
-    const existingUser = await User.findByUsername(username);
-    if (existingUser && existingUser.id !== userId) {
-      return res.status(400).json({ message: 'Username sudah digunakan oleh pengguna lain' });
+    // 1. Ambil semua field form sebagai object
+    const changesPayload = {};
+    for (const [key, value] of Object.entries(req.body)) {
+      changesPayload[key] = value;
     }
-
-    // Jika password baru ada, hash password tersebut
-    let password_hash = null;
-    if (password) {
-      const saltRounds = 10;
-      password_hash = await bcrypt.hash(password, saltRounds);
-    }
-
-    // Jika ada file upload, ambil nama file nya
-    let foto_profile = null;
     if (req.file) {
-      foto_profile = req.file.filename;
+      changesPayload.foto_profile = req.file.filename;
     }
 
-    // Gabungkan data pembaruan
-    const updateData = {
-      username,
-      nama_lengkap: namaLengkap, 
-      password_hash, 
-      tempat_tanggal_lahir: tempatTanggalLahir, 
-      alamat, 
-      nik, 
-      nip, 
-      pangkat, 
-      ruang, 
-      level_pk: levelPk, 
-      unit_kerja: unitKerja, 
-      pendidikan, 
-      no_str: noStr, 
-      akhir_str: expiredStr, 
-      no_sipp: noSipp, 
-      akhir_sipp: expiredSipp, 
-      kredensial, 
-      jenis_ketenagaan: jenisKetenagaan,
-      file_str: fileStr,
-      file_sipp: fileSipp
-    };
-    if (foto_profile) {
-      updateData.foto_profile = foto_profile;
-    }
+    // 2. Insert ke workflow_instances
+    await pool.query(
+      `INSERT INTO workflow_instances
+         (workflow_id, initiated_by, current_step_order, payload, status)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        10,                    // VERIFY_PROFILE
+        userId,                // user yang submit
+        1,                     // step pertama
+        JSON.stringify(changesPayload),
+        'in-progress'          // default
+      ]
+    );
 
-    // Update data user
-    const updatedUser = await User.updateProfile(userId, updateData);
+    // 3. (Opsional) Kirim notifikasi via FCM ke admin
+    // await sendFcmToRole('super admin', 'Ada permintaan verifikasi profil baru.');
 
-    res.json({ message: 'Profil berhasil diperbarui', user: updatedUser });
+    return res.json({
+      message: 'Perubahan profil dikirim untuk verifikasi admin.'
+    });
   } catch (error) {
     console.error('Edit profile error:', error);
     res.status(500).json({ message: 'Internal server error' });

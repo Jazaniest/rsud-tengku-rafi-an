@@ -76,7 +76,9 @@
             <h3>Tugas Anda</h3>
             <div id="tasksList" class="row"></div>
             <hr>
-            <h4>Tugas yang Anda inisiasi</h4>
+            <h3>Tugas Admin</h3>
+            <div id="verifList" class="row"></div>
+            <h3>Tugas yang Anda inisiasi</h3>
             <div class="table-responsive">
             <table id="initiatedTasksTable" class="table table-hover">
                 <thead>
@@ -141,8 +143,16 @@
                     // Sembunyikan kolom User di tabel "Tugas Recent (Selesai)"
                     $("#recentTasksTable thead th:nth-child(6), #recentTasksTable tbody td:nth-child(6)").hide();
                 }
-            }, 500); // Delay 1 detik untuk menunggu update
+
+                // Sembunyikan bagian "Tugas Admin" jika bukan super admin
+                if (userRole !== 'super admin') {
+                    $('#register').hide();
+                    $('#verifList').prev('h3').hide();
+                    $('#verifList').hide();
+                }
+            }, 500); // Delay agar konten username dan role terisi
         });
+
 
     </script>
     <!-- Firebase SDK -->
