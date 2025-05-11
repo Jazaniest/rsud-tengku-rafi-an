@@ -49,10 +49,8 @@ exports.updateWorkflowStep = async (req, res) => {
         pangkat: 'pangkat',
         ruang: 'ruang',
         pendidikan: 'pendidikan',
-        kredensial: 'kredensial',
         tempatTanggalLahir: 'tempat_tanggal_lahir',
         levelPk: 'level_pk',
-        unitKerja: 'unit_kerja',
         noStr: 'no_str',
         akhirStr: 'akhir_str',
         fileStr: 'file_str',
@@ -134,62 +132,6 @@ exports.updateWorkflowStep = async (req, res) => {
       action,
       assigned_user_name: assignedUserName
     };
-
-    //untuk memvalidasi data user
-    if (action === 'setuju') {
-      // Ambil payload dari instance
-    console.log(">> Proses SETUJU dimulai <<");
-    const payload = JSON.parse(instance.payload || '{}');
-    console.log("Payload:", payload);
-
-      // Pastikan ada username untuk dicocokkan ke tabel users
-      if (!payload.username) {
-        return res.status(400).json({ message: 'Username tidak ditemukan dalam payload' });
-      }
-
-      const fieldMap = {
-        namaLengkap: 'nama_lengkap',
-        tempatTanggalLahir: 'tempat_tanggal_lahir',
-        levelPk: 'level_pk',
-        unitKerja: 'unit_kerja',
-        noStr: 'no_str',
-        noSipp: 'no_sipp',
-        jenisKetenagaan: 'jenis_ketenagaan',
-        akhirStr: 'akhir_str',
-        akhirSipp: 'akhir_sipp',
-        fileStr: 'file_str',
-        fileSipp: 'file_sipp'
-      }
-
-      // Buat query UPDATE ke tabel users berdasarkan field-field dari payload
-      const fieldsToUpdate = Object.keys(payload).filter(key => key !== 'username' && fieldMap[key]); // username untuk WHERE
-      console.log('isi fieldstoupdate: ', fieldsToUpdate);
-      const values = fieldsToUpdate.map(key => payload[key]);
-      console.log('nilainya: ', values);
-
-      // Buat query dinamis
-      const setClause = fieldsToUpdate.map(key => `${fieldMap[key]} = ?`).join(', ');
-      const sql = `UPDATE users SET ${setClause} WHERE username = ?`;
-      values.push(payload.username); // untuk WHERE username = ?
-
-      // Eksekusi update
-      await pool.query(sql, values);
-
-      // Update status instance jadi completed
-      await pool.query(
-        'UPDATE workflow_instances SET status = ? WHERE id = ?',
-        ['completed', instanceId]
-      );
-
-      eventEmitter.emit('taskStepUpdated', { ...notificationData, status: 'completed' });
-      return res.json({ message: 'Data berhasil disetujui dan disimpan ke tabel users' });
-    }
-
-    
-    if (action === 'tolak') {
-      eventEmitter.emit('taskStepUpdated', { ...notificationData, status: 'rejected' });
-      return res.json({ message: 'Data ditolak dan tidak disimpan ke tabel users' });
-    }
     
     // Proses aksi berdasarkan action
     if (action === 'stop') {

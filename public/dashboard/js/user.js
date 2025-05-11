@@ -62,14 +62,12 @@ const fetchUsers = async () => {
                 <td>${getSafeValue(user.pangkat)}</td>
                 <td>${getSafeValue(user.ruang)}</td>
                 <td>${getSafeValue(user.level_pk)}</td>
-                <td>${getSafeValue(user.unit_kerja)}</td>
                 <td>${getSafeValue(user.pendidikan)}</td>
                 <td>${getSafeValue(user.no_str)}</td>
                 <td>${getSafeValue(user.akhir_str)}</td>
                 <td>${getSafeValue(user.no_sipp)}</td>
                 <td>${getSafeValue(user.akhir_sipp)}</td>
                 <td>${getSafeValue(user.file_sipp)}</td> <!-- untuk sementara dalam bentuk nama file. selanjutnya buat agar file bisa di lihat dari menu ini. --!>
-                <td>${getSafeValue(user.kredensial)}</td>
                 <td>${getSafeValue(user.jenis_ketenagaan)}</td>
                 <td>
                     <button class="edit-btn" onclick="editUser(${user.id})">Edit</button>
@@ -122,11 +120,9 @@ const editUser = (id) => {
         document.getElementById('editPangkat').value = user.pangkat;
         document.getElementById('editRuang').value = user.ruang;
         document.getElementById('editLevelPk').value = user.level_pk;
-        document.getElementById('editUnitKerja').value = user.unit_kerja;
         document.getElementById('editPendidikan').value = user.pendidikan;
         document.getElementById('editNoStr').value = user.no_str;
         document.getElementById('editNoSipp').value = user.no_sipp;
-        document.getElementById('editKredensial').value = user.kredensial;
         document.getElementById('editJenisKetenagaan').value = user.jenis_ketenagaan;
 
         document.getElementById('editModal').style.display = "block"; // Menampilkan modal
@@ -154,11 +150,9 @@ document.getElementById('editForm').addEventListener('submit', async (event) => 
         pangkat: document.getElementById('editPangkat').value,
         ruang: document.getElementById('editRuang').value,
         level_pk: document.getElementById('editLevelPk').value,
-        unit_kerja: document.getElementById('editUnitKerja').value,
         pendidikan: document.getElementById('editPendidikan').value,
         no_str: document.getElementById('editNoStr').value,
         no_sipp: document.getElementById('editNoSipp').value,
-        kredensial: document.getElementById('editKredensial').value,
         jenis_ketenagaan: document.getElementById('editJenisKetenagaan').value,
     };
 

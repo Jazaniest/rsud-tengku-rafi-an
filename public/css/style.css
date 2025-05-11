@@ -72,6 +72,12 @@ button:focus {
   .container {
     max-width: 1170px; } }
 
+/* @media (min-width: 500px) {
+  .container-logo {
+    padding: 0px 0px;
+  }
+} */
+
 .area-padding-top {
   padding-top: 130px; }
 
@@ -438,9 +444,11 @@ ul {
   background-position: center;
   background-size: cover;
   position: relative; }
+  /* untuk mengatur posisi background banner */
   @media (max-width: 767px) {
     .banner-area {
-      min-height: 600px; } }
+      min-height: 600px; 
+      background-position: 65% center;} }
   .banner-area h1 {
     font-size: 45px;
     color: #000;

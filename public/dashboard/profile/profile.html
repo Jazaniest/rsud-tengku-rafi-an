@@ -32,19 +32,67 @@
     <div class="profile-details">
       <div class="profile-detail">
         <span class="detail-label">Pangkat / Golongan:</span>
-        <span class="detail-value" id="pangkat">Loading...</span>
+        <span class="detail-value" id="pangkat"> </span>
       </div>
       <div class="profile-detail">
         <span class="detail-label">Jabatan:</span>
-        <span class="detail-value" id="role">Loading...</span>
+        <span class="detail-value" id="role"> </span>
       </div>
       <div class="profile-detail">
         <span class="detail-label">Level PK/BK:</span>
-        <span class="detail-value" id="levelPk">Loading...</span>
+        <span class="detail-value" id="levelPk"> </span>
       </div>
       <div class="profile-detail">
         <span class="detail-label">Unit Kerja:</span>
-        <span class="detail-value" id="unitKerja">Loading...</span>
+        <span class="detail-value" id="unitKerja"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">Tempat Tanggal Lahir:</span>
+        <span class="detail-value" id="tempatTamggalLahir"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">Alamat:</span>
+        <span class="detail-value" id="alamat"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">Nik:</span>
+        <span class="detail-value" id="nik"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">Ruang:</span>
+        <span class="detail-value" id="ruang"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">Pendidikan:</span>
+        <span class="detail-value" id="pendidikan"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">No STR:</span>
+        <span class="detail-value" id="noStr"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">Expired STR:</span>
+        <span class="detail-value" id="expiredStr"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">File STR:</span>
+        <span class="detail-value" id="fileStr"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">No SIPP:</span>
+        <span class="detail-value" id="noSipp"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">Expired SIPP:</span>
+        <span class="detail-value" id="expiredSipp"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">File SIPP:</span>
+        <span class="detail-value" id="fileSipp"> </span>
+      </div>
+      <div class="profile-detail">
+        <span class="detail-label">Jenis Ketenagaan:</span>
+        <span class="detail-value" id="jenisKetenagaan"> </span>
       </div>
     </div>
   </div>
@@ -56,11 +104,11 @@
       <form id="editProfileForm">
         <div class="form-group">
           <label for="editUsername">Username:</label>
-          <input type="text" id="editUsername" name="username">
+          <input type="text" id="editUsername" name="username" placeholder="isi username anda" required>
         </div>
         <div class="form-group">
           <label for="editNamaLengkap">Nama Lengkap:</label>
-          <input type="text" id="editNamaLengkap" name="namaLengkap">
+          <input type="text" id="editNamaLengkap" name="namaLengkap" placeholder="isi nama lengkap anda" required>
         </div>
         <div class="form-group">
           <label for="editFotoProfile">Foto Profil:</label>
@@ -68,71 +116,63 @@
         </div>
         <div class="form-group">
           <label for="editTempatTanggalLahir">Tempat Tanggal Lahir:</label>
-          <input type="text" id="editTempatTanggalLahir" name="tempatTanggalLahir" placeholder="contoh: siak, 11 November 1999">
+          <input type="text" id="editTempatTanggalLahir" name="tempatTanggalLahir" placeholder="tempat, tanggal-bulan-tahun">
         </div>
         <div class="form-group">
           <label for="editAlamat">Alamat:</label>
-          <input type="text" id="editAlamat" name="alamat">
+          <input type="text" id="editAlamat" name="alamat" placeholder="isi alamat anda">
         </div>
         <div class="form-group">
           <label for="editNik">Nik:</label>
-          <input type="text" id="editNik" name="nik">
+          <input type="text" id="editNik" name="nik" placeholder="isi nik anda">
         </div>
         <div class="form-group">
           <label for="editNip">Nip:</label>
-          <input type="text" id="editNip" name="nip">
+          <input type="text" id="editNip" name="nip" placeholder="isi nip anda">
         </div>
         <div class="form-group">
           <label for="editPangkat">Pangkat:</label>
-          <input type="text" id="editPangkat" name="pangkat">
+          <input type="text" id="editPangkat" name="pangkat" placeholder="isi pangkat anda">
         </div>
         <div class="form-group">
           <label for="editRuang">Ruang:</label>
-          <input type="text" id="editRuang" name="Ruang">
+          <input type="text" id="editRuang" name="Ruang" placeholder="isi ruangan anda">
         </div>
         <div class="form-group">
           <label for="editLevelPk">Level PK:</label>
-          <input type="text" id="editLevelPk" name="levelPk">
-        </div>
-        <div class="form-group">
-          <label for="editUnitKerja">Unit Kerja:</label>
-          <input type="text" id="editUnitKerja" name="unitKerja">
+          <input type="text" id="editLevelPk" name="levelPk" placeholder="isi level pk anda">
         </div>
         <div class="form-group">
           <label for="editPendidikan">Pendidikan:</label>
-          <input type="text" id="editPendidikan" name="pendidikan">
+          <input type="text" id="editPendidikan" name="pendidikan" placeholder="isi pendidikan anda">
         </div>
         <div class="form-group">
           <label for="editNoStr">No STR:</label>
-          <input type="text" id="editNoStr" name="noStr">
+          <input type="text" id="editNoStr" name="noStr" placeholder="isi no str anda">
         </div>
         <div class="form-group">
           <label for="editAkhirStr">Expired STR:</label>
-          <input type="text" id="editExpiredStr" name="akhirStr">
+          <input type="text" id="editExpiredStr" name="akhirStr" placeholder="isi tanggal berakhir str anda">
         </div>
         <div class="form-group">
           <label for="editFileStr">File STR:</label>
-          <input type="text" id="editFileStr" name="fileStr">
+          <input type="text" id="editFileStr" name="fileStr" placeholder="isi link gdrive str anda">
         </div>
         <div class="form-group">
           <label for="editNoSipp">No SIPP:</label>
-          <input type="text" id="editNoSipp" name="noSipp">
+          <input type="text" id="editNoSipp" name="noSipp" placeholder="isi no sipp anda">
         </div>
         <div class="form-group">
           <label for="editAkhirSipp">Expired SIPP:</label>
-          <input type="text" id="editExpiredSipp" name="akhirSipp">
+          <input type="text" id="editExpiredSipp" name="akhirSipp" placeholder="isi tanggal berakhir sipp anda">
         </div>
         <div class="form-group">
           <label for="editFileSipp">File SIPP:</label>
-          <input type="text" id="editFileSipp" name="fileSipp">
-        </div>
-        <div class="form-group">
-          <label for="editKredensial">Kredensial:</label>
-          <input type="text" id="editKredensial" name="kredensial">
+          <input type="text" id="editFileSipp" name="fileSipp" placeholder="isi link gdrive sipp anda">
         </div>
         <div class="form-group">
           <label for="editJenisKetenagaan">Jenis Ketenagaan:</label>
-          <input type="text" id="editJenisKetenagaan" name="jenisKetenagaan">
+          <input type="text" id="editJenisKetenagaan" name="jenisKetenagaan" placeholder="isi jenis ketenagaan anda">
         </div>
         <button type="submit" class="submitBtn">Simpan Perubahan</button>
         <button type="button" id="cancelBtn">Batal</button>

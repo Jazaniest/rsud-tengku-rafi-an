@@ -42,11 +42,9 @@ class User {
       pangkat,
       ruang,
       level_pk,
-      unit_kerja,
       pendidikan,
       no_str,
       no_sipp,
-      kredensial,
       jenis_ketenagaan,
       akhir_str,
       akhir_sipp,
@@ -58,7 +56,7 @@ class User {
     const finalJenisKetenagaan = (typeof jenis_ketenagaan === 'undefined' || jenis_ketenagaan === "") ? null : jenis_ketenagaan;
   
     const [result] = await pool.query(
-      'INSERT INTO users (username, password_hash, role, created_at, nama_lengkap, tempat_tanggal_lahir, alamat, nik, nip, pangkat, ruang, level_pk, unit_kerja, pendidikan, no_str, no_sipp, kredensial, jenis_ketenagaan, akhir_str, akhir_sipp, file_str, file_sipp) VALUES (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO users (username, password_hash, role, created_at, nama_lengkap, tempat_tanggal_lahir, alamat, nik, nip, pangkat, ruang, level_pk, pendidikan, no_str, no_sipp, jenis_ketenagaan, akhir_str, akhir_sipp, file_str, file_sipp) VALUES (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         username,
         password_hash,
@@ -71,11 +69,9 @@ class User {
         pangkat,
         ruang,
         level_pk,
-        unit_kerja,
         pendidikan,
         no_str,
         no_sipp,
-        kredensial,
         finalJenisKetenagaan, 
         akhir_str,
         akhir_sipp,
@@ -83,7 +79,7 @@ class User {
         file_sipp
       ]
     );
-    return { id: result.insertId, username, role, nama_lengkap, tempat_tanggal_lahir, alamat, nik, nip, pangkat, ruang, level_pk, unit_kerja, pendidikan, no_str, no_sipp, kredensial, jenis_ketenagaan: finalJenisKetenagaan, akhir_str, akhir_sipp, file_str, file_sipp };
+    return { id: result.insertId, username, role, nama_lengkap, tempat_tanggal_lahir, alamat, nik, nip, pangkat, ruang, level_pk, pendidikan, no_str, no_sipp, jenis_ketenagaan: finalJenisKetenagaan, akhir_str, akhir_sipp, file_str, file_sipp };
   }
   
 
@@ -100,11 +96,9 @@ class User {
       pangkat,
       ruang,
       level_pk,
-      unit_kerja,
       pendidikan,
       no_str,
       no_sipp,
-      kredensial,
       jenis_ketenagaan, 
       akhir_str,
       akhir_sipp,
@@ -161,11 +155,6 @@ class User {
       params.push(level_pk);
     }
   
-    if (unit_kerja) {
-      query += ', unit_kerja = ?';
-      params.push(unit_kerja);
-    }
-  
     if (pendidikan) {
       query += ', pendidikan = ?';
       params.push(pendidikan);
@@ -179,11 +168,6 @@ class User {
     if (no_sipp) {
       query += ', no_sipp = ?';
       params.push(no_sipp);
-    }
-  
-    if (kredensial) {
-      query += ', kredensial = ?';
-      params.push(kredensial);
     }
   
     if (jenis_ketenagaan) {
@@ -231,11 +215,9 @@ class User {
       pangkat,
       ruang,
       level_pk,
-      unit_kerja,
       pendidikan,
       no_str,
       no_sipp,
-      kredensial,
       jenis_ketenagaan,
       akhir_str,
       akhir_sipp,

@@ -159,7 +159,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         pangkat: 'Pangkat',
         Ruang: 'Ruang',
         levelPk: 'Level PK',
-        unitKerja: 'Unit Kerja',
         pendidikan: 'Pendidikan',
         noStr: 'Nomor STR',
         akhirStr: 'Expired STR',
@@ -167,13 +166,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         noSipp: 'Nomor SIPP',
         akhirSipp: 'Expired SIPP',
         fileSipp: 'File SIPP',
-        kredensial: 'Kredensial',
         jenisKetenagaan: 'Jenis Ketenagaan'
       };
       
       
       taskEl.innerHTML = `
-        <div class="card mb-3">
+        <div class="card mb-3" style="color: #767676">
           <div class="card-body">
             <h5 class="card-title">${task.title} (${task.code})</h5>
             <p class="card-text">${task.description}</p>
@@ -337,7 +335,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Setelah dropdownHTML siap, sisipkan ke dalam innerHTML elemen taskEl
             taskEl.innerHTML = `
-              <div class="card mb-3">
+              <div class="card mb-3" style="color: #767676">
                 <div class="card-body">
                   <h5 class="card-title">${task.title} (${task.code})</h5>
                   <p class="card-text">${task.description}</p>
@@ -360,7 +358,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('Tidak ada langkah berikutnya untuk step_order:', currentStepOrder);
             // Jika fetch gagal, kamu bisa memilih untuk tetap merender elemen tanpa dropdown
             taskEl.innerHTML = `
-              <div class="card mb-3">
+              <div class="card mb-3" style="color: #767676">
                 <div class="card-body">
                   <h5 class="card-title">${task.title} (${task.code})</h5>
                   <p class="card-text">${task.description}</p>
@@ -531,7 +529,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const templateEl = document.createElement('div');
       templateEl.className = 'col-md-4 task-item';
       templateEl.innerHTML = `
-        <div class="card mb-3">
+        <div class="card mb-3" style="color: #767676">
           <div class="card-body">
             <h5 class="card-title">${template.title} (${template.code})</h5>
             <p class="card-text">${template.description}</p>

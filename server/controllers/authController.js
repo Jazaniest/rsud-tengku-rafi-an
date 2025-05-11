@@ -25,7 +25,6 @@ exports.register = async (req, res) => {
       pendidikan,
       no_str,
       no_sipp,
-      kredensial,
       jenis_ketenagaan
     } = req.body;
 
@@ -59,7 +58,6 @@ exports.register = async (req, res) => {
       pendidikan,
       no_str,
       no_sipp,
-      kredensial,
       jenis_ketenagaan: finalJenisKetenagaan
     });
 
@@ -107,7 +105,6 @@ exports.getProfile = async (req, res) => {
       namaLengkap: user.nama_lengkap,
       pangkat: user.pangkat,
       levelPk: user.level_pk,
-      unitKerja: user.unit_kerja,
       foto_profile: user.foto_profile || "" ,
       tempatTanggalLahir: user.tempat_tanggal_lahir,
       alamat: user.alamat,
@@ -120,7 +117,6 @@ exports.getProfile = async (req, res) => {
       noSipp: user.no_sipp,
       expiredSipp: user.akhir_sipp,
       fileSipp: user.file_sipp,
-      kredensial: user.kredensial,
       jenisKetenagaan: user.jenis_ketenagaan
     });
   } catch (error) {
