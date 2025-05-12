@@ -3,6 +3,69 @@ const eventEmitter = require('./eventEmitter');
 const { sendNotification } = require('../utils/fcm');
 const pool = require('../config/db'); // pastikan modul database Anda
 
+eventEmitter.on('startVerif', async (data) => {
+  try {
+    const { verificatorRole } = data;
+
+    const [tokens] = await pool.query('SELECT fcm_token FROM users WHERE role = ?', verificatorRole);
+    const tokenList = tokens.map(row => row.fcm_token).filter(Boolean);
+
+    if (tokenList.length === 0) {
+      console.log('tidak ada token untuk: ', verificatorRole);
+    }
+
+    const payload = {
+      notification: {
+        title: 'Tugas Baru',
+        body: 'Anda menerima tugas verifikasi baru!'
+      }
+    }
+
+    await sendNotification(tokenList, payload);
+    console.log(`tugas baru untuk ${verificatorRole} telah dikirim`)
+  } catch (error) {
+    console.log('Error saat mengirim tugas baru: ', error);
+  }
+});
+
+
+eventEmitter.on('verifUpdate', async (data) => {
+  try {
+    const { assigned_user_name, status} = data;
+
+    const [tokens] = await pool.query('SELECT fcm_token FROM users WHERE nama_lengkap = ?', assigned_user_name);
+    const tokenList = tokens.map(row => row.fcm_token).filter(Boolean);
+
+    if (tokenList.length === 0) {
+      console.log('tidak ada token untuk: ', assigned_user_name);
+      return;
+    }
+
+    let payload;
+    if (status === 'completed') {
+      payload = {
+        notification: {
+          title: 'Data verifikasi diterima',
+          body: 'Data update verifikasi yang anda ajukan diterima!'
+        }
+      };
+    } else {
+      payload = {
+        notification: {
+          title: 'Data verifikasi ditolak',
+          body: 'Data verifikasi yang anda ajukan ditolak!'
+        }
+      }
+    }
+
+    await sendNotification(tokenList, payload);
+    console.log(`Tugas baru untuk ${assigned_user_name} telah dikirim`)
+  } catch (error) {
+    console.log('Error saat mengirim tugas baru : ', error);
+  }
+});
+
+
 // Handler untuk event newTaskInitiated
 eventEmitter.on('newTaskInitiated', async (data) => {
   try {
@@ -33,7 +96,6 @@ eventEmitter.on('newTaskInitiated', async (data) => {
   }
 });
 
-// Handler untuk event taskStepUpdated
 // Handler untuk event taskStepUpdated
 eventEmitter.on('taskStepUpdated', async (data) => {
   try {

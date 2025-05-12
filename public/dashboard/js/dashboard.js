@@ -14,7 +14,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
     const profile = await profileRes.json();
-    // console.log('berikut hasil debugging nya : ', profile);
+    
+    //untuk mengambil data username
+    localStorage.setItem('username', profile.username);
+
     document.getElementById('username').textContent = profile.username;
     document.getElementById('role').textContent = profile.role;
     
@@ -47,7 +50,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
     console.error('Error fetching profile:', error);
   }
-
 
 
   async function initSwitchButton() {

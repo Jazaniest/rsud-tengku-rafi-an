@@ -12,57 +12,62 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
     const profile = await profileRes.json();
+    
+    function safeText(value) {
+      return (value === undefined || value === 'undefined' || value === null) ? '' : value;
+    }
 
-    document.getElementById('username').textContent = profile.username;
-    document.getElementById('role').textContent = profile.role;
-    document.getElementById('nip').textContent = profile.nip;
-    document.getElementById('namaLengkap').textContent = profile.namaLengkap;
-    document.getElementById('pangkat').textContent = profile.pangkat;
-    document.getElementById('levelPk').textContent = profile.levelPk;
-    document.getElementById('tempatTanggalLahir').textContent = profile.tempatTanggalLahir;
-    document.getElementById('alamat').textContent = profile.alamat;
-    document.getElementById('nik').textContent = profile.nik;
-    document.getElementById('ruang').textContent = profile.ruang;
-    document.getElementById('pendidikan').textContent = profile.pendidikan;
-    document.getElementById('noStr').textContent = profile.noStr;
-    document.getElementById('expiredStr').textContent = profile.expiredStr;
-    document.getElementById('fileStr').textContent = profile.fileStr;
-    document.getElementById('noSipp').textContent = profile.noSipp;
-    document.getElementById('expiredSipp').textContent = profile.expiredSipp;
-    document.getElementById('fileSipp').textContent = profile.fileSipp;
-    document.getElementById('jenisKetenagaan').textContent = profile.jenisKetenagaan;
+    document.getElementById('username').textContent = safeText(profile.username);
+    document.getElementById('role').textContent = safeText(profile.role);
+    document.getElementById('namaLengkap').textContent = safeText(profile.namaLengkap);
+    document.getElementById('tempatTanggalLahir').textContent = safeText(profile.tempatTanggalLahir);
+    document.getElementById('nip').textContent = safeText(profile.nip);
+    document.getElementById('pangkat').textContent = safeText(profile.pangkat);
+    document.getElementById('levelPk').textContent = safeText(profile.levelPk);
+    document.getElementById('alamat').textContent = safeText(profile.alamat);
+    document.getElementById('nik').textContent = safeText(profile.nik);
+    document.getElementById('ruang').textContent = safeText(profile.ruang);
+    document.getElementById('pendidikan').textContent = safeText(profile.pendidikan);
+    document.getElementById('noStr').textContent = safeText(profile.noStr);
+    document.getElementById('expiredStr').textContent = safeText(profile.expiredStr);
+    document.getElementById('fileStr').textContent = safeText(profile.fileStr);
+    document.getElementById('noSipp').textContent = safeText(profile.noSipp);
+    document.getElementById('expiredSipp').textContent = safeText(profile.expiredSipp);
+    document.getElementById('fileSipp').textContent = safeText(profile.fileSipp);
+    document.getElementById('jenisKetenagaan').textContent = safeText(profile.jenisKetenagaan);
 
     // Perbarui foto profil jika ada, jika tidak kosong
     const profilePhotoEl = document.querySelector('.profile-photo');
     if (profile.foto_profile) {
-      profilePhotoEl.src = '/uploads/' + profile.foto_profile;
+      profilePhotoEl.src = '/../uploads/' + profile.foto_profile;
     } else {
       profilePhotoEl.src = ''; // atau set ke default placeholder
     }
 
     // Isi form dengan data profil yang ada
-    document.getElementById('editUsername').value = profile.username;
-    document.getElementById('editNamaLengkap').value = profile.namaLengkap;
-    document.getElementById('editTempatTanggalLahir').value = profile.tempatTanggalLahir;
-    document.getElementById('editAlamat').value = profile.alamat;
-    document.getElementById('editNik').value = profile.nik;
-    document.getElementById('editNip').value = profile.nip;
-    document.getElementById('editPangkat').value = profile.pangkat;
-    document.getElementById('editRuang').value = profile.ruang;
-    document.getElementById('editLevelPk').value = profile.levelPk;
-    document.getElementById('editPendidikan').value = profile.pendidikan;
-    document.getElementById('editNoStr').value = profile.noStr;
-    document.getElementById('editExpiredStr').value = profile.expiredStr;
-    document.getElementById('editNoSipp').value = profile.noSipp;
-    document.getElementById('editExpiredSipp').value = profile.expiredSipp;
-    document.getElementById('editJenisKetenagaan').value = profile.jenisKetenagaan;
-    document.getElementById('editFileStr').value = profile.fileStr;
-    document.getElementById('editFileSipp').value = profile.fileSipp;
-
+    document.getElementById('editUsername').value = safeText(profile.username);
+    document.getElementById('editNamaLengkap').value = safeText(profile.namaLengkap);
+    document.getElementById('editTempatTanggalLahir').value = safeText(profile.tempatTanggalLahir);
+    document.getElementById('editAlamat').value = safeText(profile.alamat || '');
+    document.getElementById('editNik').value = safeText(profile.nik);
+    document.getElementById('editNip').value = safeText(profile.nip);
+    document.getElementById('editPangkat').value = safeText(profile.pangkat);
+    document.getElementById('editRuang').value = safeText(profile.ruang);
+    document.getElementById('editLevelPk').value = safeText(profile.levelPk);
+    document.getElementById('editPendidikan').value = safeText(profile.pendidikan);
+    document.getElementById('editNoStr').value = safeText(profile.noStr);
+    document.getElementById('editExpiredStr').value = safeText(profile.expiredStr);
+    document.getElementById('editNoSipp').value = safeText(profile.noSipp);
+    document.getElementById('editExpiredSipp').value = safeText(profile.expiredSipp);
+    document.getElementById('editJenisKetenagaan').value = safeText(profile.jenisKetenagaan);
+    document.getElementById('editFileStr').value = safeText(profile.fileStr);
+    document.getElementById('editFileSipp').value = safeText(profile.fileSipp);
 
   } catch (error) {
     console.error('Error fetching profile:', error);
   }
+
+
 
   // Tampilkan modal ketika tombol Edit Profil diklik
   document.getElementById('editProfileBtn').addEventListener('click', () => {
@@ -80,15 +85,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modalContent = document.querySelector('.settings-modal');
 
   document.addEventListener('click', (e) => {
-    if (e.target === modal / modalContent) {
+    if (e.target === modal || e.target === modalContent) {
       modal.classList.remove('show');
     }
   });
 
+  const username = localStorage.getItem('username');
+  console.log('isi username di localstorage: ', username)
+
   document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-  
+
+    
     try {
       const res = await fetch('/api/auth/editProfile', {
         method: 'PUT',

@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const pool = require('../config/db')
+const eventEmitter = require('../notification-handler/eventEmitter')
 
 const secret = 'mysecretkey'; // Pastikan untuk menggunakan environment variable untuk produksi
 
@@ -95,18 +96,19 @@ exports.login = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
+    console.log('isi username: ', req.user.id);
     if (!user) {
       return res.status(404).json({ message: 'User tidak ditemukan' });
     }
     res.json({ 
       username: user.username, 
       role: user.role, 
-      nip: user.nip,
       namaLengkap: user.nama_lengkap,
-      pangkat: user.pangkat,
-      levelPk: user.level_pk,
       foto_profile: user.foto_profile || "" ,
       tempatTanggalLahir: user.tempat_tanggal_lahir,
+      nip: user.nip,
+      pangkat: user.pangkat,
+      levelPk: user.level_pk,
       alamat: user.alamat,
       nik: user.nik,
       ruang: user.ruang,
@@ -125,15 +127,10 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-
-
-
-// server/controllers/authController.js
 exports.editProfile = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // 1. Ambil semua field form sebagai object
     const changesPayload = {};
     for (const [key, value] of Object.entries(req.body)) {
       changesPayload[key] = value;
@@ -142,23 +139,23 @@ exports.editProfile = async (req, res) => {
       changesPayload.foto_profile = req.file.filename;
     }
 
-    // 2. Insert ke workflow_instances
     await pool.query(
       `INSERT INTO workflow_instances
          (workflow_id, initiated_by, current_step_order, payload, status)
        VALUES (?, ?, ?, ?, ?)`,
       [
-        10,                    // VERIFY_PROFILE
-        userId,                // user yang submit
-        1,                     // step pertama
+        10,
+        userId,
+        1,
         JSON.stringify(changesPayload),
-        'in-progress'          // default
+        'in-progress'
       ]
     );
 
-    // 3. (Opsional) Kirim notifikasi via FCM ke admin
-    // await sendFcmToRole('super admin', 'Ada permintaan verifikasi profil baru.');
-
+    const notificationData = {
+      verificatorRole: 'super admin'
+    };
+    eventEmitter.emit('startVerif', {...notificationData});
     return res.json({
       message: 'Perubahan profil dikirim untuk verifikasi admin.'
     });

@@ -17,6 +17,9 @@ exports.updateWorkflowStep = async (req, res) => {
 
     // Ambil nilai assigned_user_name dari form (jika dikirim)
     const assignedUserName = req.body.assigned_user_name ? req.body.assigned_user_name.trim() : '';
+    console.log('isi assigned: ', req.body.assigned_user_name)
+
+    // const assignName = req.user.namaLengkap;
 
     // Ambil instance workflow
     const [instances] = await pool.query(
@@ -31,19 +34,23 @@ exports.updateWorkflowStep = async (req, res) => {
 
     // **Bypass untuk setuju/tolak** (langung proses tanpa cek steps)
     if (action === 'setuju' || action === 'tolak') {
+
+      const payload = JSON.parse(instance.payload || '{}');
+      const assignName = payload.namaLengkap;
       const notificationData = {
         instanceId,
-        workflowId: instance.workflow_id,
-        currentStep: instance.current_step_order,
-        action
+        action,
+        assigned_user_name: assignName
       };
 
       if (action === 'setuju') {
+      
 
       const fieldMap = {
         username: 'username',
         namaLengkap: 'nama_lengkap',
         alamat: 'alamat',
+        foto_profile: 'foto_profile',
         nik: 'nik',
         nip: 'nip',
         pangkat: 'pangkat',
@@ -92,15 +99,17 @@ exports.updateWorkflowStep = async (req, res) => {
 
       await pool.query('UPDATE workflow_instances SET status = ? WHERE id = ?', ['completed', instanceId]);
 
-      eventEmitter.emit('taskStepUpdated', { instanceId, workflowId: instance.workflow_id, action: 'setuju', status: 'completed' });
+      eventEmitter.emit('verifUpdate', { ...notificationData, status: 'completed' });
       return res.json({ message: 'Data berhasil disetujui dan disimpan ke tabel users' });
 
       }
 
     
     if (action === 'tolak') {
-      eventEmitter.emit('taskStepUpdated', { ...notificationData, status: 'rejected' });
-      return res.json({ message: 'Data ditolak dan tidak disimpan ke tabel users' });
+      await pool.query('Delete FROM workflow_instances WHERE id = ?', instanceId)
+      
+      eventEmitter.emit('verifUpdate', { ...notificationData, status: 'rejected' });
+      return res.json({ message: 'Data anda ditolak, silahkan perbaiki data yang salah' });
     }
     }
     const currentStep = steps[0] || {};
