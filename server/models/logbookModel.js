@@ -5,7 +5,14 @@ module.exports = {
   // Fungsi untuk mengambil logbook berdasarkan user id
   // Pastikan tabel logbook Anda memiliki kolom misalnya: id, user_id, activity, date, status, dll.
   getAllByUser: async (userId) => {
-    const [rows] = await db.execute('SELECT * FROM logbook_entries WHERE user_id = ?', [userId]);
+    const [rows] = await db.execute(
+      `SELECT * 
+        FROM logbook_entries 
+        WHERE user_id = ? 
+    ORDER BY kolom_kegiatan ASC, id ASC`,
+    [userId]
+    );
+
     return rows;
   },
   

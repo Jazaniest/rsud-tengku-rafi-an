@@ -1,60 +1,63 @@
-const token = localStorage.getItem('token')
+// js/logbook.js (menggunakan Fetch API)
+const token = localStorage.getItem('token');
 
-const fetchUser = async () => {
-  if (!token) {
-    console.log('Token is missing or invalid');
-    window.location.href = '/login';
-    return;
-  }
-
-  try {
-    const profileRes = await fetch('/api/auth/profile', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
-    const profile = await profileRes.json();
-
-    document.getElementById('role').textContent = profile.role;
-    if (profile.role !== 'staff') {
-      console.log('User tidak sesuai!');
-      alert('Anda tidak memiliki akses untuk fitur ini!');
-      window.location.href = '/public/dashboard/index.html';
-    } else {
-      console.log('Role sesuai!');
-    }
-  } catch (error) {
-    console.error('Error fetching profile:', error);
-  }
-}
-
-$(document).ready(function(){
+document.addEventListener('DOMContentLoaded', () => {
   let kegiatanData = [];
   let entryCount = 0;
-
-  function loadKegiatan() {
-    $.ajax({
-      url: '/api/kegiatan',
-      method: 'GET',
-      headers: { Authorization: 'Bearer ' + token },
-      success: function(data) {
-        kegiatanData = data;
-        let listHtml = '';
-        data.forEach(k => { listHtml += '<li>' + k.name + '</li>'; });
-        $('#kegiatanList').html(listHtml);
-        // Update semua dropdown kegiatan pada entri
-        $('.kegiatanDropdown').each(function() {
-          const sel = $(this);
-          sel.empty().append('<option value="">Pilih Kegiatan</option>');
-          kegiatanData.forEach(k => sel.append('<option value="'+ k.name +'">'+ k.name +'</option>'));
-        });
-      },
-      error: function(err) { console.error('Error loading kegiatan', err); }
-    });
+  
+  // Fetch user profile
+  async function fetchUser() {
+    if (!token) {
+      console.log('Token is missing or invalid');
+      return window.location.href = '/login';
+    }
+    try {
+      const res = await fetch('/api/auth/profile', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) throw new Error('Gagal mengambil data profil');
+      const profile = await res.json();
+      document.getElementById('role').textContent = profile.role;
+      
+      if (profile.role !== 'staff') {
+        alert('Anda tidak memiliki akses untuk fitur ini!');
+        return window.location.href = '/public/dashboard/index.html';
+      }
+      console.log('Role sesuai!');
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+    }
   }
 
+  // Load daftar kegiatan
+  async function loadKegiatan() {
+    try {
+      const res = await fetch('/api/kegiatan', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) throw new Error('Error loading kegiatan');
+      kegiatanData = await res.json();
+      // Render list
+      const listHtml = kegiatanData.map(k => `<li>${k.name}</li>`).join('');
+      document.getElementById('kegiatanList').innerHTML = listHtml;
+      // Update semua dropdown
+      document.querySelectorAll('.kegiatanDropdown').forEach(sel => {
+        sel.innerHTML = `<option value="">Pilih Kegiatan</option>` +
+          kegiatanData.map(k => `<option value="${k.name}">${k.name}</option>`).join('');
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Render entry baru
   function renderNewEntry() {
     entryCount++;
-    const entryHtml = `<div class="logbook-entry" data-entry="${entryCount}">
+    const container = document.getElementById('logbookEntriesContainer');
+    const div = document.createElement('div');
+    div.className = 'logbook-entry';
+    div.dataset.entry = entryCount;
+    div.innerHTML = `
       <div class="form-group">
         <label>Kegiatan:</label>
         <select class="form-control kegiatanDropdown" name="kegiatan">
@@ -72,127 +75,177 @@ $(document).ready(function(){
       <div class="form-group">
         <label>Isi Data:</label>
         <input type="text" class="form-control" name="isiData" placeholder="Masukkan data" />
-      </div>
-    </div>`;
-    $('#logbookEntriesContainer').append(entryHtml);
-    // Pastikan dropdown terbaru diisi
-    loadKegiatan();
+      </div>`;
+    container.appendChild(div);
+  }
+
+  // Tambah kegiatan baru
+  document.getElementById('btnAddKegiatan').addEventListener('click', async () => {
+    const name = document.getElementById('newKegiatan').value.trim();
+    if (!name) return alert('Masukkan nama kegiatan');
+    try {
+      const res = await fetch('/api/kegiatan', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name })
+      });
+      if (!res.ok) throw new Error('Error adding kegiatan');
+      document.getElementById('newKegiatan').value = '';
+      await loadKegiatan();
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  // Simpan logbook
+  document.getElementById('btnSaveLogbook').addEventListener('click', async () => {
+    const entries = [];
+    const rows = document.querySelectorAll('.logbook-entry');
+    for (const row of rows) {
+      const kegiatan = row.querySelector('.kegiatanDropdown').value;
+      const kolom = row.querySelector('select[name="kolomKegiatan"]').value;
+      const isi = row.querySelector('input[name="isiData"]').value.trim();
+      if (!kegiatan || !kolom || !isi) {
+        return alert('Semua field harus terisi!');
+      }
+      entries.push({
+        row_number: row.dataset.entry,
+        kegiatan,
+        kolom_kegiatan: kolom,
+        isi_data: isi
+      });
+    }
+    try {
+      const log_date = new Date().toISOString().split('T')[0];
+      const res = await fetch('/api/logbook/save', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ log_date, entries })
+      });
+      if (!res.ok) throw new Error('Error saving logbook');
+      alert('Logbook berhasil disimpan');
+      loadLogbookSummary();
+    } catch (err) {
+      console.error(err);
+      alert('Terjadi kesalahan saat menyimpan logbook');
+    }
+  });
+
+  // Hapus list kegiatan
+  document.getElementById('btnDeleteKegiatan').addEventListener('click', async () => {
+    const btn = document.getElementById('btnDeleteKegiatan');
+    if (!confirm('Yakin ingin menghapus semua kegiatan anda ?')) {
+      return;
+    }
+    try {
+      btn.disabled = true;
+
+      const res = await fetch('/api/kegiatan/deleteKegiatan', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      if(!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || `HTTP ${res.status}`);
+      }
+
+    } catch (error) {
+      console.error('Error saat menghapus kegiatan: ', error);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // Load summary tanpa tanggal
+  async function loadLogbookSummary() {
+    try {
+      const res = await fetch('/api/logbook/user', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) throw new Error('Error loading summary');
+      const data = await res.json();
+      console.log('isi data:', data);
+      const grouped = {};
+      data.forEach(entry => {
+        const kegiatan = entry.kegiatan;
+        const col = parseInt(entry.kolom_kegiatan, 10);
+        if (!grouped[kegiatan]) grouped[kegiatan] = Array.from({ length: 16 }, ()=>[]);
+        if (col >=1 && col <=16) grouped[kegiatan][col-1].push(entry.isi_data);
+      });
+      const tbody = document.getElementById('summaryBody');
+      tbody.innerHTML = '';
+      let idx = 1;
+      for (const [keg, cols] of Object.entries(grouped)) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${idx++}</td><td class="col-butir">${keg}</td>` +
+          cols.map(arr => `<td class="col-angka">${arr.join(', ')}</td>`).join('');
+        tbody.appendChild(tr);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Export logbook
+  document.getElementById('btnExport').addEventListener('click', async () => {
+    try {
+      const res = await fetch('/api/export/logbook', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) throw new Error('Error exporting');
+
+      // Baca response sebagai Blob
+      const blob = await res.blob();
+      window.location.reload();
+      alert('Export logbook berhasil !');
+    } catch (err) {
+      console.error(err);
+      alert('Terjadi kesalahan saat mengekspor logbook');
+    }
+  });
+
+
+  async function fetchList() {
+    try {
+      const res = await fetch('/api/logbook/list', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) throw new Error('Gagal mengambil data list logbook');
+      const data = await res.json();
+      console.log('isi data: ', data);
+      displayListLogbook(data);
+    } catch (error) {
+      console.error('Error fetching lists: ', error)
+    }
+  }
+
+  async function displayListLogbook(lists) {
+    const tableBody = document.getElementById('listLogbook');
+    tableBody.innerHTML = '';
+    lists.forEach((list, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${new Date(list.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+      <td><a href="/../uploads/${list.path}" class="btn btn-info btn-sm" download>Download file</a></td>
+      `;
+      tableBody.appendChild(row);
+    });
   }
 
   // Inisialisasi
-  loadKegiatan();
+  fetchList();
+  displayListLogbook();
   fetchUser();
-  renderNewEntry();
-
-  // Tambah Kegiatan baru
-  $('#btnAddKegiatan').click(function() {
-    const name = $('#newKegiatan').val().trim();
-    if (!name) {
-      alert('Masukkan nama kegiatan');
-      return;
-    }
-    $.ajax({
-      url: '/api/kegiatan',
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + token },
-      contentType: 'application/json',
-      data: JSON.stringify({ name }),
-      success: function() {
-        $('#newKegiatan').val('');
-        loadKegiatan();
-      },
-      error: function(err) { console.error('Error adding kegiatan', err); }
-    });
-  });
-
-  // Simpan Logbook
-  $('#btnSaveLogbook').click(function() {
-    const entries = [];
-    let valid = true;
-    $('#logbookEntriesContainer .logbook-entry').each(function() {
-      const row = $(this);
-      const row_number = row.data('entry');
-      const kegiatan = row.find('.kegiatanDropdown').val();
-      const kolomKegiatan = row.find('select[name="kolomKegiatan"]').val();
-      const isiData = row.find('input[name="isiData"]').val().trim();
-      if (!kegiatan) { alert('Kegiatan harus dipilih!'); valid = false; return false; }
-      if (!kolomKegiatan) { alert('Kolom harus dipilih!'); valid = false; return false; }
-      if (!isiData) { alert('Data harus terisi!'); valid = false; return false; }
-      entries.push({ row_number, kegiatan, kolom_kegiatan: kolomKegiatan, isi_data: isiData });
-    });
-    if (!valid) return;
-    const log_date = new Date().toISOString().split('T')[0];
-    $.ajax({
-      url: '/api/logbook',
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + token },
-      contentType: 'application/json',
-      data: JSON.stringify({ log_date, entries }),
-      success: function() { alert('Logbook berhasil disimpan'); loadLogbookSummary(); },
-      error: function(err) { console.error('Error saving logbook', err); alert('Terjadi kesalahan saat menyimpan logbook'); }
-    });
-  });
-
-  function loadLogbookSummary() {
-    const log_date = new Date().toISOString().split('T')[0];
-    $.ajax({
-      url: `/api/logbook?log_date=${log_date}`,
-      method: 'GET',
-      headers: { Authorization: 'Bearer ' + token },
-      success: function(data) {
-        const grouped = {};
-        data.forEach(entry => {
-          const kegiatan = entry.kegiatan;
-          const rawCol = entry.kolom_kegiatan ?? entry.kolomKegiatan;
-          if (!rawCol) return;
-          const col = parseInt(rawCol, 10);
-          if (isNaN(col) || col < 1 || col > 16) return;
-          if (!grouped[kegiatan]) {
-            grouped[kegiatan] = {};
-            for (let i = 1; i <= 16; i++) grouped[kegiatan][i] = [];
-          }
-          grouped[kegiatan][col].push(entry.isi_data);
-        });
-
-        let summaryHtml = '';
-        let rowNumber = 1;
-        Object.keys(grouped).forEach(kegiatan => {
-          summaryHtml += '<tr>' +
-            `<td>${rowNumber++}</td>` +
-            `<td class=\"col-butir\">${kegiatan}</td>` +
-            [...Array(16).keys()].map(i => {
-              const cellData = grouped[kegiatan][i+1] || [];
-              return `<td class=\"col-angka\">${cellData.length ? cellData.join(', ') : ''}</td>`;
-            }).join('') +
-            '</tr>';
-        });
-        $('#summaryBody').html(summaryHtml);
-      },
-      error: function(err) { console.error('Error loading logbook summary', err); }
-    });
-  }
-
+  loadKegiatan().then(renderNewEntry);
   loadLogbookSummary();
-
-  // Export Logbook
-  if (localStorage.getItem('downloadButtonAdded') === 'true') {
-    const downloadButtonHtml = `<a id=\"linkDownload\" href=\"${localStorage.getItem('filePath')}\" class=\"btn btn-info\" target=\"_blank\">Download File</a>`;
-    $('.export-buttons').append(downloadButtonHtml);
-  }
-
-  $('#btnExport').click(function() {
-    $.ajax({
-      url: '/api/export/logbook',
-      method: 'GET',
-      headers: { Authorization: 'Bearer ' + token },
-      success: function(data) {
-        alert(data.message);
-        const downloadButtonHtml = `<a id=\"linkDownload\" href=\"${data.filePath}\" class=\"btn btn-info\" target=\"_blank\">Download File</a>`;
-        localStorage.setItem('downloadButtonAdded', 'true');
-        localStorage.setItem('filePath', data.filePath);
-        if ($('#linkDownload').length === 0) $('.export-buttons').append(downloadButtonHtml);
-      },
-      error: function(err) { console.error('Error exporting logbook', err); alert('Terjadi kesalahan saat mengekspor logbook'); }
-    });
-  });
 });

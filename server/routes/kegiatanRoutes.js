@@ -5,5 +5,6 @@ const authmiddleware = require('../middlewares/authMiddleware');
 
 router.get('/', authmiddleware, kegiatanController.getKegiatan);
 router.post('/', authmiddleware, kegiatanController.addKegiatan);
+router.delete('/deleteKegiatan', authmiddleware, kegiatanController.deleteKegiatan);
 
 module.exports = router;

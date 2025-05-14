@@ -24,6 +24,9 @@
       </div>
       <ul id="kegiatanList" class="list-group"></ul>
     </div>
+    <div class="text-center mt-4">
+      <button id="btnDeleteKegiatan" class="btn btn-danger btn-m">Hapus Daftar Kegiatan</button>
+    </div>
 
     <!-- Section B: Input Logbook Entries -->
     <div class="section" id="sectionB">
@@ -68,6 +71,21 @@
 
       <div class="export-buttons text-center mt-4">
         <button id="btnExport" class="btn btn-warning btn-lg">Export Logbook</button>
+      </div>
+    </div>
+    <div class="section" id="sectionD">
+      <h3 style="text-align: center;">List Logbook Export</h3>
+      <div class="table-container">
+        <table id="ringkasanTable" class="table table-bordered table-striped" style="width: 500px; margin: 0 auto;">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Tanggal Export</th>
+              <th>Download File</th>
+            </tr>
+          </thead>
+          <tbody id="listLogbook"></tbody>
+        </table>
       </div>
     </div>
   </div>
