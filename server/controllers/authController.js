@@ -1,15 +1,14 @@
-// server/controllers/authController.js
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const pool = require('../config/db')
 const eventEmitter = require('../notification-handler/eventEmitter')
 
-const secret = 'mysecretkey'; // Pastikan untuk menggunakan environment variable untuk produksi
+require('dotenv').config();
+const secret = process.env.JWT_SECRET;
 
 exports.register = async (req, res) => {
   try {
-    // Ekstraksi data dari req.body termasuk field jenis_ketenagaan
     const {
       username,
       password,
@@ -29,20 +28,16 @@ exports.register = async (req, res) => {
       jenis_ketenagaan
     } = req.body;
 
-    // Cek apakah username sudah ada
     const existingUser = await User.findByUsername(username);
     if (existingUser) {
       return res.status(400).json({ message: 'Username sudah ada' });
     }
     
-    // Hash password sebelum disimpan
     const saltRounds = 10;
     const password_hash = await bcrypt.hash(password, saltRounds);
 
-    // Jika jenis_ketenagaan tidak diberikan, tetapkan default null
     const finalJenisKetenagaan = jenis_ketenagaan || null;
 
-    // Simpan user baru ke database, perhatikan mapping namaLengkap ke nama_lengkap
     const newUser = await User.create({ 
       username, 
       password_hash, 
@@ -79,7 +74,6 @@ exports.login = async (req, res) => {
       console.log('User not found');
       return res.status(401).json({ message: 'Invalid username or password' });
     }
-    // Bandingkan password dengan hash yang tersimpan
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
       console.log('Password mismatch');

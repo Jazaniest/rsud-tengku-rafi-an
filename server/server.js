@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const workflowRoutes = require('./routes/workflowRoutes');
 const { sendNotification } = require('./utils/fcm');
 
+require('dotenv').config();
+
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -69,7 +71,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

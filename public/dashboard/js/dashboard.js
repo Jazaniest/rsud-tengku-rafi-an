@@ -1,4 +1,3 @@
-// public/dashboard/dashboard.js
 document.addEventListener('DOMContentLoaded', async () => {
   const token = localStorage.getItem('token');
   // console.log('berikut token yang tersimpan di dashboard.js : ', token);
@@ -7,21 +6,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Ambil data profil user
   try {
     const profileRes = await fetch('/api/auth/profile', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
     const profile = await profileRes.json();
-    
-    //untuk mengambil data username
-    localStorage.setItem('username', profile.username);
 
     document.getElementById('username').textContent = profile.username;
     document.getElementById('role').textContent = profile.role;
     
-    // Tambahkan logika navigasi berdasarkan role
     const logbookContainer = document.getElementById('logbook');
     if (profile.role === 'staff') {
       logbookContainer.innerHTML = `
@@ -69,17 +63,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
   
-      // Ambil status awal dari server
       const response = await fetch('/api/switch/status');
       if (!response.ok) throw new Error('Gagal mengambil status switch dari server');
       
       const data = await response.json();
       console.log('Status awal dari server:', data.status);
-  
-      // Set posisi awal switch (ON/OFF)
+
       switchButton.checked = data.status;
-  
-      // Event listener untuk perubahan switch
+
       switchButton.addEventListener('change', async function () {
         const isChecked = switchButton.checked;
         console.log('Status switch berubah:', isChecked);
@@ -104,14 +95,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
   
-
-  // Logout
   document.getElementById('logoutLink').addEventListener('click', () => {
     localStorage.removeItem('token');
     window.location.href = '../login-form/index.html';
   });
 
-  // Fungsi untuk mengambil data tugas (instance workflow) dan recent tasks
   async function fetchTasks() {
     try {
       const res = await fetch('/api/workflow/instances', {
@@ -196,7 +184,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Render tugas yang diinisiasi oleh user (aktif)
   function displayInitiatedTasks(tasks) {
     const tableBody = document.querySelector('#initiatedTasksTable tbody');
     tableBody.innerHTML = '';
@@ -218,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function fetchStaffProfiles() {
     try {
       const res = await fetch('/api/auth/staff', {
-        headers: { 'Authorization': 'Bearer ' + token } // Jika autentikasi diperlukan
+        headers: { 'Authorization': 'Bearer ' + token }
       });
       if (!res.ok) throw new Error('Gagal mengambil data staff');
       const profiles = await res.json();
@@ -230,11 +217,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Fungsi untuk mengambil seluruh data staff dari endpoint baru
+  // Fungsi untuk mengambil seluruh data karu dari endpoint baru
   async function fetchKaruProfiles() {
     try {
       const res = await fetch('/api/auth/karu', {
-        headers: { 'Authorization': 'Bearer ' + token } // Jika autentikasi diperlukan
+        headers: { 'Authorization': 'Bearer ' + token }
       });
       if (!res.ok) throw new Error('Gagal mengambil data kepala ruangan');
       const profiles = await res.json();

@@ -1,4 +1,3 @@
-// server/controllers/userController.js
 const User = require('../models/User');
 const pool = require('../config/db');
 

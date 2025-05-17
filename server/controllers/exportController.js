@@ -1,4 +1,3 @@
-// server/controllers/exportController.js
 const fs = require('fs');
 const path = require('path');
 const ExcelJS = require('exceljs');
@@ -9,12 +8,12 @@ exports.exportLogbook = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Load the Excel template
+    // ambil template
     const templatePath = path.join(__dirname, '../templates/logbook.xlsx');
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(templatePath);
 
-    // Get the 'logbook' sheet or fallback to first
+    // cari sheet logbook
     let worksheet = workbook.getWorksheet('logbook');
     if (!worksheet) {
       worksheet = workbook.worksheets[0];
@@ -34,26 +33,22 @@ exports.exportLogbook = async (req, res) => {
 
     const uniqueKegiatan = Object.keys(grouped);
     const totalGroups = uniqueKegiatan.length;
-    const templateRowCount = 2; // template rows at 13 & 14
+    const templateRowCount = 2;
 
-    // Duplicate row templates if needed
+    // Duplikat row jika lebih dari 2
     if (totalGroups > templateRowCount) {
       const extraRows = totalGroups - templateRowCount;
       worksheet.duplicateRow(14, extraRows, true);
     }
 
-    // Write data for each unique kegiatan starting at row 13
     uniqueKegiatan.forEach((kegiatan, idx) => {
       const rowIndex = 13 + idx;
       const row = worksheet.getRow(rowIndex);
 
-      // Column A: sequential numbering
-      row.getCell(1).value = idx + 1; // A
+      row.getCell(1).value = idx + 1;
 
-      // Column B: butir kegiatan
-      row.getCell(2).value = kegiatan; // B
+      row.getCell(2).value = kegiatan;
 
-      // For each record in this group, set the isi_data in the correct column
       grouped[kegiatan].forEach(rec => {
         const colIdx = 2 + (parseInt(rec.kolom_kegiatan, 10) || 1);
         const cell = row.getCell(colIdx);
@@ -67,15 +62,12 @@ exports.exportLogbook = async (req, res) => {
       row.commit();
     });
 
-    // Write workbook to buffer
     const buffer = await workbook.xlsx.writeBuffer();
 
-    // Determine and store filename
     const hasilExport = `logbook_${userId}.xlsx`;
 
     await pool.query('INSERT INTO logbook_files (user_id, path) value (?, ?)', [userId, `${hasilExport}`]);
 
-    // Send workbook as download
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename=${hasilExport}`);
     res.send(buffer);

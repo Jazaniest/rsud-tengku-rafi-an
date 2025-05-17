@@ -1,7 +1,3 @@
-/* ============================
-   Combined main + auth JS
-   Filename: app.js
-   ============================ */
 (function ($) {
     "use strict";
 

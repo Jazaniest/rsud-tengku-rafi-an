@@ -1,5 +1,4 @@
-// server/config/jwt.js
-module.exports = {
-    secret: process.env.JWT_SECRET || 'mysecretkey',
-    accessTokenExpiry: '100000000000000000000000000000000000000000000000000000000000h', 
-  };  
+require('dotenv').config();
+
+export const secret = process.env.JWT_SECRET;
+export const accessTokenExpiry = '1h';

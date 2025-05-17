@@ -139,7 +139,7 @@
             setTimeout(function () {
                 var userRole = $('#role').text().trim().toLowerCase();
 
-                if (userRole === 'staff') {
+                if (userRole === 'staff' || 'kepala ruangan') {
                     // Sembunyikan kolom User di tabel "Tugas Recent (Selesai)"
                     $("#recentTasksTable thead th:nth-child(6), #recentTasksTable tbody td:nth-child(6)").hide();
                 }
