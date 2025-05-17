@@ -1,97 +1,102 @@
-    document.addEventListener('DOMContentLoaded', async () => {
-        // Periksa token; jika tidak ada, arahkan ke halaman login.
-        // const token = localStorage.getItem('token');
-        // if (!token) {
-        //     alert('Anda harus login terlebih dahulu.');
-        //     window.location.href = '/public/login-form/login.html';
-        //     return;
-        // }
-        
-        // try {
-        //     const profileRes = await fetch('/api/auth/profile', {
-        //         headers: { 'Authorization': 'Bearer ' + token }
-        //     });
+// FUNGSI DI NONAKTIFKAN 
+//     document.addEventListener('DOMContentLoaded', async () => {
+//         // Periksa token; jika tidak ada, arahkan ke halaman login.
+//         const roleFieldWrapper = document.getElementById('roleFieldWrapper');
+//         const registerForm = document.getElementById('registerForm');
 
-        //     if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
-        //     const profile = await profileRes.json();
+//         // Tambahkan input hidden role=STAFF secara default
+//         const hiddenRoleInput = document.createElement('input');
+//         hiddenRoleInput.type = 'hidden';
+//         hiddenRoleInput.name = 'role';
+//         hiddenRoleInput.value = 'STAFF';
+//         hiddenRoleInput.id = 'hiddenRoleInput';
+//         registerForm.appendChild(hiddenRoleInput);
 
-        //     const roleUser = profile.role;
+//         try {
+//             const token = localStorage.getItem('token');
+//             if (!token) throw new Error('Tidak ada token');
 
-        //     // Hanya super admin yang diizinkan mengakses halaman register ini
-        //     if (roleUser !== 'super admin') {
-        //         alert('Anda tidak memiliki akses untuk fitur ini!');
-        //         window.location.href = '/public/dashboard/index.html';
-        //         return;
-        //     }
-        // } catch (error) {
-        //     console.error('Error fetching profile:', error);
-        //     alert(error.message);
-        //     return;
-        // }
+//             const profileRes = await fetch('/api/auth/profile', {
+//                 headers: { 'Authorization': 'Bearer ' + token }
+//             });
 
-        // Validasi kecocokan password
-        const passwordInput = document.getElementById("password");
-        const confirmPasswordInput = document.getElementById("confirmPassword");
-        const passwordMatchMessage = document.getElementById("passwordMatchMessage");
+//             if (!profileRes.ok) throw new Error('Fetch profil gagal');
 
-        function validatePasswordMatch() {
-            if (confirmPasswordInput.value === "") {
-                passwordMatchMessage.textContent = "";
-            } else if (passwordInput.value === confirmPasswordInput.value) {
-                passwordMatchMessage.textContent = "Password sesuai ✔️";
-                passwordMatchMessage.classList.remove("text-danger");
-                passwordMatchMessage.classList.add("text-success");
-            } else {
-                passwordMatchMessage.textContent = "Password tidak sesuai ❌";
-                passwordMatchMessage.classList.remove("text-success");
-                passwordMatchMessage.classList.add("text-danger");
-            }
-        }
+//             const profile = await profileRes.json();
 
-        passwordInput.addEventListener("keyup", validatePasswordMatch);
-        confirmPasswordInput.addEventListener("keyup", validatePasswordMatch);
-    });
+//             if (profile.role === 'super admin') {
+//                 // Tampilkan dropdown role
+//                 roleFieldWrapper.style.display = 'block';
+//                 // Hapus input hidden role=STAFF
+//                 hiddenRoleInput.remove();
+//             }
+//         } catch (error) {
+//             // Tidak lakukan apa-apa, biarkan role tetap diset sebagai STAFF
+//             console.log('Mode publik atau non-superadmin:', error.message);
+//         }
 
-    $(document).ready(function () {
-        $('#registerForm').submit(function (e) {
-            e.preventDefault();
 
-            // Kumpulkan data dari form
-            let formData = {
-                username: $('#username').val(),
-                password: $('#password').val(),
-                namaLengkap: $('#namaLengkap').val()
-                // role: $('#inputRole').val(),
-                // tempat_tanggal_lahir: $('#tempat_tanggal_lahir').val(),
-                // alamat: $('#alamat').val(),
-                // nik: $('#nik').val(),
-                // nip: $('#nip').val(),
-                // pangkat: $('#pangkat').val(),
-                // ruang: $('#ruang').val(),
-                // level_pk: $('#level_pk').val(),
-                // unit_kerja: $('#unit_kerja').val(),
-                // pendidikan: $('#pendidikan').val(),
-                // no_str: $('#no_str').val(),
-                // no_sipp: $('#no_sipp').val(),
-                // kredensial: $('#kredensial').val(),
-                // jenis_ketenagaan: $('#jenis_ketenagaan').val()
-            };
-            console.log(formData);
+//         // Validasi kecocokan password
+//         const passwordInput = document.getElementById("password");
+//         const confirmPasswordInput = document.getElementById("confirmPassword");
+//         const passwordMatchMessage = document.getElementById("passwordMatchMessage");
 
-            // Kirim data ke endpoint register
-            $.ajax({
-                url: '/api/auth/register',
-                method: 'POST',
-                data: JSON.stringify(formData),
-                contentType: 'application/json',
-                success: function (response) {
-                    alert('Registrasi berhasil');
-                    window.location.href = 'index.html';
-                },
-                error: function (xhr, status, error) {
-                    let errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Registrasi gagal';
-                    alert('Registrasi gagal: ' + errorMsg);
-                }
-            });
-        });
-    });
+//         function validatePasswordMatch() {
+//             if (confirmPasswordInput.value === "") {
+//                 passwordMatchMessage.textContent = "";
+//             } else if (passwordInput.value === confirmPasswordInput.value) {
+//                 passwordMatchMessage.textContent = "Password sesuai ✔️";
+//                 passwordMatchMessage.classList.remove("text-danger");
+//                 passwordMatchMessage.classList.add("text-success");
+//             } else {
+//                 passwordMatchMessage.textContent = "Password tidak sesuai ❌";
+//                 passwordMatchMessage.classList.remove("text-success");
+//                 passwordMatchMessage.classList.add("text-danger");
+//             }
+//         }
+
+//         passwordInput.addEventListener("keyup", validatePasswordMatch);
+//         confirmPasswordInput.addEventListener("keyup", validatePasswordMatch);
+//     });
+
+//     $(document).ready(function () {
+//     $('#registerForm').submit(function (e) {
+//         console.log("form submit intercepted");
+//         e.preventDefault();
+
+//         // Tentukan nilai role tergantung elemen mana yang tersedia
+//         let roleValue = $('#inputRole').length ? $('#inputRole').val() : $('#hiddenRoleInput').val();
+
+//         // Validasi jika dropdown tampil dan user belum pilih apa-apa
+//         if ($('#inputRole').length && !roleValue) {
+//             alert('Silakan pilih role terlebih dahulu.');
+//             return;
+//         }
+
+//         // Kumpulkan data dari form
+//         let formData = {
+//             username: $('#username').val(),
+//             password: $('#password').val(),
+//             namaLengkap: $('#namaLengkap').val(),
+//             role: roleValue
+//         };
+
+//         console.log('Data dikirim:', formData);
+
+//         // Kirim data ke endpoint register
+//         $.ajax({
+//             url: '/api/auth/register',
+//             method: 'POST',
+//             data: JSON.stringify(formData),
+//             contentType: 'application/json',
+//             success: function (response) {
+//                 alert('Registrasi berhasil');
+//                 window.location.href = 'index.html';
+//             },
+//             error: function (xhr, status, error) {
+//                 let errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Registrasi gagal';
+//                 alert('Registrasi gagal: ' + errorMsg);
+//             }
+//         });
+//     });
+// });
