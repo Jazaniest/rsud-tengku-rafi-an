@@ -45,11 +45,8 @@ if ('serviceWorker' in navigator) {
           });
       };
 
-      // Panggil fungsi updateToken saat inisialisasi
-      (updateToken, 1000);
+      (updateToken, 10000);
 
-      // Anda bisa memanggil updateToken secara periodik atau ketika user melakukan aksi tertentu
-      // Contoh: setInterval(updateToken, 1000 * 60 * 60); // setiap 1 jam
     })
     .catch((err) => {
       console.error('Registrasi Service Worker gagal:', err);
@@ -65,7 +62,6 @@ function updateTokenOnServer(fcmToken) {
     headers: {
       'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json'
-      // Sertakan header Authorization jika endpoint Anda memerlukannya, misalnya:
     },
     body: JSON.stringify({ fcmToken })
   })

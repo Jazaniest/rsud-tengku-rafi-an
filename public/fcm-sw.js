@@ -1,4 +1,3 @@
-// public/fcm-sw.js
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
@@ -16,5 +15,5 @@ const messaging = firebase.messaging();
 // Opsional: Tambahkan handler untuk background message
 messaging.onBackgroundMessage((payload) => {
     console.log('Received background message ', payload);
-    // Anda bisa menampilkan notifikasi custom di sini jika diinginkan
+    // Custom notif di tambahkan disini
 });
