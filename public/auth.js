@@ -62,7 +62,6 @@
 
     document.addEventListener('DOMContentLoaded', function(){
         checkSwitchAndDisplay();
-
         if (document.getElementById('loginForm')) initAuth();
         if (document.getElementById('registerForm')) initRegister();
     });
@@ -84,7 +83,7 @@
                     localStorage.setItem('token', data.token);
                     window.location.href = '../dashboard/index.html';
                 } else {
-                    alert('Login gagal: periksa kredensial.');
+                    alert('Login gagal: username atau password salah.');
                 }
             } catch (err) { console.error(err); alert('Kesalahan saat login.'); }
         });
@@ -92,58 +91,76 @@
 
     // Registration initialization
     function initRegister() {
-        var form = document.getElementById('registerForm');
-        var wrapper = document.getElementById('roleFieldWrapper');
-        // hidden role default
-        var hiddenRole = $('<input>',{type:'hidden',name:'role',id:'hiddenRoleInput',value:'staff'}).appendTo(form);
-
-        // Fetch profile to adjust role field for super admin
         (async ()=>{
+            var switchStatus = false;
             try {
-                var token = localStorage.getItem('token');
-                if (!token) throw 0;
-                var pr = await fetch('/api/auth/profile',{ headers:{'Authorization':'Bearer '+token} });
-                if (!pr.ok) throw new Error();
-                var profile = await pr.json();
-                if (profile.role === 'super admin') {
-                    wrapper.style.display = 'block';
-                    hiddenRole.remove();
+                const sw = await fetch('/api/switch/status');
+                if (sw.ok) {
+                    const json = await sw.json();
+                    switchStatus = json.status;
                 }
-            } catch {};
-        })();
+            } catch {}
 
-        // Password match indicator
-        var pw = $('#password'), cpw = $('#confirmPassword'), msg = $('#passwordMatchMessage');
-        function checkMatch(){
-            var v1 = pw.val() || '', v2 = cpw.val() || '';
-            if (!v2) msg.text('');
-            else if (v1 === v2) msg.text('Password sesuai ✔️').removeClass('text-danger').addClass('text-success');
-            else msg.text('Password tidak sesuai ❌').removeClass('text-success').addClass('text-danger');
-        }
-        pw.add(cpw).on('keyup', checkMatch);
-
-        // Submit handler
-        $('#registerForm').on('submit', function(e){
-            e.preventDefault();
-            var hasDropdown = $('#inputRole').is(':visible');
-            var roleVal = hasDropdown ? ($('#inputRole').val() || '') : $('#hiddenRoleInput').val();
-            if (hasDropdown && !roleVal) { alert('Pilih role terlebih dahulu.'); return; }
-            var payload = {
-                username: $('#username').val() || '',
-                password: pw.val() || '',
-                namaLengkap: $('#namaLengkap').val() || '',
-                role: roleVal
-            };
-            $.ajax({
-                url:'/api/auth/register', method:'POST', contentType:'application/json',
-                data: JSON.stringify(payload),
-                success: function(){ alert('Registrasi berhasil'); window.location.href = 'index.html'; },
-                error: function(xhr){
-                    var m = xhr.responseJSON?.message || 'Gagal registrasi';
-                    alert('Registrasi gagal: '+m);
+            var role = null;
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const pr = await fetch('/api/auth/profile', { headers: { 'Authorization': 'Bearer ' + token } });
+                    if (pr.ok) {
+                        const profile = await pr.json();
+                        role = profile.role;
+                    }
                 }
+            } catch {}
+
+            // Hanya redirect jika kedua kondisi terpenuhi: switch off AND bukan super admin
+            if (!switchStatus && role !== 'super admin') {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Setup form: jika super admin tampilkan dropdown, else hidden default STAFF
+            var form = document.getElementById('registerForm');
+            var wrapper = document.getElementById('roleFieldWrapper');
+            if (role === 'super admin') {
+                wrapper.style.display = 'block';
+            } else {
+                // tambahkan hidden role=STAFF
+                $('<input>',{type:'hidden',name:'role',id:'hiddenRoleInput',value:'STAFF'}).appendTo(form);
+            }
+
+            // Password match indicator
+            var pw = $('#password'), cpw = $('#confirmPassword'), msg = $('#passwordMatchMessage');
+            function checkMatch(){
+                var v1 = pw.val() || '', v2 = cpw.val() || '';
+                if (!v2) msg.text('');
+                else if (v1 === v2) msg.text('Password sesuai ✔️').removeClass('text-danger').addClass('text-success');
+                else msg.text('Password tidak sesuai ❌').removeClass('text-success').addClass('text-danger');
+            }
+            pw.add(cpw).on('keyup', checkMatch);
+
+            // Submit handler
+            $('#registerForm').on('submit', function(e){
+                e.preventDefault();
+                var roleVal = (role === 'super admin') ? ($('#inputRole').val() || '') : $('#hiddenRoleInput').val();
+                if (role === 'super admin' && !roleVal) { alert('Pilih role terlebih dahulu.'); return; }
+                var payload = {
+                    username: $('#username').val() || '',
+                    password: pw.val() || '',
+                    namaLengkap: $('#namaLengkap').val() || '',
+                    role: roleVal
+                };
+                $.ajax({
+                    url: '/api/auth/register', method: 'POST', contentType: 'application/json',
+                    data: JSON.stringify(payload),
+                    success: function(){ alert('Registrasi berhasil'); window.location.href = 'index.html'; },
+                    error: function(xhr){
+                        var m = xhr.responseJSON?.message || 'Gagal registrasi';
+                        alert('Registrasi gagal: ' + m);
+                    }
+                });
             });
-        });
+        })();
     }
 
 })(jQuery);

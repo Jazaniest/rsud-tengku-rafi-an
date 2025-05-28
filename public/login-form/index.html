@@ -38,7 +38,7 @@
 
 					<div class="wrap-input100 validate-input m-b-23">
 						<span class="label-input100">Username</span>
-						<input class="input100" type="text" name="username" placeholder="Type your username" id="username">
+						<input class="input100" type="text" name="username" placeholder="Type your username" id="username" required>
 						<span class="focus-input100" data-symbol="&#xf206;"></span>
 					</div>
 
@@ -85,6 +85,21 @@
 	<script src="vendor/countdowntime/countdowntime.js"></script>
 <!--===============================================================================================-->
 	<script src="../auth.js"></script>
+
+	<!-- <script>
+		const form = document.getElementById('loginForm');
+		const usernameInput = document.getElementById('username');
+		// const passwordInput = document.getElementById('password');
+
+		usernameInput.addEventListener('invalid', function(event) {
+			event.preventDefault();
+			usernameInput.setCustomValidity('Username harus di isi !');
+		});
+
+		usernameInput.addEventListener('input', function(event) {
+			usernameInput.setCustomValidity('');
+		});
+	</script> -->
 
 </body>
 </html>

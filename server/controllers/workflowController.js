@@ -1,5 +1,3 @@
-// server/controllers/workflowController.js
-
 const pool = require('../config/db');
 const eventEmitter = require('../notification-handler/eventEmitter')
 
@@ -13,7 +11,7 @@ exports.updateWorkflowStep = async (req, res) => {
     const userId = req.user.id;
     const userRole = req.user.role;
     const instanceId = req.params.id; 
-    const { action } = req.body; // 'approve', 'reject', atau 'stop'
+    const { action } = req.body;
 
     // Ambil nilai assigned_user_name dari form (jika dikirim)
     const assignedUserName = req.body.assigned_user_name ? req.body.assigned_user_name.trim() : '';
@@ -32,7 +30,6 @@ exports.updateWorkflowStep = async (req, res) => {
     const instance = instances[0];
     
 
-    // **Bypass untuk setuju/tolak** (langung proses tanpa cek steps)
     if (action === 'setuju' || action === 'tolak') {
 
       const payload = JSON.parse(instance.payload || '{}');
@@ -112,28 +109,32 @@ exports.updateWorkflowStep = async (req, res) => {
       return res.json({ message: 'Data anda ditolak, silahkan perbaiki data yang salah' });
     }
     }
+
+    const [steps] = await pool.query(
+      'SELECT * FROM workflow_steps WHERE workflow_id = ? AND step_order = ?',
+      [instance.workflow_id, instance.current_step_order]
+    );
+
     const currentStep = steps[0] || {};
     
-    // Validasi: Pastikan user memiliki peran yang sesuai (harus sama dengan to_role)
+    // // Validasi: Pastikan user memiliki peran yang sesuai (harus sama dengan to_role)
     if (userRole !== currentStep.to_role && userRole !== 'super admin') {
       return res.status(403).json({ message: 'User tidak berhak memproses langkah ini' });
     }
     
-    // Ambil file path jika ada file yang diupload
+
     let filePath = null;
     if (req.file) {
       filePath = req.file.path;
     }
-    // Pastikan filePath selalu ada (gunakan string kosong jika tidak ada file)
+
     filePath = filePath || '';
     
-    // Catat aksi ke history, termasuk file jika ada
     await pool.query(
       'INSERT INTO workflow_instance_steps (workflow_instance_id, step_order, from_role, to_role, action_taken, acted_by, remarks, file_path, assigned_user_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [instanceId, instance.current_step_order, currentStep.from_role, currentStep.to_role, action, userId, '', filePath, assignedUserName]
     );
     
-    // Variabel untuk menampung data notifikasi
     let notificationData = {
       instanceId,
       workflowId: instance.workflow_id,

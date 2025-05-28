@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const token = localStorage.getItem('token');
-  // console.log('berikut token yang tersimpan di dashboard.js : ', token);
+  console.log('berikut token yang tersimpan di dashboard.js : ', token);
   if (!token) {
-    window.location.href = '../login-form/index.html';
+    alert('anda tidak dapat melakukan aksi ini !');
+    window.location.href = '../../login-form/index.html';
     return;
   }
 

@@ -135,22 +135,19 @@
     <script src="js/dashboard.js"></script>
     <script>
         $(document).ready(function () {
-            // Tunggu hingga data pengguna dimuat
             setTimeout(function () {
                 var userRole = $('#role').text().trim().toLowerCase();
 
                 if (userRole === 'staff' || 'kepala ruangan') {
-                    // Sembunyikan kolom User di tabel "Tugas Recent (Selesai)"
                     $("#recentTasksTable thead th:nth-child(6), #recentTasksTable tbody td:nth-child(6)").hide();
                 }
 
-                // Sembunyikan bagian "Tugas Admin" jika bukan super admin
                 if (userRole !== 'super admin') {
                     $('#register').hide();
                     $('#verifList').prev('h3').hide();
                     $('#verifList').hide();
                 }
-            }, 500); // Delay agar konten username dan role terisi
+            }, 500);
         });
 
 
