@@ -41,6 +41,7 @@
               <span class="label-input100">Username</span>
               <input class="input100" type="text" name="username" placeholder="Masukkan username" id="username" required>
               <span class="focus-input100" data-symbol="&#xf206;"></span>
+              <div id="error" class="error text-danger"></div>
             </div>
             
             <!-- Nama Lengkap -->
@@ -55,7 +56,7 @@
               <span class="label-input100">Role</span>
               <select class="input100" name="role" id="inputRole">
                 <option value="" disabled selected>Pilih role</option>
-                <option value="Super Admin">Super Admin</option>
+                <option value="super admin">Super Admin</option>
                 <option value="Direktur">Direktur</option>
                 <option value="Kepala Bidang">Kepala Bidang</option>
                 <option value="Seksi Pelayanan Keperawatan">Seksi Pelayanan Keperawatan</option>
@@ -209,5 +210,19 @@
   <script src="vendor/daterangepicker/daterangepicker.js"></script>
   <script src="vendor/countdowntime/countdowntime.js"></script>
   <script src="../auth.js"></script>
+
+  <script>
+    const usernameInput = document.getElementById('username');
+    const errorDiv = document.getElementById('error');
+
+    usernameInput.addEventListener('input', function() {
+      const value = usernameInput.value;
+      if (/\s/.test(value)) {
+        errorDiv.textContent = "Username tidak boleh mengandung spasi!";
+      } else {
+        errorDiv.textContent = "";
+      }
+    });
+  </script>
 </body>
 </html>

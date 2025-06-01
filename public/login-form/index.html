@@ -86,20 +86,17 @@
 <!--===============================================================================================-->
 	<script src="../auth.js"></script>
 
-	<!-- <script>
-		const form = document.getElementById('loginForm');
-		const usernameInput = document.getElementById('username');
-		// const passwordInput = document.getElementById('password');
+	<script>
+		const inputUsername = document.getElementById('username');
 
-		usernameInput.addEventListener('invalid', function(event) {
-			event.preventDefault();
-			usernameInput.setCustomValidity('Username harus di isi !');
+		inputUsername.addEventListener("invalid", function(e) {
+			e.target.setCustomValidity("Username tidak boleh kosong !");
 		});
 
-		usernameInput.addEventListener('input', function(event) {
-			usernameInput.setCustomValidity('');
+		inputUsername.addEventListener("input", function(e) {
+			e.target.setCustomValidity("");
 		});
-	</script> -->
+	</script>
 
 </body>
 </html>

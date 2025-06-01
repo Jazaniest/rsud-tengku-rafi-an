@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('role').textContent = profile.role;
     
     const logbookContainer = document.getElementById('logbook');
-    if (profile.role === 'staff') {
+    if (profile.role === 'Staff') {
       logbookContainer.innerHTML = `
         <li class="nav-item"><a class="nav-link" href="profile/profile.html">Profil</a></li>
         <li class="nav-item"><a class="nav-link" href="logbook.html">Logbook</a></li>
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       switchButton.addEventListener('change', async function () {
         const isChecked = switchButton.checked;
-        console.log('Status switch berubah:', isChecked);
+        // console.log('Status switch berubah:', isChecked);
   
         try {
           const saveResponse = await fetch('/api/switch/status', {
@@ -243,7 +243,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       container.innerHTML = '<p>Tidak ada tugas yang ditugaskan kepada Anda.</p>';
     } else {
 
-      // triggerPushNotification(tasks.length);
 
       // Ambil data staff untuk dropdown dari endpoint baru
       const staffProfiles = await fetchStaffProfiles();
@@ -304,7 +303,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Bangun dropdownHTML berdasarkan toRole
             let dropdownHTML = '';
-            if (toRole === 'staff') {
+            if (toRole === 'Staff') {
               dropdownHTML = `
                 <p class="card-text" style="margin-bottom: 0;"><small>Kirim ke</small></p>
                 <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari staff..." list="staffList-${task.id}">
@@ -313,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </datalist>
               `;
             }
-            else if(toRole === 'kepala ruangan') {
+            else if(toRole === 'Kepala Ruangan') {
               dropdownHTML = `
                 <p class="card-text" style="margin-bottom: 0;"><small>Kirim ke</small></p>
                 <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari kepala ruangan..." list="staffList-${task.id}">
@@ -389,7 +388,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tableBody = document.querySelector('#recentTasksTable tbody');
         tableBody.innerHTML = ''; // Hapus data lama
 
-        if (role === 'staff' && 'kepala ruangan') {
+        if (role === 'Staff' && 'Kepala Ruangan') {
             tasks.forEach((task, index) => {
                 const row = document.createElement('tr');
 
@@ -507,60 +506,117 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
 
-  // Render template workflow untuk inisiasi tugas
-  function displayAvailableTemplates(templates) {
-    const container = document.getElementById('availableTasksList');
-    container.innerHTML = '';
-    if (templates.length === 0) {
-      container.innerHTML = '<p>Tidak ada tugas yang dapat diinisiasi untuk peran Anda.</p>';
-      return;
-    }
-    templates.forEach(template => {
-      const templateEl = document.createElement('div');
-      templateEl.className = 'col-md-4 task-item';
-      templateEl.innerHTML = `
-        <div class="card mb-3" style="color: #767676">
-          <div class="card-body">
-            <h5 class="card-title">${template.title} (${template.code})</h5>
-            <p class="card-text">${template.description}</p>
-            <p class="card-text"><small>Aksi: ${template.action_description}</small></p>
-            <form class="mb-2" id="template-form-${template.workflow_id}" enctype="multipart/form-data">
-              <input type="hidden" name="workflow_id" value="${template.workflow_id}">
-              <label for="templateFileInput-${template.workflow_id}">Upload file (jika diperlukan):</label>
-              <input type="file" name="file" class="form-control" id="templateFileInput-${template.workflow_id}" accept=".pdf,.doc,.docx,.xls,.xlsx">
-            </form>
-            <button class="btn btn-primary btn-sm" onclick="initiateTask(${template.workflow_id})" type="submit">Mulai Tugas</button>
-          </div>
-        </div>
-      `;
-      container.appendChild(templateEl);
-    });
-  }
+    // Render template workflow untuk inisiasi tugas
+    async function displayAvailableTemplates(templates) {
+      const container = document.getElementById('availableTasksList');
+      container.innerHTML = '';
 
-  // Fungsi untuk menginisiasi task berdasarkan template dengan file upload
-  window.initiateTask = async (workflow_id) => {
-    try {
-      const formElement = document.getElementById(`template-form-${workflow_id}`);
-      const formData = new FormData(formElement);
-      const res = await fetch('/api/workflow/instances', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        },
-        body: formData
-      });
-      const result = await res.json();
-      if (res.ok) {
-        alert(result.message);
-        fetchTasks();
-      } else {
-        alert(result.message);
+      const staffProfiles = await fetchStaffProfiles();
+      const karuProfiles = await fetchKaruProfiles();
+
+      if (!templates || templates.length === 0) {
+        container.innerHTML = '<p>Tidak ada tugas yang dapat diinisiasi untuk peran Anda.</p>';
+        return;
       }
-    } catch (error) {
-      console.error('Error initiating task:', error);
-      alert('Terjadi kesalahan saat menginisiasi tugas.');
+
+      templates.forEach(template => {
+
+        fetch(`/api/workflow/steps/${template.workflow_id}/1`, {
+          headers: { 'Authorization': 'Bearer ' + token}
+        })
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error('Step berikutnya tidak ditemukan');
+            }
+          })
+          .then(nextStep => {
+            const toRole = nextStep.to_role;
+            console.log('role selanjutnya dari inisiasi: ', toRole);
+
+            let dropdownInitiate = '';
+            if (toRole === 'Staff') {
+              dropdownInitiate = `
+              <p class="card-text" style="margin-bottom: 0;"><small>Kirim ke</small></p>
+                  <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari staff..." list="staffList-${template.workflow_id}">
+                  <datalist id="staffList-${template.workflow_id}">
+                    ${staffProfiles.map(staff => `<option value="${staff.nama_lengkap}">`).join('')}
+                  </datalist>
+              `
+            }
+            else if (toRole === 'Kepala Ruangan') {
+              dropdownInitiate = `
+              <p class="card-text" style="margin-bottom: 0;"><small>Kirim ke</small></p>
+                  <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari kepala ruangan..." list="staffList-${template.workflow_id}">
+                  <datalist id="staffList-${template.workflow_id}">
+                    ${karuProfiles.map(karu => `<option value="${karu.nama_lengkap}">`).join('')}
+                  </datalist>
+              `
+            }
+
+            const templateEl = document.createElement('div');
+            templateEl.className = 'col-md-4 task-item';
+            templateEl.innerHTML = `
+              <div class="card mb-3" style="color: #767676">
+                <div class="card-body">
+                  <h5 class="card-title">${template.title} (${template.code})</h5>
+                  <p class="card-text">${template.description}</p>
+                  <p class="card-text"><small>Aksi: ${template.action_description}</small></p>
+                  <form class="mb-2" id="template-form-${template.workflow_id}" enctype="multipart/form-data">
+                    <input type="hidden" name="instanceId" value="${template.workflow_id}">
+                    ${dropdownInitiate}
+                    <input type="hidden" name="workflow_id" value="${template.workflow_id}">
+                    <label for="templateFileInput-${template.workflow_id}">Upload file (jika diperlukan):</label>
+                    <input type="file" name="file" class="form-control" id="templateFileInput-${template.workflow_id}" accept=".pdf,.doc,.docx,.xls,.xlsx">
+                  </form>
+                  <button class="btn btn-primary btn-sm" id="start-btn-${template.workflow_id}" type="button">Mulai Tugas</button>
+                </div>
+              </div>
+            `;
+            container.appendChild(templateEl);
+
+
+            // Attach click handler
+            const btn = document.getElementById(`start-btn-${template.workflow_id}`);
+            btn.addEventListener('click', async () => {
+              try {
+                const formElement = document.getElementById(`template-form-${template.workflow_id}`);
+                const formData = new FormData(formElement);
+
+                const assignedInput = formElement.querySelector('input[name="assigned_user_name"]');
+                formData.set('assigned_user_name', assignedInput?.value || '');
+                const res = await fetch('/api/workflow/instances', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': 'Bearer ' + token
+                  },
+                  body: formData
+                });
+                const result = await res.json();
+
+                if (res.ok) {
+                  alert(result.message);
+                  // untuk refresh tasklist
+                  fetchTasks();
+                } else {
+                  alert(result.message);
+                }
+              } catch (error) {
+                console.error('Error initiating task:', error);
+                alert('Terjadi kesalahan saat menginisiasi tugas.');
+              }
+
+              
+          });
+        })
+      });
     }
-  };
+      
+// sudah menambahkan fungsi untuk memberikan value user tertentu jika langkah selanjutnya adalah staff atau karu
+// untuk backend nya belum di setting untuk penerimaannya
+// uji untuk memastikan tampil dropdown apabila next role adalah karu atau staff sudah di lakukan
+
   
   // Fungsi untuk mengambil template workflow
   async function fetchAvailableTemplates() {

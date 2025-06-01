@@ -220,48 +220,54 @@ exports.getUserTasks = async (req, res) => {
     );
 
     // Tugas yang ditugaskan kepada user (aktif)
-    const [assignedTasks] = await pool.query(
-      `SELECT 
-          wi.*, 
-          w.code, 
-          w.title, 
-          w.description, 
+    const [assignedTasks] = await pool.query(`
+        SELECT
+          wi.*,
+          w.code,
+          w.title,
+          w.description,
           ws.action_description,
-          ws.next_step_if_approved, 
-          ws.next_step_if_rejected, 
-          ws.no_need_next_step, 
-          ws.to_role, 
-          ws.from_role, 
+          ws.next_step_if_approved,
+          ws.next_step_if_rejected,
+          ws.no_need_next_step,
+          ws.to_role,
+          ws.from_role,
           ws.step_order,
-          (SELECT id FROM workflow_instance_steps 
-            WHERE workflow_instance_id = wi.id AND file_path <> '' 
-            ORDER BY step_order DESC LIMIT 1) AS last_step_id,
-          (SELECT file_path FROM workflow_instance_steps 
-            WHERE workflow_instance_id = wi.id AND file_path <> '' 
-            ORDER BY step_order DESC LIMIT 1) AS file_path,
-          (SELECT wis.assigned_user_name FROM workflow_instance_steps wis
-            WHERE wis.workflow_instance_id = wi.id
-            ORDER BY wis.step_order DESC LIMIT 1) as assigned_user_name
-      FROM workflow_instances wi
-      JOIN workflows w ON wi.workflow_id = w.id
-      JOIN workflow_steps ws ON ws.workflow_id = wi.workflow_id AND ws.step_order = wi.current_step_order
-      WHERE ws.to_role = ?
-        AND wi.status != 'completed'
-        AND (
-              ( (SELECT wis.assigned_user_name 
-                    FROM workflow_instance_steps wis
-                    WHERE wis.workflow_instance_id = wi.id
-                    ORDER BY wis.step_order DESC LIMIT 1) IS NULL 
-                OR (SELECT wis.assigned_user_name 
-                    FROM workflow_instance_steps wis
-                    WHERE wis.workflow_instance_id = wi.id
-                    ORDER BY wis.step_order DESC LIMIT 1) = '' )
-            OR 
-              ( (SELECT wis.assigned_user_name 
-                    FROM workflow_instance_steps wis
-                    WHERE wis.workflow_instance_id = wi.id
-                    ORDER BY wis.step_order DESC LIMIT 1) = ? )
-            )`,
+          ls.last_step_id,
+          ls.file_path,
+          ls.assigned_user_name
+        FROM workflow_instances wi
+        JOIN workflows w
+          ON wi.workflow_id = w.id
+        JOIN workflow_steps ws
+          ON ws.workflow_id = wi.workflow_id
+          AND ws.step_order = wi.current_step_order
+        LEFT JOIN (
+          SELECT
+            t.workflow_instance_id,
+            t.id           AS last_step_id,
+            t.file_path,
+            t.assigned_user_name
+          FROM workflow_instance_steps t
+          JOIN (
+            SELECT 
+              workflow_instance_id,
+              MAX(step_order) AS max_step_order
+            FROM workflow_instance_steps
+            GROUP BY workflow_instance_id
+          ) mx
+            ON t.workflow_instance_id = mx.workflow_instance_id
+          AND t.step_order = mx.max_step_order
+        ) ls
+          ON ls.workflow_instance_id = wi.id
+        WHERE
+          ws.to_role = ?  
+          AND wi.status != 'completed'
+          AND (
+            ls.assigned_user_name IS NULL
+            OR ls.assigned_user_name = ''
+            OR ls.assigned_user_name = ?
+          );`,
       [userRole, userName]
     );
 
@@ -280,8 +286,6 @@ exports.getUserTasks = async (req, res) => {
       LIMIT 10`, 
        [userRole]
     );
-
-    // percobaan dipindah kesini
     
     
     res.json({
@@ -296,15 +300,10 @@ exports.getUserTasks = async (req, res) => {
 };
 
 
-
-
-
-
-
 exports.initiateWorkflow = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { workflow_id } = req.body;
+    const { workflow_id, assigned_user_name } = req.body;
     
     // Ambil langkah pertama dari workflow (step_order = 1)
     const [steps] = await pool.query(
@@ -332,24 +331,28 @@ exports.initiateWorkflow = async (req, res) => {
     const instanceId = result.insertId;
     
     // Jika ada file yang diupload, simpan ke history (workflow_instance_steps)
-    if (req.file) {
+    let assignedUserName = null;
+    if (req.file || assigned_user_name) {
       await pool.query(
-        'INSERT INTO workflow_instance_steps (workflow_instance_id, step_order, from_role, to_role, action_taken, acted_by, remarks, file_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [instanceId, 1, firstStep.from_role, firstStep.to_role, 'initiate', userId, '', req.file.path]
+        'INSERT INTO workflow_instance_steps (workflow_instance_id, step_order, from_role, to_role, action_taken, acted_by, remarks, file_path, assigned_user_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [instanceId, 1, firstStep.from_role, firstStep.to_role, 'initiate', userId, '', req.file?.path || '', assigned_user_name || null]
       );
+      assignedUserName = assigned_user_name || null;
     }
     
     console.log('Emitting newTaskInitiated event with data:', {
       instanceId,
       workflowId: workflow_id,
-      firstStep
+      firstStep,
+      assignedUserName
     });
 
     // Emit event tugas baru diinisiasi
     eventEmitter.emit('newTaskInitiated', {
       instanceId,
       workflowId: workflow_id,
-      firstStep // mengirimkan data step awal jika dibutuhkan handler notifikasi
+      firstStep,
+      assignedUserName
     });
     
     return res.status(201).json({ message: 'Workflow instance berhasil diinisiasi', instanceId });

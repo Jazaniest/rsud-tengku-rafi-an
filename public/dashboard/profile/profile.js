@@ -30,10 +30,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('pendidikan').textContent = safeText(profile.pendidikan);
     document.getElementById('noStr').textContent = safeText(profile.noStr);
     document.getElementById('expiredStr').textContent = safeText(profile.expiredStr);
-    document.getElementById('fileStr').textContent = safeText(profile.fileStr);
+    // document.getElementById('fileStr').textContent = safeText(profile.fileStr);
+    const fileStr = document.getElementById('fileStr');
+    const urlStr = profile.fileStr;
+    if(urlStr) {
+      fileStr.innerHTML = `
+      <a href="${urlStr}" target="_blank" class="edit-btn">Lihat File</a>
+      `;
+    } else {
+      fileStr.innerHTML = `<span>Tidak ada file</span>`;
+    }
+
     document.getElementById('noSipp').textContent = safeText(profile.noSipp);
     document.getElementById('expiredSipp').textContent = safeText(profile.expiredSipp);
-    document.getElementById('fileSipp').textContent = safeText(profile.fileSipp);
+    // document.getElementById('fileSipp').textContent = safeText(profile.fileSipp);
+    const fileSipp = document.getElementById('fileSipp');
+    const urlSipp = profile.fileSipp;
+    if(urlSipp) {
+      fileSipp.innerHTML = `
+      <a href="${urlSipp}" target="_blank" class="edit-btn">Lihat File</a>
+      `;
+    } else {
+      fileSipp.innerHTML = `<span>Tidak ada file</span>`;
+    }
     document.getElementById('jenisKetenagaan').textContent = safeText(profile.jenisKetenagaan);
 
     // Perbarui foto profil jika ada, jika tidak kosong
@@ -48,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('editUsername').value = safeText(profile.username);
     document.getElementById('editNamaLengkap').value = safeText(profile.namaLengkap);
     document.getElementById('editTempatTanggalLahir').value = safeText(profile.tempatTanggalLahir);
-    document.getElementById('editAlamat').value = safeText(profile.alamat || '');
+    document.getElementById('editAlamat').value = safeText(profile.alamat);
     document.getElementById('editNik').value = safeText(profile.nik);
     document.getElementById('editNip').value = safeText(profile.nip);
     document.getElementById('editPangkat').value = safeText(profile.pangkat);

@@ -65,9 +65,18 @@ const fetchUsers = async () => {
                 <td>${getSafeValue(user.pendidikan)}</td>
                 <td>${getSafeValue(user.no_str)}</td>
                 <td>${getSafeValue(user.akhir_str)}</td>
+                <td>${
+                    user.file_str && user.file_str.trim() !== ''
+                        ? `<a href="${user.file_str}" target="_blank" class="file-btn">Lihat File</a>`
+                        : '-'
+                }</td>
                 <td>${getSafeValue(user.no_sipp)}</td>
                 <td>${getSafeValue(user.akhir_sipp)}</td>
-                <td>${getSafeValue(user.file_sipp)}</td> <!-- untuk sementara dalam bentuk nama file. selanjutnya buat agar file bisa di lihat dari menu ini. --!>
+                <td>${
+                    user.file_sipp && user.file_sipp.trim() !== ''
+                        ? `<a href="${user.file_sipp}" target="_blank" class="file-btn">Lihat File</a>`
+                        : '-'
+                }</td>
                 <td>${getSafeValue(user.jenis_ketenagaan)}</td>
                 <td>
                     <button class="edit-btn" onclick="editUser(${user.id})">Edit</button>

@@ -126,7 +126,7 @@
                 wrapper.style.display = 'block';
             } else {
                 // tambahkan hidden role=STAFF
-                $('<input>',{type:'hidden',name:'role',id:'hiddenRoleInput',value:'STAFF'}).appendTo(form);
+                $('<input>',{type:'hidden',name:'role',id:'hiddenRoleInput',value:'Staff'}).appendTo(form);
             }
 
             // Password match indicator
@@ -153,7 +153,15 @@
                 $.ajax({
                     url: '/api/auth/register', method: 'POST', contentType: 'application/json',
                     data: JSON.stringify(payload),
-                    success: function(){ alert('Registrasi berhasil'); window.location.href = 'index.html'; },
+                    success: function(){
+                         if(role === 'super admin') {
+                            alert('Registrasi berhasil');
+                            location.reload();
+                         } else {
+                            alert('Registrasi berhasil')
+                            window.location.href = 'index.html'; 
+                         }
+                    },
                     error: function(xhr){
                         var m = xhr.responseJSON?.message || 'Gagal registrasi';
                         alert('Registrasi gagal: ' + m);

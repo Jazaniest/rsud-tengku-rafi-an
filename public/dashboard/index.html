@@ -137,8 +137,13 @@
         $(document).ready(function () {
             setTimeout(function () {
                 var userRole = $('#role').text().trim().toLowerCase();
+                console.log('isi userRole : ', userRole);
 
-                if (userRole === 'staff' || 'kepala ruangan') {
+                if (userRole === 'Staff') {
+                    alert('masuk ke if');
+                    $("#recentTasksTable thead th:nth-child(6), #recentTasksTable tbody td:nth-child(6)").hide();
+                } else if (userRole === 'Kepala Ruangan') {
+                    alert('masuk ke else if');
                     $("#recentTasksTable thead th:nth-child(6), #recentTasksTable tbody td:nth-child(6)").hide();
                 }
 

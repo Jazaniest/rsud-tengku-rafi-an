@@ -69,32 +69,57 @@ eventEmitter.on('verifUpdate', async (data) => {
 // Handler untuk event newTaskInitiated
 eventEmitter.on('newTaskInitiated', async (data) => {
   try {
-    const { instanceId, workflowId, firstStep } = data;
-    // Misalnya, target notifikasi berdasarkan firstStep.to_role
-    const targetRole = firstStep.to_role;
-    
-    // Query token FCM user yang sesuai (asumsikan tabel users memiliki field fcm_token)
-    const [tokens] = await pool.query('SELECT fcm_token FROM users WHERE role = ?', [targetRole]);
-    const tokenList = tokens.map(row => row.fcm_token).filter(Boolean);
-    
-    if (tokenList.length === 0) {
-      console.log(`Tidak ada token FCM untuk role ${targetRole}`);
-      return;
-    }
-    
-    const payload = {
-      notification: {
-        title: 'Tugas Baru',
-        body: 'Anda menerima tugas baru, silahkan cek aplikasi.'
+    const { instanceId, workflowId, firstStep, assignedUserName } = data;
+    // Jika ada assignedUserName, target notifikasi hanya ke user tersebut
+    if (assignedUserName) {
+      // Ambil token FCM user berdasarkan username yang ditugaskan
+      const [tokens] = await pool.query(
+        'SELECT fcm_token FROM users WHERE username = ? AND fcm_token IS NOT NULL',
+        [assignedUserName]
+      );
+      const tokenList = tokens.map(row => row.fcm_token);
+
+      if (tokenList.length === 0) {
+        console.log(`Tidak ada token FCM untuk user ${assignedUserName}`);
+        return;
       }
-    };
-    
-    await sendNotification(tokenList, payload);
-    console.log(`Notifikasi tugas baru untuk role ${targetRole} telah dikirim.`);
+
+      const payload = {
+        notification: {
+          title: 'Tugas Baru',
+          body: `Anda menerima tugas baru untuk workflow ${workflowId}, silakan cek aplikasi.`
+        }
+      };
+
+      await sendNotification(tokenList, payload);
+      console.log(`Notifikasi tugas baru untuk user ${assignedUserName} telah dikirim.`);
+    } else {
+      // Jika tidak ada assignedUserName, kirim ke semua user berdasarkan role to_role
+      const targetRole = firstStep.to_role;
+
+      const [tokens] = await pool.query('SELECT fcm_token FROM users WHERE role = ? AND fcm_token IS NOT NULL', [targetRole]);
+      const tokenList = tokens.map(row => row.fcm_token);
+
+      if (tokenList.length === 0) {
+        console.log(`Tidak ada token FCM untuk role ${targetRole}`);
+        return;
+      }
+
+      const payload = {
+        notification: {
+          title: 'Tugas Baru',
+          body: `Anda menerima tugas baru untuk workflow ${workflowId}, silakan cek aplikasi.`
+        }
+      };
+
+      await sendNotification(tokenList, payload);
+      console.log(`Notifikasi tugas baru untuk role ${targetRole} telah dikirim.`);
+    }
   } catch (error) {
     console.error('Error saat mengirim notifikasi untuk tugas baru:', error);
   }
 });
+
 
 // Handler untuk event taskStepUpdated
 eventEmitter.on('taskStepUpdated', async (data) => {
