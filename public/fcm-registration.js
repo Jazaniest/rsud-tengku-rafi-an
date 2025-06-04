@@ -1,7 +1,3 @@
-/* fcm-setup.js
-   Mendukung FCM Push Notification dengan refresh token setiap 1 detik
-   dan menampilkan token di UI untuk debugging/testing */
-
 (async function() {
   // Cek dukungan Service Worker dan Notifikasi
   if (!('serviceWorker' in navigator) || !('Notification' in window)) {
@@ -57,7 +53,7 @@
         tokenContainer.value = fcmToken;
         // Kirim token ke server
         updateTokenOnServer(fcmToken);
-        console.log('FCM Token refreshed and sent:', fcmToken);
+        // console.log('FCM Token refreshed and sent:', fcmToken);
       } catch (err) {
         console.error('Error mendapatkan token FCM:', err);
       }

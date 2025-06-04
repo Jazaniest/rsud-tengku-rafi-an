@@ -1,18 +1,17 @@
 const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-// Sesuaikan konfigurasi database Anda
-const sequelize = new Sequelize('rsud_siak', 'root', 'jazani07', {
-  host: 'localhost',
-  dialect: 'mysql', // ganti sesuai dengan database yang Anda gunakan (misalnya: mysql, postgres, sqlite, mssql)
-  logging: false,   // nonaktifkan logging jika tidak diperlukan
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+  host: process.env.DB_HOST,
+  dialect: process.env.DB_DIALECT,
+  logging: false,
 });
 
 const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-// Import model User (sesuaikan dengan struktur model Anda)
-// Misalnya, jika file User.js mengekspor fungsi model, panggil fungsi tersebut:
+// Import model User (sesuaikan dengan struktur model)
 db.User = require('./User');
 
 module.exports = db;

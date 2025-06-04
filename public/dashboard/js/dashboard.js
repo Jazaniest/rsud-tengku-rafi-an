@@ -42,59 +42,102 @@ document.addEventListener('DOMContentLoaded', async () => {
       await initSwitchButton();
     }
 
-    } catch (error) {
+    async function buttonTelegram() {
+      const telegramButton = document.getElementById('telegramButton');
+      try {
+        const res = await fetch('/api/notification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ username: profile.username })
+        });
+
+        const username = profile.username;
+  
+        if (!res.ok) throw new Error('Gagal memeriksa data Telegram');
+  
+        const data = await res.json();
+  
+        // Ubah isi tombol sesuai status
+        if (data.linked === true) {
+          telegramButton.innerHTML = '';
+        } else {
+          telegramButton.innerHTML = `
+            <h4>Sistem notifikasi telegram</h4>
+            <a id="telegram-link" href="https://t.me/rsudtr_bot?start=link:${username}" target="_blank" class="file-btn mb-3">
+                Hubungkan Ke Telegram
+            </a>
+          `;
+        }
+      } catch (error) {
+        console.error('Gagal memuat status Telegram:', error);
+      }
+    }
+  
+    async function initSwitchButton() {
+      try {
+        const registerButton = document.getElementById('register');
+
+        if(profile.role === 'super admin') {
+          registerButton.innerHTML = `
+          <h4>Formulir Register</h4>
+          <div class="checkbox-wrapper-8">
+            <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
+            <label for="cb3-8" data-tg-on="AKTIF" data-tg-off="MATI" class="tgl-btn"></label>
+          </div>
+        `;
+        } else {
+          registerButton.innerHTML = '';
+        }
+    
+        const switchButton = document.getElementById('cb3-8');
+        if (!switchButton) {
+          console.error('Switch button tidak ditemukan.');
+          return;
+        }
+    
+        const response = await fetch('/api/switch/status');
+        if (!response.ok) throw new Error('Gagal mengambil status switch dari server');
+        
+        const data = await response.json();
+        console.log('Status awal dari server:', data.status);
+  
+        switchButton.checked = data.status;
+  
+        switchButton.addEventListener('change', async function () {
+          const isChecked = switchButton.checked;
+          // console.log('Status switch berubah:', isChecked);
+    
+          try {
+            const saveResponse = await fetch('/api/switch/status', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: isChecked })
+            });
+    
+            if (!saveResponse.ok) throw new Error('Gagal menyimpan status switch');
+            const result = await saveResponse.json();
+            console.log('Berhasil menyimpan status:', result);
+          } catch (saveError) {
+            console.error('Error saat menyimpan status:', saveError);
+          }
+        });
+    
+      } catch (error) {
+        console.error('Error saat inisialisasi switch:', error);
+      }
+    }
+
+    buttonTelegram();
+    initSwitchButton();
+    
+  } catch (error) {
     console.error('Error fetching profile:', error);
   }
+  
 
-
-  async function initSwitchButton() {
-    try {
-      const registerButton = document.getElementById('register');
-      registerButton.innerHTML = `
-        <h4>Formulir Register</h4>
-        <div class="checkbox-wrapper-8">
-          <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
-          <label for="cb3-8" data-tg-on="AKTIF" data-tg-off="MATI" class="tgl-btn"></label>
-        </div>
-      `;
-  
-      const switchButton = document.getElementById('cb3-8');
-      if (!switchButton) {
-        console.error('Switch button tidak ditemukan.');
-        return;
-      }
-  
-      const response = await fetch('/api/switch/status');
-      if (!response.ok) throw new Error('Gagal mengambil status switch dari server');
-      
-      const data = await response.json();
-      console.log('Status awal dari server:', data.status);
-
-      switchButton.checked = data.status;
-
-      switchButton.addEventListener('change', async function () {
-        const isChecked = switchButton.checked;
-        // console.log('Status switch berubah:', isChecked);
-  
-        try {
-          const saveResponse = await fetch('/api/switch/status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: isChecked })
-          });
-  
-          if (!saveResponse.ok) throw new Error('Gagal menyimpan status switch');
-          const result = await saveResponse.json();
-          console.log('Berhasil menyimpan status:', result);
-        } catch (saveError) {
-          console.error('Error saat menyimpan status:', saveError);
-        }
-      });
-  
-    } catch (error) {
-      console.error('Error saat inisialisasi switch:', error);
-    }
-  }
   
   document.getElementById('logoutLink').addEventListener('click', () => {
     localStorage.removeItem('token');
@@ -633,7 +676,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Panggil fungsi untuk mengambil data tugas dan template
-  initSwitchButton();
   fetchTasks();
   verifUser();
   fetchAvailableTemplates();

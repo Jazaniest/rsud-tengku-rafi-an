@@ -16,6 +16,7 @@ const kegiatanRoutes = require('./routes/kegiatanRoutes');
 const logbookRoutes = require('./routes/logbookRoutes');
 const exportRoutes = require('./routes/exportRoutes');
 const switchRoutes = require('./routes/switchRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -38,6 +39,7 @@ app.use('/api/logbook', logbookRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/workflow', workflowRoutes);
 app.use('/api/switch', switchRoutes);
+app.use('/api/notification', notificationRoutes);
 
 // ✅ Static folders
 app.use('/exports', express.static(path.resolve(__dirname, '..', 'exports')));
