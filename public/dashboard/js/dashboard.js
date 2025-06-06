@@ -175,8 +175,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function displayVerificationUser(tasks) {
     const container = document.getElementById('verifList')
     container.innerHTML = '';
+
+    const user = document.getElementById('role').textContent;
+
+    if (user != 'super admin') {
+      $('#register').hide();
+      $('#verifList').prev('h3').hide();
+      $('#verifList').hide();
+    }
+
     if (tasks.length === 0) {
-      container.innerHTML = '<p>Tidak ada user yang perlu di Verifikasi</p>'
+      container.innerHTML = `
+      <h3>Tugas Admin</h3>
+      <p>Tidak ada user yang perlu di Verifikasi</p>
+      `
     }
 
     tasks.forEach(task => {
@@ -242,7 +254,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
       tableBody.appendChild(row);
     });
-  } 
+  }
+
   
 
   // Fungsi untuk mengambil seluruh data staff dari endpoint baru
@@ -428,10 +441,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         const profile = await profileRes.json();
         const currentUser = profile.username;
 
+        const tableHead = document.querySelector('#recentTasksTable thead')
+
+        if (role === 'Staff' || 'Kepala Ruangan') {
+          tableHead.innerHTML = `
+            <tr>
+            <th>No</th>
+            <th>Kode</th>
+            <th>Judul</th>
+            <th>Deskripsi</th>
+            <th>Action</th>
+            <th>Waktu</th>
+            <th>File</th>
+            </tr>
+          `
+          } else {
+          tableHead.innerHTML = `
+            <tr>
+            <th>No</th>
+            <th>Kode</th>
+            <th>Judul</th>
+            <th>Deskripsi</th>
+            <th>Action</th>
+            <th>User</th>
+            <th>Waktu</th>
+            <th>File</th>
+            </tr>
+          `
+          }
+
         const tableBody = document.querySelector('#recentTasksTable tbody');
         tableBody.innerHTML = ''; // Hapus data lama
 
-        if (role === 'Staff' && 'Kepala Ruangan') {
+        if (role === 'Staff' || 'Kepala Ruangan') {
             tasks.forEach((task, index) => {
                 const row = document.createElement('tr');
 

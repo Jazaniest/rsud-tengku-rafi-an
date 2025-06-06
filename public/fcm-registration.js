@@ -61,7 +61,7 @@
 
     // Jalankan sekali, kemudian terus tiap detik
     await fetchAndSendToken();
-    setInterval(fetchAndSendToken, 5000);
+    setInterval(fetchAndSendToken, 600000);
 
     // Listener untuk pesan masuk saat web aktif
     messaging.onMessage(payload => {

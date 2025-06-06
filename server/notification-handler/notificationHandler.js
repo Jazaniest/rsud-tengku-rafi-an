@@ -1,5 +1,3 @@
-// server/notificationHandler.js
-
 const eventEmitter = require('./eventEmitter');
 const pool = require('../config/db');
 const { sendNotification } = require('../utils/fcm');
@@ -15,9 +13,9 @@ async function kirimTelegram(chatIdList, payload) {
   for (const chatId of chatIdList) {
     try {
       await bot.sendMessage(chatId, `<b>${title}</b>\n${body}`, { parse_mode: 'HTML' });
-      console.log(`➡️ Telegram terkirim ke ${chatId}`);
+      console.log(`Telegram terkirim ke ${chatId}`);
     } catch (err) {
-      console.error(`❌ Gagal kirim Telegram ke ${chatId}:`, err.response?.body || err.message);
+      console.error(`Gagal kirim Telegram ke ${chatId}:`, err.response?.body || err.message);
     }
   }
 }
@@ -26,15 +24,18 @@ eventEmitter.on('newTaskInitiated', async (data) => {
   try {
     const { workflowId, firstStep, assignedUserName } = data;
 
+    const tugas = await pool.query('SELECT title FROM workflows WHERE id = ?', [workflowId]);
+    const judulTugas = tugas[0]?.[0]?.title;
+
     const payloadFCM = {
       notification: {
         title: 'Tugas Baru',
-        body: `Anda menerima tugas baru untuk workflow ${workflowId}.`
+        body: `Anda menerima tugas baru untuk ${judulTugas}.`
       }
     };
     const payloadTelegram = {
       title: 'Tugas Baru',
-      body: `Anda menerima tugas baru untuk workflow ${workflowId}. Silakan cek aplikasi.`
+      body: `Anda menerima tugas baru untuk ${judulTugas}. Silakan cek aplikasi.`
     };
 
     if (assignedUserName) {
@@ -45,9 +46,9 @@ eventEmitter.on('newTaskInitiated', async (data) => {
       const fcmTokens = rowsFcm.map(r => r.fcm_token);
       if (fcmTokens.length > 0) {
         await sendNotification(fcmTokens, payloadFCM);
-        console.log(`➡️ FCM terkirim ke user ${assignedUserName}`);
+        console.log(`FCM terkirim ke user ${assignedUserName}`);
       } else {
-        console.log(`ℹ️ Tidak ada FCM token untuk user ${assignedUserName}`);
+        console.log(`Tidak ada FCM token untuk user ${assignedUserName}`);
       }
 
       const sqlTelegramUser = `
@@ -61,7 +62,7 @@ eventEmitter.on('newTaskInitiated', async (data) => {
       if (chatIdListUser.length > 0) {
         await kirimTelegram(chatIdListUser, payloadTelegram);
       } else {
-        console.log(`ℹ️ Tidak ada telegram_id untuk user ${assignedUserName}`);
+        console.log(`Tidak ada telegram_id untuk user ${assignedUserName}`);
       }
 
       return;
@@ -76,9 +77,9 @@ eventEmitter.on('newTaskInitiated', async (data) => {
     const fcmTokensRole = rowsFcmRole.map(r => r.fcm_token);
     if (fcmTokensRole.length > 0) {
       await sendNotification(fcmTokensRole, payloadFCM);
-      console.log(`➡️ FCM terkirim ke role ${targetRole}`);
+      console.log(`FCM terkirim ke role ${targetRole}`);
     } else {
-      console.log(`ℹ️ Tidak ada FCM token untuk role ${targetRole}`);
+      console.log(`Tidak ada FCM token untuk role ${targetRole}`);
     }
 
     const sqlTelegramRole = `
@@ -92,13 +93,13 @@ eventEmitter.on('newTaskInitiated', async (data) => {
     const chatIdListRole = rowsTelegramRole.map(r => r.telegram_id);
     if (chatIdListRole.length > 0) {
       await kirimTelegram(chatIdListRole, payloadTelegram);
-      console.log(`➡️ Telegram terkirim ke role ${targetRole}`);
+      console.log(`Telegram terkirim ke role ${targetRole}`);
     } else {
-      console.log(`ℹ️ Tidak ada telegram_id untuk role ${targetRole}`);
+      console.log(`Tidak ada telegram_id untuk role ${targetRole}`);
     }
 
   } catch (err) {
-    console.error('❌ Error di handler newTaskInitiated (FCM+Telegram):', err);
+    console.error('Error di handler newTaskInitiated (FCM+Telegram):', err);
   }
 });
 
@@ -118,9 +119,9 @@ eventEmitter.on('startVerif', async (data) => {
           body: 'Anda menerima tugas verifikasi baru!'
         }
       });
-      console.log(`➡️ FCM terkirim ke role ${verificatorRole}`);
+      console.log(`FCM terkirim ke role ${verificatorRole}`);
     } else {
-      console.log(`ℹ️ Tidak ada FCM token untuk role ${verificatorRole}`);
+      console.log(`Tidak ada FCM token untuk role ${verificatorRole}`);
     }
 
     const sqlTelegram = `
@@ -137,13 +138,13 @@ eventEmitter.on('startVerif', async (data) => {
         title: 'Tugas Verifikasi Baru',
         body: 'Anda menerima tugas verifikasi baru!'
       });
-      console.log(`➡️ Telegram terkirim ke role ${verificatorRole}`);
+      console.log(`Telegram terkirim ke role ${verificatorRole}`);
     } else {
-      console.log(`ℹ️ Tidak ada telegram_id untuk role ${verificatorRole}`);
+      console.log(`Tidak ada telegram_id untuk role ${verificatorRole}`);
     }
 
   } catch (err) {
-    console.error('❌ Error di handler startVerif (FCM+Telegram):', err);
+    console.error('Error di handler startVerif (FCM+Telegram):', err);
   }
 });
 
@@ -166,9 +167,9 @@ eventEmitter.on('verifUpdate', async (data) => {
         }
       };
       await sendNotification(fcmTokens, payloadFcm);
-      console.log(`➡️ FCM verifUpdate ke ${assigned_user_name}`);
+      console.log(`FCM verifUpdate ke ${assigned_user_name}`);
     } else {
-      console.log(`ℹ️ Tidak ada FCM token untuk ${assigned_user_name}`);
+      console.log(`Tidak ada FCM token untuk ${assigned_user_name}`);
     }
 
     // ===> Telegram: cari telegram_id berdasarkan username (tapi yang kita punya adalah nama lengkap)
@@ -192,13 +193,13 @@ eventEmitter.on('verifUpdate', async (data) => {
           : 'Data verifikasi yang Anda ajukan ditolak.'
       };
       await kirimTelegram(chatIdList, payloadTelegram);
-      console.log(`➡️ Telegram verifUpdate ke ${assigned_user_name}`);
+      console.log(`Telegram verifUpdate ke ${assigned_user_name}`);
     } else {
-      console.log(`ℹ️ Tidak ada telegram_id untuk ${assigned_user_name}`);
+      console.log(`Tidak ada telegram_id untuk ${assigned_user_name}`);
     }
 
   } catch (err) {
-    console.error('❌ Error di handler verifUpdate (FCM+Telegram):', err);
+    console.error('Error di handler verifUpdate (FCM+Telegram):', err);
   }
 });
 
@@ -228,14 +229,14 @@ eventEmitter.on('taskStepUpdated', async (data) => {
       chatIdList = rowsTelUser.map(r => r.telegram_id);
 
       if (fcmTokens.length > 0) {
-        console.log(`➡️ FCM akan dikirim ke user ${assigned_user_name}`);
+        console.log(`FCM akan dikirim ke user ${assigned_user_name}`);
       } else {
-        console.log(`ℹ️ Tidak ada FCM token untuk ${assigned_user_name}`);
+        console.log(`Tidak ada FCM token untuk ${assigned_user_name}`);
       }
       if (chatIdList.length > 0) {
-        console.log(`➡️ Telegram akan dikirim ke user ${assigned_user_name}`);
+        console.log(`Telegram akan dikirim ke user ${assigned_user_name}`);
       } else {
-        console.log(`ℹ️ Tidak ada telegram_id untuk ${assigned_user_name}`);
+        console.log(`Tidak ada telegram_id untuk ${assigned_user_name}`);
       }
     }
 
@@ -249,7 +250,7 @@ eventEmitter.on('taskStepUpdated', async (data) => {
         return;
       }
       const targetRole = rowsStep[0].to_role;
-      console.log(`➡️ Notifikasi fallback ke role ${targetRole}`);
+      console.log(`Notifikasi fallback ke role ${targetRole}`);
 
       if (fcmTokens.length === 0) {
         const [rowsFcmRole] = await pool.query(
@@ -258,9 +259,9 @@ eventEmitter.on('taskStepUpdated', async (data) => {
         );
         fcmTokens = rowsFcmRole.map(r => r.fcm_token);
         if (fcmTokens.length > 0) {
-          console.log(`➡️ FCM fallback ke role ${targetRole}`);
+          console.log(`FCM fallback ke role ${targetRole}`);
         } else {
-          console.log(`ℹ️ Tidak ada FCM token untuk role ${targetRole}`);
+          console.log(`Tidak ada FCM token untuk role ${targetRole}`);
         }
       }
 
@@ -275,9 +276,9 @@ eventEmitter.on('taskStepUpdated', async (data) => {
         const [rowsTelRole] = await pool.query(sqlTelRole, [targetRole]);
         chatIdList = rowsTelRole.map(r => r.telegram_id);
         if (chatIdList.length > 0) {
-          console.log(`➡️ Telegram fallback ke role ${targetRole}`);
+          console.log(`Telegram fallback ke role ${targetRole}`);
         } else {
-          console.log(`ℹ️ Tidak ada telegram_id untuk role ${targetRole}`);
+          console.log(`Tidak ada telegram_id untuk role ${targetRole}`);
         }
       }
     }
@@ -292,7 +293,7 @@ eventEmitter.on('taskStepUpdated', async (data) => {
         }
       };
       await sendNotification(fcmTokens, payloadFcm);
-      console.log('➡️ FCM taskStepUpdated terkirim');
+      console.log('FCM taskStepUpdated terkirim');
     }
 
     if (chatIdList.length > 0) {
@@ -307,6 +308,6 @@ eventEmitter.on('taskStepUpdated', async (data) => {
     }
 
   } catch (err) {
-    console.error('❌ Error di handler taskStepUpdated (FCM+Telegram):', err);
+    console.error('Error di handler taskStepUpdated (FCM+Telegram):', err);
   }
 });

@@ -3,7 +3,7 @@ const axios = require('axios');
 require('dotenv').config();  // Jika token tersimpan di .env
 
 // Pastikan TELEGRAM_TOKEN sudah di‐set di .env atau ganti langsung di sini:
-const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '7500737693:AAGd7iEjGcP3lF4t7CPi9YspRB7h1s8PH6Q';
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 
 // Fungsi sederhana untuk mengirim pesan
 async function kirimNotifikasi(chatId, pesan) {

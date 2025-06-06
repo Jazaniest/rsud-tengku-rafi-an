@@ -1,4 +1,3 @@
-/* Tambahan untuk responsivitas tabel */
 .table-responsive {
   width: 100%;
   overflow-x: auto;
@@ -83,3 +82,18 @@
 .btn-info:hover {
   background-color: #138496;
 }
+
+.table-scroll-body {
+  max-height: 250px; /* Estimasi tinggi untuk 5 baris */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Pastikan header tetap terlihat */
+.table-responsive thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #f8f8f8; /* sama seperti background header */
+}
+
