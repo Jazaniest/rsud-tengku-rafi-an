@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const token = localStorage.getItem('token');
-  console.log('berikut token yang tersimpan di dashboard.js : ', token);
+  // console.log('berikut token yang tersimpan di dashboard.js : ', token);
   if (!token) {
     alert('anda tidak dapat melakukan aksi ini !');
     window.location.href = '../../login-form/index.html';
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!response.ok) throw new Error('Gagal mengambil status switch dari server');
         
         const data = await response.json();
-        console.log('Status awal dari server:', data.status);
+        // console.log('Status awal dari server:', data.status);
   
         switchButton.checked = data.status;
   
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
             if (!saveResponse.ok) throw new Error('Gagal menyimpan status switch');
             const result = await saveResponse.json();
-            console.log('Berhasil menyimpan status:', result);
+            // console.log('Berhasil menyimpan status:', result);
           } catch (saveError) {
             console.error('Error saat menyimpan status:', saveError);
           }
@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       if (!res.ok) throw new Error('Gagal mengambil data staff');
       const profiles = await res.json();
-      console.log('Data staff:', profiles);
+      // console.log('Data staff:', profiles);
       return profiles;
     } catch (error) {
       console.error('Error fetching staff profiles:', error);
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       if (!res.ok) throw new Error('Gagal mengambil data kepala ruangan');
       const profiles = await res.json();
-      console.log('Data kepala ruangan:', profiles);
+      // console.log('Data kepala ruangan:', profiles);
       return profiles;
     } catch (error) {
       console.error('Error fetching kepala ruangan profiles:', error);
@@ -338,7 +338,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Tampilkan dropdown hanya jika task.to_role adalah "staff"
         // Ambil step_order saat ini
         const currentStepOrder = task.step_order;
-        console.log('Step order saat ini:', currentStepOrder);
+        // console.log('Step order saat ini:', currentStepOrder);
         const nextStepOrder = currentStepOrder + 1; // Hitung step_order berikutnya
 
         // Lakukan fetch untuk mendapatkan data step berikutnya
@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           .then(nextStep => {
             // Ambil nilai to_role dari step berikutnya
             const toRole = nextStep.to_role;
-            console.log('Ini role selanjutnya:', toRole);
+            // console.log('Ini role selanjutnya:', toRole);
 
             // Bangun dropdownHTML berdasarkan toRole
             let dropdownHTML = '';
@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
           })
           .catch(error => {
-            console.log('Tidak ada langkah berikutnya untuk step_order:', currentStepOrder);
+            // console.log('Tidak ada langkah berikutnya untuk step_order:', currentStepOrder);
             // Jika fetch gagal, kamu bisa memilih untuk tetap merender elemen tanpa dropdown
             taskEl.innerHTML = `
               <div class="card mb-3" style="color: #767676">
@@ -583,7 +583,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (!res.ok) throw new Error('Gagal memproses tugas');
       const result = await res.json();
-      console.log('Tugas berhasil diproses:', result);
+      // console.log('Tugas berhasil diproses:', result);
       await verifUser();
     } catch (error) {
       console.error('Error processing task:', error);
@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           })
           .then(nextStep => {
             const toRole = nextStep.to_role;
-            console.log('role selanjutnya dari inisiasi: ', toRole);
+            // console.log('role selanjutnya dari inisiasi: ', toRole);
 
             let dropdownInitiate = '';
             if (toRole === 'Staff') {

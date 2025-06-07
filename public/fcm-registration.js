@@ -5,16 +5,18 @@
     return;
   }
 
+  const apiToken = localStorage.getItem('token');
+
   // penampil token di ui
-  let tokenContainer = document.getElementById('fcm-token-display');
-  if (!tokenContainer) {
-    tokenContainer = document.createElement('textarea');
-    tokenContainer.id = 'fcm-token-display';
-    tokenContainer.readOnly = true;
-    tokenContainer.style = 'position:fixed; bottom:10px; right:10px; width:300px; height:100px; z-index:9999; font-size:12px; padding:8px;';
-    tokenContainer.placeholder = 'FCM token akan muncul di sini...';
-    document.body.appendChild(tokenContainer);
-  }
+  // let tokenContainer = document.getElementById('fcm-token-display');
+  // if (!tokenContainer) {
+  //   tokenContainer = document.createElement('textarea');
+  //   tokenContainer.id = 'fcm-token-display';
+  //   tokenContainer.readOnly = true;
+  //   tokenContainer.style = 'position:fixed; bottom:10px; right:10px; width:300px; height:100px; z-index:9999; font-size:12px; padding:8px;';
+  //   tokenContainer.placeholder = 'FCM token akan muncul di sini...';
+  //   document.body.appendChild(tokenContainer);
+  // }
 
   // Deteksi iOS Safari (hanya mendukung Push di PWA)
   const isIOS = /iP(hone|od|ad)/.test(navigator.platform);
@@ -28,7 +30,7 @@
   try {
     // Daftarkan Service Worker
     const registration = await navigator.serviceWorker.register('../fcm-sw.js');
-    console.log('Service Worker terdaftar:', registration);
+    // console.log('Service Worker terdaftar:', registration);
 
     // Inisialisasi Firebase
     firebase.initializeApp(firebaseConfig);
@@ -50,7 +52,7 @@
           return;
         }
         // Tampilkan token di textarea
-        tokenContainer.value = fcmToken;
+        // tokenContainer.value = fcmToken;
         // Kirim token ke server
         updateTokenOnServer(fcmToken);
         // console.log('FCM Token refreshed and sent:', fcmToken);
@@ -74,7 +76,7 @@
   }
 
   // Fungsi kirim token ke server
-  const apiToken = localStorage.getItem('token');
+  
   function updateTokenOnServer(fcmToken) {
     fetch('/api/users/update-fcm-token', {
       method: 'POST',
@@ -85,7 +87,6 @@
       body: JSON.stringify({ fcmToken })
     })
     .then(res => res.json())
-    .then(data => console.log('Token update response:', data))
     .catch(err => console.error('Error updating token:', err));
   }
 })();
