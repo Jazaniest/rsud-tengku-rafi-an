@@ -1,5 +1,4 @@
-// js/logbook.js (menggunakan Fetch API)
-const token = localStorage.getItem('token');
+const token = localStorage.getItem('accessToken');
 
 document.addEventListener('DOMContentLoaded', () => {
   let kegiatanData = [];
@@ -9,21 +8,22 @@ document.addEventListener('DOMContentLoaded', () => {
   async function fetchUser() {
     if (!token) {
       console.log('Token is missing or invalid');
-      return window.location.href = '/login';
+      return window.location.href = '../index.html';
     }
     try {
-      const res = await fetch('/api/auth/profile', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchWithAuth('/api/auth/profile');
       if (!res.ok) throw new Error('Gagal mengambil data profil');
       const profile = await res.json();
       document.getElementById('role').textContent = profile.role;
+
+      const role = profile.role;
+      console.log('isi role : ', role);
       
-      if (profile.role !== 'staff') {
+      if (!['Staff', 'super admin'].includes(role)) {
         alert('Anda tidak memiliki akses untuk fitur ini!');
-        return window.location.href = '/public/dashboard/index.html';
+        return window.location.href = '/dashboard/index.html';
       }
-      console.log('Role sesuai!');
+      console.log('Role : ', profile.role);
     } catch (err) {
       console.error('Error fetching profile:', err);
     }
@@ -32,9 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load daftar kegiatan
   async function loadKegiatan() {
     try {
-      const res = await fetch('/api/kegiatan', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchWithAuth('/api/kegiatan');
       if (!res.ok) throw new Error('Error loading kegiatan');
       kegiatanData = await res.json();
       // Render list
@@ -84,10 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const name = document.getElementById('newKegiatan').value.trim();
     if (!name) return alert('Masukkan nama kegiatan');
     try {
-      const res = await fetch('/api/kegiatan', {
+      const res = await fetchWithAuth('/api/kegiatan', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer ' + token,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ name })
@@ -120,10 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     try {
       const log_date = new Date().toISOString().split('T')[0];
-      const res = await fetch('/api/logbook/save', {
+      const res = await fetchWithAuth('/api/logbook/save', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer ' + token,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ log_date, entries })
@@ -146,11 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       btn.disabled = true;
 
-      const res = await fetch('/api/kegiatan/deleteKegiatan', {
-        method: 'DELETE',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
+      const res = await fetchWithAuth('/api/kegiatan/deleteKegiatan', {
+        method: 'DELETE'
       });
 
       if(!res.ok) {
@@ -168,9 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load summary tanpa tanggal
   async function loadLogbookSummary() {
     try {
-      const res = await fetch('/api/logbook/user', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchWithAuth('/api/logbook/user');
       if (!res.ok) throw new Error('Error loading summary');
       const data = await res.json();
       console.log('isi data:', data);
@@ -198,9 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Export logbook
   document.getElementById('btnExport').addEventListener('click', async () => {
     try {
-      const res = await fetch('/api/export/logbook', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchWithAuth('/api/export/logbook');
       if (!res.ok) throw new Error('Error exporting');
 
       // Baca response sebagai Blob
@@ -216,9 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchList() {
     try {
-      const res = await fetch('/api/logbook/list', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchWithAuth('/api/logbook/list');
       if (!res.ok) throw new Error('Gagal mengambil data list logbook');
       const data = await res.json();
       console.log('isi data: ', data);

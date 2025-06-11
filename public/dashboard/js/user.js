@@ -1,5 +1,5 @@
 // Mengambil token dari localStorage
-const token = localStorage.getItem('token'); // 'token' adalah nama key tempat Anda menyimpan JWT
+const token = localStorage.getItem('accessToken'); // 'token' adalah nama key tempat Anda menyimpan JWT
 let currentUserId = null; // Menyimpan ID pengguna yang sedang diedit
 
 // Fungsi untuk mengambil data pengguna dari API
@@ -12,9 +12,7 @@ const fetchUsers = async () => {
     }
 
     try {
-        const profileRes = await fetch('/api/auth/profile', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
+        const profileRes = await fetchWithAuth('/api/auth/profile');
         if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
         const profile = await profileRes.json();
 
@@ -34,11 +32,8 @@ const fetchUsers = async () => {
     }
 
     try {
-        const response = await fetch('/api/users', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`, // Menambahkan header Authorization
-            },
+        const response = await fetchWithAuth('/api/users', {
+            method: 'GET'
         });
         const data = await response.json();
 
@@ -111,12 +106,8 @@ const fetchUsers = async () => {
 // Fungsi untuk membuka modal dan mengisi form dengan data pengguna
 const editUser = (id) => {
     currentUserId = id;
-    // Ambil data pengguna berdasarkan ID
-    fetch(`/api/users/${id}`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-        },
+    fetchWithAuth(`/api/users/${id}`, {
+        method: 'GET'
     })
     .then(response => response.json())
     .then(user => {
@@ -166,11 +157,10 @@ document.getElementById('editForm').addEventListener('submit', async (event) => 
     };
 
     try {
-        const response = await fetch(`/api/users/${currentUserId}`, {
+        const response = await fetchWithAuth(`/api/users/${currentUserId}`, {
             method: 'PUT',
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(updatedData),
         });

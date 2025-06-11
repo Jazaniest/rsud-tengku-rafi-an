@@ -16,8 +16,7 @@ class User {
     const [rows] = await pool.query('SELECT * FROM users');
     return rows; // Mengembalikan semua pengguna dalam bentuk array
   }
-  
-  // server/models/User.js
+
   static async delete(id) {
     try {
         const [result] = await pool.query('DELETE FROM users WHERE id = ?', [id]);
@@ -26,6 +25,28 @@ class User {
         console.error('Error during delete operation:', err); // Log error SQL
         throw new Error('Database delete failed');
     }
+  }
+
+  static async saveRefreshToken(userId, token) {
+    await pool.query(
+      'UPDATE users SET refresh_token = ? WHERE id = ?',
+      [token, userId]
+    );
+  }
+
+  static async findByRefreshToken(token) {
+    const user = await pool.query(
+      'SELECT id FROM users WHERE refresh_token = ?',
+      [token]
+    );
+    return user[0][0];
+  }
+
+  static async removeRefreshToken(token) {
+    await pool.query(
+      'UPDATE users SET refresh_token = NULL WHERE refresh_token = ?',
+      [token]
+    );
   }
 
 

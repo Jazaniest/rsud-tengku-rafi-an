@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const authMiddleware = require('../middlewares/authmiddleware');
 const multer = require('multer');
 const path = require('path');
 const User = require('../models/User');
@@ -53,5 +53,7 @@ router.put('/editProfile', authMiddleware, upload.single('fotoProfile'), authCon
 router.post('/login', authController.login);
 router.post('/register', authController.register);
 router.get('/profile', authMiddleware, authController.getProfile);
+router.post('/token', authController.refreshToken);
+router.post('/logout', authController.logout);
 
 module.exports = router;

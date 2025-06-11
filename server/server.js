@@ -1,5 +1,6 @@
 // server.js (backend)
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const http = require('http');
 const bodyParser = require('body-parser');
@@ -23,6 +24,7 @@ const server = http.createServer(app);
 
 // ✅ Serve frontend (static files) dari folder public
 app.use(express.static(path.join(__dirname, '../public')));
+app.use(cookieParser());
 
 // ✅ Middleware
 app.use(bodyParser.json());

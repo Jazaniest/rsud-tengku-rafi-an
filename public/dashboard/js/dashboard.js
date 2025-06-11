@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
   // console.log('berikut token yang tersimpan di dashboard.js : ', token);
   if (!token) {
     alert('anda tidak dapat melakukan aksi ini !');
@@ -8,9 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const profileRes = await fetch('/api/auth/profile', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
+    const profileRes = await fetchWithAuth('/api/auth/profile');
     if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
     const profile = await profileRes.json();
 
@@ -45,11 +43,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function buttonTelegram() {
       const telegramButton = document.getElementById('telegramButton');
       try {
-        const res = await fetch('/api/notification', {
+        const res = await fetchWithAuth('/api/notification', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({ username: profile.username })
         });
@@ -139,16 +136,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   
 
   
-  document.getElementById('logoutLink').addEventListener('click', () => {
-    localStorage.removeItem('token');
+  document.getElementById('logoutLink').addEventListener('click', async () => {
+    await fetch ('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+    localStorage.removeItem('accessToken');
     window.location.href = '../login-form/index.html';
   });
 
   async function fetchTasks() {
     try {
-      const res = await fetch('/api/workflow/instances', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchWithAuth('/api/workflow/instances');
       if (!res.ok) throw new Error('Gagal mengambil tugas');
       const data = await res.json();
       displayInitiatedTasks(data.initiatedTasks);
@@ -161,9 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function verifUser() {
     try {
-      const res = await fetch('/api/workflow/verification', {
-        headers : { 'Authorization': 'Bearer ' + token}
-      });
+      const res = await fetchWithAuth('/api/workflow/verification');
       if (!res.ok) throw new Error('Gagal memuat data verifikasi');
       const data = await res.json();
       displayVerificationUser(data.assignedRows);
@@ -261,9 +258,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Fungsi untuk mengambil seluruh data staff dari endpoint baru
   async function fetchStaffProfiles() {
     try {
-      const res = await fetch('/api/auth/staff', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchWithAuth('/api/auth/staff');
       if (!res.ok) throw new Error('Gagal mengambil data staff');
       const profiles = await res.json();
       // console.log('Data staff:', profiles);
@@ -277,9 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Fungsi untuk mengambil seluruh data karu dari endpoint baru
   async function fetchKaruProfiles() {
     try {
-      const res = await fetch('/api/auth/karu', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchWithAuth('/api/auth/karu');
       if (!res.ok) throw new Error('Gagal mengambil data kepala ruangan');
       const profiles = await res.json();
       // console.log('Data kepala ruangan:', profiles);
@@ -342,9 +335,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const nextStepOrder = currentStepOrder + 1; // Hitung step_order berikutnya
 
         // Lakukan fetch untuk mendapatkan data step berikutnya
-        fetch(`/api/workflow/steps/${task.workflow_id}/${nextStepOrder}`, {
-          headers: { 'Authorization': 'Bearer ' + token }
-        })
+        fetchWithAuth(`/api/workflow/steps/${task.workflow_id}/${nextStepOrder}`)
           .then(response => {
             if (response.ok) {
               return response.json();
@@ -432,9 +423,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Render recent tasks (tugas yang telah dikerjakan user atau rekan dengan role yang sama)
   async function displayRecentTasks(tasks) {
     try {
-        const profileRes = await fetch('/api/auth/profile', {
-            headers: { 'Authorization': 'Bearer ' + token } // Pastikan `token` dideklarasikan sebelumnya
-        });
+        const profileRes = await fetchWithAuth('/api/auth/profile');
 
         if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
 
@@ -554,11 +543,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const formData = new FormData(formElement);
       formData.append('action', action);
       
-      const res = await fetch(`/api/workflow/instances/${instanceId}/step`, {
+      const res = await fetchWithAuth(`/api/workflow/instances/${instanceId}/step`, {
         method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        },
         body: formData
       });
       const result = await res.json();
@@ -572,10 +558,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   window.processValid = async function(taskId, action) {
     try {
-      const res = await fetch(`/api/workflow/tasks/${taskId}/step`, {
+      const res = await fetchWithAuth(`/api/workflow/tasks/${taskId}/step`, {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer ' + token,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ action: action })
@@ -606,9 +591,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       templates.forEach(template => {
 
-        fetch(`/api/workflow/steps/${template.workflow_id}/1`, {
-          headers: { 'Authorization': 'Bearer ' + token}
-        })
+        fetchWithAuth(`/api/workflow/steps/${template.workflow_id}/1`)
           .then(response => {
             if (response.ok) {
               return response.json();
@@ -671,11 +654,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const assignedInput = formElement.querySelector('input[name="assigned_user_name"]');
                 formData.set('assigned_user_name', assignedInput?.value || '');
-                const res = await fetch('/api/workflow/instances', {
+                const res = await fetchWithAuth('/api/workflow/instances', {
                   method: 'POST',
-                  headers: {
-                    'Authorization': 'Bearer ' + token
-                  },
                   body: formData
                 });
                 const result = await res.json();
@@ -706,9 +686,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Fungsi untuk mengambil template workflow
   async function fetchAvailableTemplates() {
     try {
-      const res = await fetch('/api/workflow/templates', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchWithAuth('/api/workflow/templates');
       if (!res.ok) throw new Error('Gagal mengambil template workflow');
       const templates = await res.json();
       displayAvailableTemplates(templates);

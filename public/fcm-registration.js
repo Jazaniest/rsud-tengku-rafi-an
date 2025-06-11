@@ -78,7 +78,7 @@
   // Fungsi kirim token ke server
   
   function updateTokenOnServer(fcmToken) {
-    fetch('/api/users/update-fcm-token', {
+    fetchWithAuth('/api/users/update-fcm-token', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + apiToken,

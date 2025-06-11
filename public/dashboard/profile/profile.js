@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
   if (!token) {
     window.location.href = '../../login-form/index.html';
     return;
@@ -7,9 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Ambil data profil user
   try {
-    const profileRes = await fetch('/api/auth/profile', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
+    const profileRes = await fetchWithAuth('/api/auth/profile');
     if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
     const profile = await profileRes.json();
     
@@ -118,11 +116,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     
     try {
-      const res = await fetch('/api/auth/editProfile', {
+      const res = await fetchWithAuth('/api/auth/editProfile', {
         method: 'PUT',
-        headers: {
-          'Authorization': 'Bearer ' + localStorage.getItem('token'),
-        },
         body: formData
       });
       const result = await res.json();

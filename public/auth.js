@@ -76,11 +76,12 @@
                 const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: {'Content-Type':'application/json'},
+                    credentials: 'include',
                     body: JSON.stringify({ username, password })
                 });
                 const data = await res.json();
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
+                if (data.accessToken) {
+                    localStorage.setItem('accessToken', data.accessToken);
                     window.location.href = '../dashboard/index.html';
                 } else {
                     alert('Login gagal: username atau password salah.');
@@ -103,9 +104,9 @@
 
             var role = null;
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('accessToken');
                 if (token) {
-                    const pr = await fetch('/api/auth/profile', { headers: { 'Authorization': 'Bearer ' + token } });
+                    const pr = await fetchWithAuth('/api/auth/profile');
                     if (pr.ok) {
                         const profile = await pr.json();
                         role = profile.role;

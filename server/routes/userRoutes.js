@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const authMiddleware = require('../middlewares/authmiddleware');
 
 // Route untuk mendapatkan daftar semua pengguna
 router.get('/', authMiddleware, userController.getAllUsers); // Menambahkan route untuk mengambil semua pengguna

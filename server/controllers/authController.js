@@ -5,7 +5,7 @@ const pool = require('../config/db')
 const eventEmitter = require('../notification-handler/eventEmitter')
 
 require('dotenv').config();
-const secret = process.env.JWT_SECRET;
+const {ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET} = process.env;
 
 exports.register = async (req, res) => {
   try {
@@ -68,21 +68,40 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    console.log('Login attempt for username:', username);
     const user = await User.findByUsername(username);
     if (!user) {
-      console.log('User not found');
       return res.status(401).json({ message: 'Invalid username or password' });
     }
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
-      console.log('Password mismatch');
       return res.status(401).json({ message: 'Invalid username or password' });
     }
-    const token = jwt.sign({ id: user.id, role: user.role, namaLengkap: user.nama_lengkap }, secret, { expiresIn: '7d' });
-    res.json({ token });
-  } catch (error) {
-    console.error('Login error:', error);
+
+    const accessToken = jwt.sign(
+      { id: user.id, role: user.role, namaLengkap: user.nama_lengkap },
+      ACCESS_TOKEN_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    const refreshToken = jwt.sign(
+      { id: user.id },
+      REFRESH_TOKEN_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    await User.saveRefreshToken(user.id, refreshToken);
+
+    res
+      .cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production' && req.secure,
+        sameSite: 'Strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .json({ accessToken });
+
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -157,5 +176,37 @@ exports.editProfile = async (req, res) => {
     console.error('Edit profile error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
+};
+
+exports.refreshToken = async (req, res) => {
+  try {
+    const token = req.cookies.refreshToken;
+    if (!token) return res.sendStatus(401);
+
+    const payload = jwt.verify(token, REFRESH_TOKEN_SECRET);
+
+    const user = await User.findByRefreshToken(token);
+    if (!user || user.id !== payload.id) {
+      return res.sendStatus(403);
+    }
+
+    const newAccessToken = jwt.sign(
+      { id: user.id, role: user.role, namaLengkap: user.nama_lengkap },
+      ACCESS_TOKEN_SECRET,
+      { expiresIn: '15m' }
+    );
+    res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    console.error('Refresh error:', err);
+    res.sendStatus(403);
+  }
+};
+
+exports.logout = async (req, res) => {
+  const token = req.cookies.refreshToken;
+  if (token) {
+    await User.removeRefreshToken(token);
+  }
+  res.clearCookie('refreshToken').sendStatus(204);
 };
 
