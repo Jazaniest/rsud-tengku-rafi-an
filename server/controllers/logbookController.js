@@ -40,7 +40,7 @@ exports.saveLogbookEntries = async (req, res) => {
 
       await pool.query(
         `INSERT INTO logbook_entries
-         (user_id, log_date, kegiatan, row_number, isi_data, kolom_kegiatan)
+         (user_id, log_date, kegiatan, row_num, isi_data, kolom_kegiatan)
          VALUES (?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
            isi_data = CASE

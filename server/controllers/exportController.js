@@ -62,16 +62,38 @@ exports.exportLogbook = async (req, res) => {
       row.commit();
     });
 
-    const buffer = await workbook.xlsx.writeBuffer();
+    const now = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    const formattedDate = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
+    const hasilExport = `logbook_${userId}_${formattedDate}.xlsx`;
 
-    const hasilExport = `logbook_${userId}.xlsx`;
+    const outputPath = path.join(__dirname, '../exports', hasilExport);
 
-    await pool.query('INSERT INTO logbook_files (user_id, path) value (?, ?)', [userId, `${hasilExport}`]);
+    // Tulis ke file di disk
+    await workbook.xlsx.writeFile(outputPath);
 
+    // Simpan path ke database
+    await pool.query('INSERT INTO logbook_files (user_id, path) value (?, ?)', [userId, hasilExport]);
+
+    // Kirim file ke user
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', `attachment; filename=${hasilExport}`);
-    res.send(buffer);
-    await pool.query('DELETE FROM logbook_entries WHERE user_id = ?', [userId])
+    res.setHeader('Content-Disposition', `attachment; filename="${hasilExport}"`);
+    res.download(outputPath, hasilExport, async (err) => {
+      if (err) {
+        console.error('Gagal kirim file:', err);
+        return res.status(500).send('Gagal mengirim file.');
+      }
+
+      // Hapus entri logbook setelah file berhasil dikirim
+      try {
+        await pool.query('DELETE FROM logbook_entries WHERE user_id = ?', [userId]);
+      } catch (e) {
+        console.error('Gagal menghapus entri logbook:', e);
+      }
+    });
+
+
+
   } catch (error) {
     console.error('Error exporting logbook:', error);
     res.status(500).json({ message: 'Internal server error' });

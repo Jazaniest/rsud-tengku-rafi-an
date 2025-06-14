@@ -22,11 +22,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         <li class="nav-item"><a class="nav-link" href="logbook.html">Logbook</a></li>
         <li class="nav-item"><a class="nav-link" href="../index.html" id="logoutLink">Logout</a></li>
       `;
-    }else if (profile.role === 'super admin') {
+    } else if (profile.role === 'super admin') {
       logbookContainer.innerHTML = `
         <li class="nav-item"><a class="nav-link" href="profile/profile.html">Profil</a></li>
         <li class="nav-item"><a class="nav-link" href="user.html">Data pengguna</a></li>
         <li class="nav-item"><a class="nav-link" href="../login-form/register.html">Register User</a></li>
+        <li class="nav-item"><a class="nav-link" href="../index.html" id="logoutLink">Logout</a></li>
+      `;
+    } else if (profile.role === 'Kepala Ruangan') {
+      logbookContainer.innerHTML = `
+        <li class="nav-item"><a class="nav-link" href="profile/profile.html">Profil</a></li>
+        <li class="nav-item"><a class="nav-link" href="logbook.html">Logbook</a></li>
         <li class="nav-item"><a class="nav-link" href="../index.html" id="logoutLink">Logout</a></li>
       `;
     } else {
@@ -184,7 +190,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (tasks.length === 0) {
       container.innerHTML = `
       <h3>Tugas Admin</h3>
-      <p>Tidak ada user yang perlu di Verifikasi</p>
+      <div class="row">
+        <p>Tidak ada user yang perlu di Verifikasi</p>
+      </div>
       `
     }
 

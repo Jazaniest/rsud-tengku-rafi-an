@@ -44,7 +44,8 @@ app.use('/api/switch', switchRoutes);
 app.use('/api/notification', notificationRoutes);
 
 // ✅ Static folders
-app.use('/exports', express.static(path.resolve(__dirname, '..', 'exports')));
+// app.use('/exports', express.static(path.resolve(__dirname, '..', 'exports')));
+app.use('/exports', express.static(path.join(__dirname, 'exports')));
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 // ✅ Endpoint kirim notifikasi

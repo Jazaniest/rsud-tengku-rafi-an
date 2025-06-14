@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const role = profile.role;
       console.log('isi role : ', role);
       
-      if (!['Staff', 'super admin'].includes(role)) {
+      if (!['Staff', 'super admin', 'Kepala Ruangan'].includes(role)) {
         alert('Anda tidak memiliki akses untuk fitur ini!');
         return window.location.href = '/dashboard/index.html';
       }
@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     try {
+      location.reload();
       btn.disabled = true;
 
       const res = await fetchWithAuth('/api/kegiatan/deleteKegiatan', {
@@ -223,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
       row.innerHTML = `
       <td>${index + 1}</td>
       <td>${new Date(list.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-      <td><a href="/../uploads/${list.path}" class="btn btn-info btn-sm" download>Download file</a></td>
+      <td><a href="/exports/${list.path}" class="btn btn-info btn-sm" download>Download file</a></td>
       `;
       tableBody.appendChild(row);
     });
