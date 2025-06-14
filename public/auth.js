@@ -116,7 +116,7 @@
 
             // Hanya redirect jika kedua kondisi terpenuhi: switch off AND bukan super admin
             if (!switchStatus && role !== 'super admin') {
-                window.location.href = 'index.html';
+                window.location.href = '808.html';
                 return;
             }
 
@@ -160,7 +160,7 @@
                             location.reload();
                          } else {
                             alert('Registrasi berhasil')
-                            window.location.href = 'index.html'; 
+                            window.location.href = '808.html'; 
                          }
                     },
                     error: function(xhr){

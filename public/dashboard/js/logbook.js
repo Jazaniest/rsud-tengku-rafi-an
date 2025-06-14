@@ -20,8 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('isi role : ', role);
       
       if (!['Staff', 'super admin', 'Kepala Ruangan'].includes(role)) {
-        alert('Anda tidak memiliki akses untuk fitur ini!');
-        return window.location.href = '/dashboard/index.html';
+        return window.location.href = '/dashboard/808.html';
       }
       console.log('Role : ', profile.role);
     } catch (err) {

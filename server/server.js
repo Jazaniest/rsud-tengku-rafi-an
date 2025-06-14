@@ -73,7 +73,7 @@ app.post('/api/send-notification', async (req, res) => {
 
 // ✅ Catch-all route: untuk menangani SPA routing
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  res.sendFile(path.join(__dirname, '../public/404.html'));
 });
 
 const PORT = process.env.PORT;

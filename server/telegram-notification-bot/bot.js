@@ -4,8 +4,8 @@ const pool = require('../config/db');
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 console.log('🤖 Bot Telegram berjalan (polling)');
-
 bot.on('polling_error', (err) => console.error('❌ [polling_error]', err));
+
 bot.on('message', (msg) => {
   const message_id = msg.message_id;
   const id = msg.from?.id;

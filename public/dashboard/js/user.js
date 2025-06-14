@@ -16,14 +16,13 @@ const fetchUsers = async () => {
         if (!profileRes.ok) throw new Error('Gagal mengambil data profil');
         const profile = await profileRes.json();
 
-        document.getElementById('role').textContent = profile.role;
+        const role = profile.role;
         
         // Tambahkan logika navigasi berdasarkan role
         const logbookContainer = document.getElementById('logbook');
-        if (profile.role != 'super admin') {
-            console.log('user tidak sesuai !')
-            alert('anda tidak memiliki akses untuk fitur ini !')
-            window.location.href = '/public/dashboard/index.html';
+        if (role != 'super admin') {
+            console.log('user tidak sesuai !');
+            window.location.href = '/dashboard/808.html';
         } else {
             console.log('role sesuai !')
         }
