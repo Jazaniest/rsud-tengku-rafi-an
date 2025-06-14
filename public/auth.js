@@ -38,7 +38,7 @@
     // Toggle register link based on switch status
     async function checkSwitchAndDisplay() {
         try {
-            const res = await fetch('/api/switch/status');
+            const res = await fetch('/api/switch/status-get');
             if (!res.ok) throw new Error();
             const { status } = await res.json();
             var el = document.getElementById('registerButton');

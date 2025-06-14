@@ -23,8 +23,8 @@ module.exports = (req, res, next) => {
       console.error('JWT verification error:', err);
       return res.status(401).json({ message: 'Invalid token' });
     }
-
     req.user = decoded;
+    // console.log('Isi req.user:', req.user);
     next();
   });
 };

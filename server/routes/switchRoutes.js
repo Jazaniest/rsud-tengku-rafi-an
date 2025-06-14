@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const authmiddleware = require('../middlewares/authMiddleware');
 
 // Import database connection
 const db = require('../config/db'); // contoh, sesuaikan dengan project kamu
 
 // GET status switch
-router.get('/status', async (req, res) => {
+router.get('/status-get', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT status FROM switches WHERE id = 1');
     if (rows.length > 0) {
@@ -20,7 +21,7 @@ router.get('/status', async (req, res) => {
 });
 
 // POST update status switch
-router.post('/status', async (req, res) => {
+router.post('/status-post', authmiddleware, async (req, res) => {
   const { status } = req.body;
   try {
     await db.query('UPDATE switches SET status = ? WHERE id = 1', [status ? 1 : 0]);

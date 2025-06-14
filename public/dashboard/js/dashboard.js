@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           return;
         }
     
-        const response = await fetch('/api/switch/status');
+        const response = await fetch('/api/switch/status-get');
         if (!response.ok) throw new Error('Gagal mengambil status switch dari server');
         
         const data = await response.json();
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           // console.log('Status switch berubah:', isChecked);
     
           try {
-            const saveResponse = await fetch('/api/switch/status', {
+            const saveResponse = await fetchWithAuth('/api/switch/status-post', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ status: isChecked })
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (tasks.length === 0) {
       container.innerHTML = `
-      <h3>Tugas Admin</h3>
+      <h4>Tugas Admin</h4>
       <div class="row">
         <p>Tidak ada user yang perlu di Verifikasi</p>
       </div>
@@ -440,7 +440,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const tableHead = document.querySelector('#recentTasksTable thead')
 
-        if (role === 'Staff' || 'Kepala Ruangan') {
+        if (['Staff', 'Kepala Ruangan'].includes(role)) {
           tableHead.innerHTML = `
             <tr>
             <th>No</th>
@@ -470,7 +470,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tableBody = document.querySelector('#recentTasksTable tbody');
         tableBody.innerHTML = ''; // Hapus data lama
 
-        if (role === 'Staff' || 'Kepala Ruangan') {
+        if (['Staff', 'Kepala Ruangan'].includes(role)) {
             tasks.forEach((task, index) => {
                 const row = document.createElement('tr');
 
@@ -614,22 +614,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             let dropdownInitiate = '';
             if (toRole === 'Staff') {
               dropdownInitiate = `
-              <p class="card-text" style="margin-bottom: 0;"><small>Kirim ke</small></p>
-                  <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari staff..." list="staffList-${template.workflow_id}">
-                  <datalist id="staffList-${template.workflow_id}">
-                    ${staffProfiles.map(staff => `<option value="${staff.nama_lengkap}">`).join('')}
-                  </datalist>
-              `
+                <p class="card-text" style="margin-bottom: 0;"><small>Kirim ke</small></p>
+                <div class="autocomplete-container" style="position: relative;">
+                  <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari staff..." data-role="staff" data-workflow-id="${template.workflow_id}" autocomplete="off">
+                  <div class="autocomplete-results" id="results-${template.workflow_id}" style="position: absolute; z-index: 1000; background: white; width: 100%; border: 1px solid #ccc;"></div>
+                </div>
+              `;
             }
             else if (toRole === 'Kepala Ruangan') {
-              dropdownInitiate = `
+            dropdownInitiate = `
               <p class="card-text" style="margin-bottom: 0;"><small>Kirim ke</small></p>
-                  <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari kepala ruangan..." list="staffList-${template.workflow_id}">
-                  <datalist id="staffList-${template.workflow_id}">
-                    ${karuProfiles.map(karu => `<option value="${karu.nama_lengkap}">`).join('')}
-                  </datalist>
-              `
+              <div class="autocomplete-container" style="position: relative;">
+                <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari kepala ruangan..." data-role="karu" data-workflow-id="${template.workflow_id}" autocomplete="off">
+                <div class="autocomplete-results" id="results-${template.workflow_id}" style="position: absolute; z-index: 1000; background: white; width: 100%; border: 1px solid #ccc;"></div>
+              </div>
+            `;
             }
+
 
             const templateEl = document.createElement('div');
             templateEl.className = 'col-md-4 task-item';
@@ -651,6 +652,44 @@ document.addEventListener('DOMContentLoaded', async () => {
               </div>
             `;
             container.appendChild(templateEl);
+
+            const input = templateEl.querySelector('.staff-search');
+            const resultsBox = templateEl.querySelector('.autocomplete-results');
+
+            input.addEventListener('input', () => {
+              const query = input.value.toLowerCase();
+              const role = input.dataset.role;
+              const sourceList = role === 'staff' ? staffProfiles : karuProfiles;
+
+              const filtered = sourceList
+                .filter(item => item.nama_lengkap.toLowerCase().includes(query))
+                .slice(0, 5); 
+
+              resultsBox.innerHTML = '';
+              if (query.length === 0 || filtered.length === 0) return;
+
+              filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.classList.add('autocomplete-item');
+                div.style.padding = '6px 12px';
+                div.style.cursor = 'pointer';
+                div.textContent = item.nama_lengkap;
+
+                div.addEventListener('click', () => {
+                  input.value = item.nama_lengkap;
+                  resultsBox.innerHTML = '';
+                });
+
+                resultsBox.appendChild(div);
+              });
+            });
+
+            document.addEventListener('click', (e) => {
+              if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
+                resultsBox.innerHTML = '';
+              }
+            });
+
 
 
             // Attach click handler

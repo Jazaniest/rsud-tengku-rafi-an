@@ -80,7 +80,7 @@ exports.login = async (req, res) => {
     const accessToken = jwt.sign(
       { id: user.id, role: user.role, namaLengkap: user.nama_lengkap },
       ACCESS_TOKEN_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '10sm' }
     );
 
     const refreshToken = jwt.sign(
@@ -193,7 +193,7 @@ exports.refreshToken = async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: user.id, role: user.role, namaLengkap: user.nama_lengkap },
       ACCESS_TOKEN_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '10s' }
     );
     res.json({ accessToken: newAccessToken });
   } catch (err) {

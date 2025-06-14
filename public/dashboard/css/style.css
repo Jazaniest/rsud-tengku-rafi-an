@@ -3533,3 +3533,35 @@ h6 {
 .checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:active:after {
   left: 10%;
 }
+
+
+.file-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.file-btn:hover {
+  color:black;
+}
+.autocomplete-results {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    width: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.autocomplete-item {
+    padding: 6px 12px;
+    cursor: pointer;
+}
+.autocomplete-item:hover {
+    background-color: #eee;
+}

@@ -36,7 +36,7 @@ class User {
 
   static async findByRefreshToken(token) {
     const user = await pool.query(
-      'SELECT id FROM users WHERE refresh_token = ?',
+      'SELECT id, role, nama_lengkap FROM users WHERE refresh_token = ?',
       [token]
     );
     return user[0][0];

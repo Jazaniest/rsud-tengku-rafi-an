@@ -207,8 +207,9 @@ exports.getUserTasks = async (req, res) => {
     const userId = req.user.id;
     const userRole = req.user.role;
     const userName = req.user.namaLengkap;
-
-    console.log('nama lengkap user yang sedang login : ', req.user.namaLengkap)
+    // console.log('isi req.user.id : ', req.user.id);
+    // console.log('isi req.user.role : ', req.user.role);
+    // console.log('nama lengkap user yang sedang login : ', req.user.namaLengkap)
     
     // Tugas yang diinisiasi oleh user (aktif)
     const [initiatedTasks] = await pool.query(
