@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.addEventListener('click', (e) => {
     if (e.target === modal || e.target === modalContent) {
-      modal.classList.remove('show');
+      modalContent.style.display = 'none';
     }
   });
 

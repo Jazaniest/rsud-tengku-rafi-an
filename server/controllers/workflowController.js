@@ -275,17 +275,51 @@ exports.getUserTasks = async (req, res) => {
     
     // Tugas recent: Tampilkan riwayat aksi yang dilakukan oleh semua user dengan role yang sama
     const [recentTasks] = await pool.query(
-      `SELECT wis.id as step_id, wis.workflow_instance_id, wis.step_order, wis.action_taken, 
-            wis.acted_by, wis.acted_at, wi.status, w.code, w.title, w.description, wis.file_path,
-            u.nama_lengkap, u.username
+      `SELECT
+          wis.id              AS step_id,
+          wis.workflow_instance_id,
+          wis.step_order,
+          wis.action_taken,
+          wis.acted_by,
+          wis.acted_at,
+          wi.status,
+          w.code,
+          w.title,
+          w.description,
+          wis.file_path,
+          u.nama_lengkap,
+          u.username
       FROM workflow_instance_steps wis
-      JOIN workflow_instances wi ON wis.workflow_instance_id = wi.id
-      JOIN workflows w ON wi.workflow_id = w.id
-      JOIN users u ON wis.acted_by = u.id
-      WHERE u.role = ?
+      JOIN workflow_instances     wi ON wis.workflow_instance_id = wi.id
+      JOIN workflows              w  ON wi.workflow_id            = w.id
+      JOIN users                  u  ON wis.acted_by              = u.id
+      WHERE (
+            (? = 'Kepala Komite'
+            AND u.role IN (
+              'Kepala Komite',
+              'Sub Komite Kredensial',
+              'Sub Komite Mutu Profesi',
+              'Sub Komite Etik dan Disiplin Profesi'
+            )
+            )
+        OR 
+            (? = 'Kepala Bidang'
+            AND u.role IN (
+              'Kepala Bidang',
+              'Seksi Pelayanan Keperawatan',
+              'Seksi Asuhan Keperawatan'
+            )
+            )
+        OR 
+            (? = 'super admin')
+        OR
+            (? NOT IN ('Kepala Komite', 'Kepala Bidang', 'super admin')
+            AND u.role = ?)
+      )
       ORDER BY wis.acted_at DESC
-      LIMIT 10`, 
-       [userRole]
+      LIMIT 10;
+      `, 
+       [userRole, userRole, userRole, userRole, userRole]
     );
     
     
