@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const role = profile.role;
       console.log('isi role : ', role);
       
-      if (!['Staff', 'super admin', 'Kepala Ruangan'].includes(role)) {
+      if (!['Staff', 'Kepala Ruangan'].includes(role)) {
         return window.location.href = '/dashboard/808.html';
       }
       console.log('Role : ', profile.role);

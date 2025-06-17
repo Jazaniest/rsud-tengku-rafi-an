@@ -25,6 +25,8 @@ window.fetchWithAuth = async (url, options = {}) => {
         const { accessToken: newToken } = await refreshRes.json();
         localStorage.setItem('accessToken', newToken);
         response = await makeRequest();
+        location.reload();
+        console.log('berhasil retoken dan reload')
       } else {
         alert('sesi telah berakhir, silahkan login ulang!');
         window.location.href = '/index.html';

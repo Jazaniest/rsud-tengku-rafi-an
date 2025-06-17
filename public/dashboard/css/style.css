@@ -3719,7 +3719,7 @@ h6 {
 .profile-dropdown {
   position: absolute;
   top: 80%;                /* pas di bawah tombol */
-  left: -3.5em;              
+  left: -4em;              
   margin-top: 4px;          /* jarak tipis dari tombol */
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   display: none;            /* sembunyikan default */

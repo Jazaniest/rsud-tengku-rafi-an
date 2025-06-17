@@ -29,8 +29,10 @@ async function askConnectTelegram(chatId, username, usersTele) {
     if (msg.chat.id !== chatId) return;
 
     const jawaban = msg.text.trim().toLowerCase();
-
-    if (jawaban === 'setuju') {
+    // ada error disini
+    // to lowercase
+    // ketika jawaban huruf besar atau kecil belum 
+    if (jawaban == 'setuju') {
       try {
         const now = new Date();
         const sql = `
@@ -54,7 +56,7 @@ async function askConnectTelegram(chatId, username, usersTele) {
         );
       }
     }
-    else if (jawaban === 'tidak') {
+    else if (jawaban == 'tidak') {
       await bot.sendMessage(
         chatId,
         'Baik, proses ditolak. Tidak ada perubahan yang dilakukan.'
@@ -82,7 +84,7 @@ async function askMoveUsername(chatId, username) {
 
     const jawaban = msg.text.trim().toLowerCase();
 
-    if (jawaban === 'setuju') {
+    if (jawaban == 'setuju') {
       try {
         const sql = `
           UPDATE user_telegram 
@@ -96,7 +98,7 @@ async function askMoveUsername(chatId, username) {
         await bot.sendMessage(chatId, '❌ Gagal menghubungkan akun. Silakan coba lagi nanti.');
       }
     }
-    else if (jawaban === 'tidak') {
+    else if (jawaban == 'tidak') {
       await bot.sendMessage(chatId, 'Baik, proses ditolak. Tidak ada perubahan yang dilakukan.');
     }
     else {

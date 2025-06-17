@@ -12,6 +12,8 @@ exports.updateWorkflowStep = async (req, res) => {
     const userRole = req.user.role;
     const instanceId = req.params.id; 
     const { action } = req.body;
+    const userSenderTask = req.body.senderTask;
+    const userSenderInitiate = req.body.senderInitiate;
 
     // Ambil nilai assigned_user_name dari form (jika dikirim)
     const assignedUserName = req.body.assigned_user_name ? req.body.assigned_user_name.trim() : '';
@@ -51,15 +53,15 @@ exports.updateWorkflowStep = async (req, res) => {
         nik: 'nik',
         nip: 'nip',
         pangkat: 'pangkat',
-        ruang: 'ruang',
+        // ruang: 'ruang',
         pendidikan: 'pendidikan',
         tempatTanggalLahir: 'tempat_tanggal_lahir',
         levelPk: 'level_pk',
         noStr: 'no_str',
-        akhirStr: 'akhir_str',
+        expiredStr: 'akhir_str',
         fileStr: 'file_str',
         noSipp: 'no_sipp',
-        akhirSipp: 'akhir_sipp',
+        expiredSipp: 'akhir_sipp',
         fileSipp: 'file_sipp',
         jenisKetenagaan: 'jenis_ketenagaan',
       };
@@ -67,9 +69,11 @@ exports.updateWorkflowStep = async (req, res) => {
       const payload = JSON.parse(instance.payload || '{}');
       console.log('isi payload: ', payload);
 
+      // filteringnya masih kurang benar
       const entriesToUpdate = Object.entries(payload)
         .filter(([key, value]) => key !== 'username' && fieldMap[key] && value !== undefined && value !== '');
 
+      console.log('isi entries to update : ', entriesToUpdate);
       if (entriesToUpdate.length === 0) {
         return res.status(400).json({ message: 'Tidak ada data valid untuk diupdate.' });
       }
@@ -78,6 +82,7 @@ exports.updateWorkflowStep = async (req, res) => {
       const values = [];
       for (const [key, value] of entriesToUpdate) {
         const column = fieldMap[key];
+        console.log('hasil dari field Map key : ', column);
         setClauses.push(`${column} = ?`);
         values.push(value);
       }
@@ -102,12 +107,12 @@ exports.updateWorkflowStep = async (req, res) => {
       }
 
     
-    if (action === 'tolak') {
-      await pool.query('Delete FROM workflow_instances WHERE id = ?', instanceId)
-      
-      eventEmitter.emit('verifUpdate', { ...notificationData, status: 'rejected' });
-      return res.json({ message: 'Data anda ditolak, silahkan perbaiki data yang salah' });
-    }
+      if (action === 'tolak') {
+        await pool.query('Delete FROM workflow_instances WHERE id = ?', instanceId)
+        
+        eventEmitter.emit('verifUpdate', { ...notificationData, status: 'rejected' });
+        return res.json({ message: 'Data anda ditolak, silahkan perbaiki data yang salah' });
+      }
     }
 
     const [steps] = await pool.query(
@@ -124,16 +129,62 @@ exports.updateWorkflowStep = async (req, res) => {
     
 
     let filePath = null;
+
     if (req.file) {
       filePath = req.file.path;
+    } else {
+      // Ambil file_path dari langkah sebelumnya (langkah terakhir)
+      const [lastStepRows] = await pool.query(`
+        SELECT file_path FROM workflow_instance_steps
+        WHERE workflow_instance_id = ?
+        ORDER BY acted_at DESC LIMIT 1
+      `, [instanceId]);
+
+      if (lastStepRows.length > 0 && lastStepRows[0].file_path) {
+        filePath = lastStepRows[0].file_path;
+      }
     }
 
-    filePath = filePath || '';
-    
-    await pool.query(
-      'INSERT INTO workflow_instance_steps (workflow_instance_id, step_order, from_role, to_role, action_taken, acted_by, remarks, file_path, assigned_user_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [instanceId, instance.current_step_order, currentStep.from_role, currentStep.to_role, action, userId, '', filePath, assignedUserName]
+    const wid = await pool.query(
+      `INSERT INTO workflow_instance_steps 
+      (workflow_instance_id, step_order, from_role, to_role, action_taken, acted_by, remarks, file_path, assigned_user_name) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        instanceId,
+        instance.current_step_order,
+        currentStep.from_role,
+        currentStep.to_role,
+        action,
+        userId,
+        '',
+        filePath || '', 
+        assignedUserName
+      ]
     );
+
+    const insertId = wid[0].insertId;
+
+    // console.log('usersenderinitiate : ', userSenderInitiate);
+    // console.log('usersendertask : ', userSenderTask);
+    let userInitiate = null;
+
+    if(!userSenderTask) {
+      userInitiate = userSenderInitiate;
+    } else {
+      userInitiate = userSenderTask;
+    }
+
+    console.log('isi user initiate : ', userInitiate);
+    const userByName = await pool.query(
+      'SELECT nama_lengkap FROM users WHERE id = ?',
+      [userInitiate]
+    )
+    const username = userByName[0][0]?.nama_lengkap;
+
+    // console.log('isi user by name : ', userByName);
+    // console.log('isi username : ', username);
+
+
     
     let notificationData = {
       instanceId,
@@ -155,7 +206,6 @@ exports.updateWorkflowStep = async (req, res) => {
     }
     
     if (action === 'approve') {
-      console.log('masuk ke approve')
       if (currentStep.next_step_if_approved === null) {
         await pool.query(
           'UPDATE workflow_instances SET status = ? WHERE id = ?',
@@ -182,8 +232,12 @@ exports.updateWorkflowStep = async (req, res) => {
       } else {
         await pool.query(
           'UPDATE workflow_instances SET current_step_order = ? WHERE id = ?',
-          [currentStep.next_step_if_rejected, instanceId]
+          [currentStep.next_step_if_rejected, instanceId] 
         );
+        await pool.query(
+          `UPDATE workflow_instance_steps SET assigned_user_name = ? WHERE id = ?`,
+          [username, insertId]
+        )
         // Emit event update untuk reject
         eventEmitter.emit('taskStepUpdated', { ...notificationData, newStep: currentStep.next_step_if_rejected });
         return res.json({ message: 'Tugas telah berpindah ke langkah berikutnya (reject).' });
@@ -224,6 +278,7 @@ exports.getUserTasks = async (req, res) => {
     const [assignedTasks] = await pool.query(`
         SELECT
           wi.*,
+          wi.initiated_by,
           w.code,
           w.title,
           w.description,
@@ -236,7 +291,8 @@ exports.getUserTasks = async (req, res) => {
           ws.step_order,
           ls.last_step_id,
           ls.file_path,
-          ls.assigned_user_name
+          ls.assigned_user_name,
+          ls.acted_by
         FROM workflow_instances wi
         JOIN workflows w
           ON wi.workflow_id = w.id
@@ -246,21 +302,21 @@ exports.getUserTasks = async (req, res) => {
         LEFT JOIN (
           SELECT
             t.workflow_instance_id,
-            t.id           AS last_step_id,
+            t.id AS last_step_id,
             t.file_path,
-            t.assigned_user_name
+            t.assigned_user_name,
+            t.acted_by
           FROM workflow_instance_steps t
           JOIN (
             SELECT 
               workflow_instance_id,
-              MAX(step_order) AS max_step_order
+              MAX(acted_at) AS last_acted_at
             FROM workflow_instance_steps
             GROUP BY workflow_instance_id
           ) mx
             ON t.workflow_instance_id = mx.workflow_instance_id
-          AND t.step_order = mx.max_step_order
-        ) ls
-          ON ls.workflow_instance_id = wi.id
+            AND t.acted_at = mx.last_acted_at
+        ) ls ON ls.workflow_instance_id = wi.id
         WHERE
           ws.to_role = ?  
           AND wi.status != 'completed'

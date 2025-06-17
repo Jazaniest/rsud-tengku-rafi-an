@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </li>
 
         <li class="nav-item profile-mobile">
-          <a class="nav-link" id="logoutLink">Logout</a>
+          <a class="nav-link" href="../login-form/index.html" id="logoutLink">Logout</a>
         </li>
       `;
     } else if (profile.role === 'Kepala Ruangan') {
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </li>
 
         <li class="nav-item profile-mobile">
-          <a class="nav-link" id="logoutLink">Logout</a>
+          <a class="nav-link" href="../login-form/index.html" id="logoutLink">Logout</a>
         </li>
       `;
     } else {
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </li>
 
         <li class="nav-item profile-mobile">
-          <a class="nav-link" id="logoutLink">Logout</a>
+          <a class="nav-link" href="../login-form/index.html" id="logoutLink">Logout</a>
         </li>
       `;
     }
@@ -408,7 +408,7 @@ addNavListener('register-button', '../login-form/register.html');
     if (tasks.length === 0) {
       container.innerHTML = `
       <h4>Tugas Admin</h4>
-      <div class="row">
+      <div>
         <p>Tidak ada user yang perlu di Verifikasi</p>
       </div>
       `
@@ -509,140 +509,189 @@ addNavListener('register-button', '../login-form/register.html');
     }
   }
 
+  let staffProfiles = [];
+  let karuProfiles = [];
+
+  async function initProfiles() {
+    staffProfiles = await fetchStaffProfiles();
+    karuProfiles  = await fetchKaruProfiles();
+  }
+  initProfiles();
+
+
 
 
   async function displayAssignedTasks(tasks) {
     const container = document.getElementById('tasksList');
     container.innerHTML = '';
-    if (tasks.length === 0) {
+
+    if (!tasks || tasks.length === 0) {
       container.innerHTML = '<p>Tidak ada tugas yang ditugaskan kepada Anda.</p>';
-    } else {
+      return;
+    }
 
+    // Ambil data staff dan karu untuk autocomplete
+    const staffProfiles = await fetchStaffProfiles();
+    const karuProfiles = await fetchKaruProfiles();
 
-      // Ambil data staff untuk dropdown dari endpoint baru
-      const staffProfiles = await fetchStaffProfiles();
-      // console.log(staffProfiles);
+    tasks.forEach(task => {
+      const taskEl = document.createElement('div');
+      taskEl.className = 'col-md-4 task-item';
 
-      const karuProfiles = await fetchKaruProfiles();
-      // console.log(karuProfiles);
-    
-      tasks.forEach(task => {
-        const taskEl = document.createElement('div');
-        taskEl.className = 'col-md-4 task-item';
-        
-        // Tentukan tombol aksi yang akan ditampilkan berdasarkan kondisi
-        let buttonsHTML = '';
-        if (task.next_step_if_approved === null && task.next_step_if_rejected === null) {
-          buttonsHTML += `<button class="btn btn-warning btn-sm" onclick="processTask(${task.id}, 'stop')">Selesaikan</button>`;
-        } else {
-          if (task.next_step_if_rejected === null) {
-            buttonsHTML += `<button class="btn btn-success btn-sm" onclick="processTask(${task.id}, 'approve')">Setuju</button>`;
-          } else {
-            buttonsHTML += `<button class="btn btn-success btn-sm" onclick="processTask(${task.id}, 'approve')">Setuju</button>
-                            <button class="btn btn-danger btn-sm" onclick="processTask(${task.id}, 'reject')">Tolak</button>`;
-          }
-          if (task.no_need_next_step) {
-            buttonsHTML += `<button class="btn btn-warning btn-sm ml-1" onclick="processTask(${task.id}, 'stop')">Selesaikan</button>`;
-          }
+      // Tentukan tombol aksi
+      let buttonsHTML = '';
+      if (task.next_step_if_approved === null && task.next_step_if_rejected === null) {
+        buttonsHTML = `<button class="btn btn-warning btn-sm" onclick="processTask(${task.id}, 'stop', ${task.acted_by}, ${task.initiated_by})">Selesaikan</button>`;
+      } else {
+        buttonsHTML = `<button class="btn btn-success btn-sm" onclick="processTask(${task.id}, 'approve', ${task.acted_by}, ${task.initiated_by})">Setuju</button>`;
+        if (task.next_step_if_rejected !== null) {
+          buttonsHTML += `<button class="btn btn-danger btn-sm ml-1" onclick="processTask(${task.id}, 'reject', ${task.acted_by}, ${task.initiated_by})">Tolak</button>`;
         }
-    
-        // Tambahkan link download jika file ada
-        let fileDownloadHTML = '';
-        if (task.file_path && task.last_step_id) {
-          fileDownloadHTML = `<a href="/api/workflow/instance-steps/${task.last_step_id}/file" target="_blank" class="btn btn-info btn-sm">Download File</a>`;
+        if (task.no_need_next_step) {
+          buttonsHTML += `<button class="btn btn-warning btn-sm ml-1" onclick="processTask(${task.id}, 'stop', ${task.acted_by}, ${task.initiated_by})">Selesaikan</button>`;
         }
-        
-        // Buat input pencarian dengan datalist untuk staff
-        // Menggunakan id unik per task agar datalist-nya terpisah
-        // Tampilkan dropdown hanya jika task.to_role adalah "staff"
-        // Ambil step_order saat ini
-        const currentStepOrder = task.step_order;
-        // console.log('Step order saat ini:', currentStepOrder);
-        const nextStepOrder = currentStepOrder + 1; // Hitung step_order berikutnya
+      }
 
-        // Lakukan fetch untuk mendapatkan data step berikutnya
-        fetchWithAuth(`/api/workflow/steps/${task.workflow_id}/${nextStepOrder}`)
-          .then(response => {
-            if (response.ok) {
-              return response.json();
-            } else {
-              throw new Error('Step berikutnya tidak ditemukan');
-            }
-          })
-          .then(nextStep => {
-            // Ambil nilai to_role dari step berikutnya
-            const toRole = nextStep.to_role;
-            // console.log('Ini role selanjutnya:', toRole);
+      // Link download file jika ada
+      const fileDownloadHTML = task.file_path && task.last_step_id
+        ? `<a href="/api/workflow/instance-steps/${task.last_step_id}/file" target="_blank" class="btn btn-info btn-sm">Download File</a>`
+        : '';
 
-            // Bangun dropdownHTML berdasarkan toRole
-            let dropdownHTML = '';
-            if (toRole === 'Staff') {
-              dropdownHTML = `
-                <p class="card-text" style="margin-bottom: 0;"><small>Kirim ke</small></p>
-                <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari staff..." list="staffList-${task.id}">
-                <datalist id="staffList-${task.id}">
-                  ${staffProfiles.map(staff => `<option value="${staff.nama_lengkap}">`).join('')}
-                </datalist>
-              `;
-            }
-            else if(toRole === 'Kepala Ruangan') {
-              dropdownHTML = `
-                <p class="card-text" style="margin-bottom: 0;"><small>Kirim ke</small></p>
-                <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari kepala ruangan..." list="staffList-${task.id}">
-                <datalist id="staffList-${task.id}">
-                  ${karuProfiles.map(karu => `<option value="${karu.nama_lengkap}">`).join('')}
-                </datalist>
-              `;
-            }
+      // Tentukan step_order berikutnya
+      const nextStepOrder = task.step_order + 1;
 
-            // Setelah dropdownHTML siap, sisipkan ke dalam innerHTML elemen taskEl
-            taskEl.innerHTML = `
-              <div class="card mb-3" style="color: #767676">
-                <div class="card-body">
-                  <h5 class="card-title">${task.title} (${task.code})</h5>
-                  <p class="card-text">${task.description}</p>
-                  <p class="card-text" style="margin-bottom: 0;"><small>Status: ${task.status}</small></p>
-                  <p class="card-text" style="margin-bottom: 0;"><small>Langkah: ${task.current_step_order}</small></p>
-                  <p class="card-text"><small>Aksis: ${task.action_description || '-'}</small></p>
-                  <form class="mb-2" id="task-form-${task.id}" enctype="multipart/form-data">
-                    <input type="hidden" name="instanceId" value="${task.id}">
-                    ${dropdownHTML}
-                    <label for="fileInput-${task.id}">Upload file (jika diperlukan):</label>
-                    <input type="file" name="file" class="form-control" id="fileInput-${task.id}" accept=".pdf,.doc,.docx,.xls,.xlsx">
-                  </form>
-                  ${buttonsHTML}
-                  ${fileDownloadHTML}
-                </div>
+      // Fetch step berikutnya untuk mengetahui role
+      fetchWithAuth(`/api/workflow/steps/${task.workflow_id}/${nextStepOrder}`)
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(nextStep => {
+          const toRole = nextStep.to_role;
+          let dropdownHTML = '';
+
+          if (toRole === 'Staff') {
+            dropdownHTML = `
+              <p class="card-text" style="margin-bottom: 0;"><small>Kirim ke</small></p>
+              <div class="autocomplete-container" style="position: relative;">
+                <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari staff..." data-role="staff" data-task-id="${task.id}" autocomplete="off">
+                <div class="autocomplete-results" id="results-${task.id}" style="position: absolute; z-index: 1000; background: white; width: 100%; border: 1px solid #ccc;"></div>
               </div>
             `;
-          })
-          .catch(error => {
-            // console.log('Tidak ada langkah berikutnya untuk step_order:', currentStepOrder);
-            // Jika fetch gagal, kamu bisa memilih untuk tetap merender elemen tanpa dropdown
-            taskEl.innerHTML = `
-              <div class="card mb-3" style="color: #767676">
-                <div class="card-body">
-                  <h5 class="card-title">${task.title} (${task.code})</h5>
-                  <p class="card-text">${task.description}</p>
-                  <p class="card-text" style="margin-bottom: 0;"><small>Status: ${task.status}</small></p>
-                  <p class="card-text" style="margin-bottom: 0;"><small>Langkah: ${task.current_step_order}</small></p>
-                  <p class="card-text"><small>Aksi: ${task.action_description || '-'}</small></p>
-                  <form class="mb-2" id="task-form-${task.id}" enctype="multipart/form-data">
-                    <input type="hidden" name="instanceId" value="${task.id}">
-                    <label for="fileInput-${task.id}">Upload file (jika diperlukan):</label>
-                    <input type="file" name="file" class="form-control" id="fileInput-${task.id}" accept=".pdf,.doc,.docx,.xls,.xlsx">
-                  </form>
-                  ${buttonsHTML}
-                  ${fileDownloadHTML}
-                </div>
+          } else if (toRole === 'Kepala Ruangan') {
+            dropdownHTML = `
+              <p class="card-text" style="margin-bottom: 0;"><small>Kirim ke</small></p>
+              <div class="autocomplete-container" style="position: relative;">
+                <input type="text" name="assigned_user_name" class="form-control staff-search" placeholder="Cari kepala ruangan..." data-role="karu" data-task-id="${task.id}" autocomplete="off">
+                <div class="autocomplete-results" id="results-${task.id}" style="position: absolute; z-index: 1000; background: white; width: 100%; border: 1px solid #ccc;"></div>
               </div>
             `;
+          }
+
+          // Render elemen card
+          taskEl.innerHTML = `
+            <div class="card mb-3" style="color: #767676">
+              <div class="card-body">
+                <h5 class="card-title">${task.title} (${task.code})</h5>
+                <p class="card-text">${task.description}</p>
+                <p class="card-text"><small>Status: ${task.status}</small></p>
+                <p class="card-text"><small>Langkah: ${task.current_step_order}</small></p>
+                <p class="card-text"><small>Aksi: ${task.action_description || '-'} </small></p>
+                <form id="task-form-${task.id}" class="mb-2" enctype="multipart/form-data">
+                  <input type="hidden" name="instanceId" value="${task.id}">
+                  ${dropdownHTML}
+                  <label for="fileInput-${task.id}">Upload file (jika diperlukan):</label>
+                  <input type="file" name="file" class="form-control" id="fileInput-${task.id}" accept=".pdf,.doc,.docx,.xls,.xlsx">
+                </form>
+                ${buttonsHTML}
+                ${fileDownloadHTML}
+              </div>
+            </div>
+          `;
+
+          container.appendChild(taskEl);
+
+          const fileInput = taskEl.querySelector(`#fileInput-${task.id}`);
+          fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // daftar MIME type yang diizinkan
+            const allowedTypes = [
+              'application/pdf',
+              'application/msword',
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              'application/vnd.ms-excel',
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+              alert('Tipe file tidak diizinkan. Hanya PDF, DOC, DOCX, XLS, XLSX yang diperbolehkan.');
+              e.target.value = '';  // reset input
+              return;
+            }
+
+            // batas maksimal 5MB
+            const maxSize = 5 * 1024 * 1024; // 5MB dalam bytes
+            if (file.size > maxSize) {
+              alert('Ukuran file terlalu besar. Maksimum 5 MB.');
+              e.target.value = '';  // reset input
+              return;
+            }
           });
 
-        container.appendChild(taskEl);
-      });
-    }
+          // Inisialisasi autocomplete setelah rendering
+          const inputEl = taskEl.querySelector('.staff-search');
+          const resultsBox = taskEl.querySelector('.autocomplete-results');
+
+          inputEl.addEventListener('input', () => {
+            const query = inputEl.value.toLowerCase();
+            const role = inputEl.dataset.role;
+            const list = role === 'staff' ? staffProfiles : karuProfiles;
+            const filtered = list.filter(u => u.nama_lengkap.toLowerCase().includes(query)).slice(0, 5);
+
+            resultsBox.innerHTML = '';
+            if (!query || filtered.length === 0) return;
+
+            filtered.forEach(u => {
+              const div = document.createElement('div');
+              div.className = 'autocomplete-item';
+              div.style.padding = '6px 12px';
+              div.style.cursor = 'pointer';
+              div.textContent = u.nama_lengkap;
+              div.addEventListener('click', () => {
+                inputEl.value = u.nama_lengkap;
+                resultsBox.innerHTML = '';
+              });
+              resultsBox.appendChild(div);
+            });
+          });
+
+          document.addEventListener('click', e => {
+            if (!inputEl.contains(e.target) && !resultsBox.contains(e.target)) {
+              resultsBox.innerHTML = '';
+            }
+          });
+
+        })
+        .catch(() => {
+          // Jika tidak ada next step, render tanpa dropdown
+          taskEl.innerHTML = `<div class="card mb-3" style="color: #767676"><div class="card-body">` +
+            `<h5 class="card-title">${task.title} (${task.code})</h5>` +
+            `<p class="card-text">${task.description}</p>` +
+            `<p class="card-text"><small>Status: ${task.status}</small></p>` +
+            `<p class="card-text"><small>Langkah: ${task.current_step_order}</small></p>` +
+            `<p class="card-text"><small>Aksi: ${task.action_description || '-'} </small></p>` +
+            `<form id="task-form-${task.id}" class="mb-2" enctype="multipart/form-data">` +
+            `<input type="hidden" name="instanceId" value="${task.id}">` +
+            `<label for="fileInput-${task.id}">Upload file (jika diperlukan):</label>` +
+            `<input type="file" name="file" class="form-control" id="fileInput-${task.id}" accept=".pdf,.doc,.docx,.xls,.xlsx">` +
+            `</form>` +
+            buttonsHTML + fileDownloadHTML +
+            `</div></div>`;
+          container.appendChild(taskEl);
+        });
+
+    });
   }
+
   
 
 
@@ -735,42 +784,49 @@ addNavListener('register-button', '../login-form/register.html');
               tableBody.appendChild(row);
           });
         }
-        // else {
-        //     const filteredTasks = tasks.filter(task => task.username === currentUser);
-
-        //     filteredTasks.forEach((task, index) => {
-        //         const row = document.createElement('tr');
-
-        //         let fileDownloadHTML = task.file_path
-        //             ? `<a href="/api/workflow/instance-steps/${task.step_id}/file" target="_blank" class="btn btn-info btn-sm">Download</a>`
-        //             : `<a>No File</a>`;
-
-        //         row.innerHTML = `
-        //             <td>${index + 1}</td>
-        //             <td>${task.code}</td>
-        //             <td>${task.title}</td>
-        //             <td>${task.description}</td>
-        //             <td>${task.action_taken}</td>
-        //             <td>${task.nama_lengkap}</td>
-        //             <td>${new Date(task.acted_at).toLocaleString()}</td>
-        //             <td>${fileDownloadHTML}</td>
-        //         `;
-
-        //         tableBody.appendChild(row);
-        //     });
-        // }
     } catch (error) {
         console.error("Terjadi kesalahan:", error);
+        location.reload();
     }
 }
 
   // Fungsi untuk memproses aksi tugas (approve, reject, atau stop) dengan file upload
-  window.processTask = async (instanceId, action) => {
+  window.processTask = async (instanceId, action, userSenderTask, userSenderInitiate) => {
     try {
       const formElement = document.getElementById(`task-form-${instanceId}`);
       const formData = new FormData(formElement);
+      const form = document.getElementById(`task-form-${instanceId}`);
+      if (!form) {
+        console.error(`Form untuk task ${instanceId} tidak ditemukan.`);
+        return;
+      }
+
+
+      let assignedName = null;
+      const assignedNameInput = form.querySelector('input[name="assigned_user_name"]');
+      if(assignedNameInput) {
+        assignedName = assignedNameInput?.value?.trim();
+      }
       formData.append('action', action);
-      
+      formData.append('senderTask', userSenderTask || '');
+      formData.append('senderInitiate', userSenderInitiate || '');
+
+
+
+      if (assignedNameInput) {
+        const arr = (action === 'approve' && form.querySelector('.staff-search'))
+          ? staffProfiles.map(u => u.nama_lengkap)
+          : karuProfiles.map(u => u.nama_lengkap);
+
+        console.log('isi assigned name : ', assignedName);
+
+        if(!assignedName || assignedName.trim() === '') {}
+        else if(!arr.includes(assignedName)) {
+          return alert(`"${assignedName}" tidak terdaftar. Mohon pilih user yang tersedia dari daftar.`);
+        }
+      }
+      console.log('usersendertask : ', userSenderTask);
+      console.log('usersenderinitiate : ', userSenderInitiate);
       const res = await fetchWithAuth(`/api/workflow/instances/${instanceId}/step`, {
         method: 'POST',
         body: formData
@@ -780,7 +836,8 @@ addNavListener('register-button', '../login-form/register.html');
       fetchTasks();
     } catch (error) {
       console.error('Error processing task:', error);
-      alert('Terjadi kesalahan saat memproses tugas.');
+      alert('Terjadi kesalahan saat memproses tugas.', error);
+      location.reload();
     }
   };
 
@@ -800,6 +857,7 @@ addNavListener('register-button', '../login-form/register.html');
       await verifUser();
     } catch (error) {
       console.error('Error processing task:', error);
+      location.reload();
     }
   };
 
@@ -873,6 +931,35 @@ addNavListener('register-button', '../login-form/register.html');
             `;
             container.appendChild(templateEl);
 
+            const fileInput = templateEl.querySelector(`#templateFileInput-${template.workflow_id}`);
+            fileInput.addEventListener('change', (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+
+              // daftar MIME type yang diizinkan
+              const allowedTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+              ];
+
+              if (!allowedTypes.includes(file.type)) {
+                alert('Tipe file tidak diizinkan. Hanya PDF, DOC, DOCX, XLS, XLSX yang diperbolehkan.');
+                e.target.value = '';  // reset input
+                return;
+              }
+
+              // batas maksimal 5MB
+              const maxSize = 5 * 1024 * 1024; // 5MB dalam bytes
+              if (file.size > maxSize) {
+                alert('Ukuran file terlalu besar. Maksimum 5 MB.');
+                e.target.value = '';  // reset input
+                return;
+              }
+            });
+
             const input = templateEl.querySelector('.staff-search');
             const resultsBox = templateEl.querySelector('.autocomplete-results');
 
@@ -937,6 +1024,7 @@ addNavListener('register-button', '../login-form/register.html');
               } catch (error) {
                 console.error('Error initiating task:', error);
                 alert('Terjadi kesalahan saat menginisiasi tugas.');
+                location.reload();
               }
 
               
@@ -944,11 +1032,6 @@ addNavListener('register-button', '../login-form/register.html');
         })
       });
     }
-      
-// sudah menambahkan fungsi untuk memberikan value user tertentu jika langkah selanjutnya adalah staff atau karu
-// untuk backend nya belum di setting untuk penerimaannya
-// uji untuk memastikan tampil dropdown apabila next role adalah karu atau staff sudah di lakukan
-
   
   // Fungsi untuk mengambil template workflow
   async function fetchAvailableTemplates() {
@@ -959,6 +1042,7 @@ addNavListener('register-button', '../login-form/register.html');
       displayAvailableTemplates(templates);
     } catch (error) {
       console.error('Error fetching templates:', error);
+      location.reload();
     }
   }
 

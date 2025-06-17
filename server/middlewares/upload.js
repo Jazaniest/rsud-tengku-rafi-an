@@ -1,11 +1,10 @@
-// server/middlewares/upload.js
 const multer = require('multer');
 const path = require('path');
 
 // Konfigurasi penyimpanan file di folder uploads
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    cb(null, '../uploads/'); // pastikan folder ini ada di root server Anda
+    cb(null, '../uploads/'); 
   },
   filename: function(req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -27,7 +26,13 @@ const fileFilter = (req, file, cb) => {
   } else {
     cb(new Error('Tipe file tidak diizinkan, hanya Word, Excel, dan PDF yang diperbolehkan.'), false);
   }
+  
+  const maxSize = 5 * 1024 * 1024;
+  if(file.size > maxSize) {
+    cb(new Error('Ukuran file melebihi batas maksimal, pilih file dengan ukuran di bawah 5MB'))
+  }
 };
+
 
 const upload = multer({
   storage: storage,
