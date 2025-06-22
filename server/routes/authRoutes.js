@@ -55,5 +55,7 @@ router.post('/register', authController.register);
 router.get('/profile', authMiddleware, authController.getProfile);
 router.post('/token', authController.refreshToken);
 router.post('/logout', authController.logout);
+router.post('/reset-pass-user', authMiddleware, authController.resetPass);
+router.post('/reset-pass-admin', authMiddleware, authController.resetForce);
 
 module.exports = router;

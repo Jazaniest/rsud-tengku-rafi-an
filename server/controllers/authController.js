@@ -80,7 +80,7 @@ exports.login = async (req, res) => {
     const accessToken = jwt.sign(
       { id: user.id, role: user.role, namaLengkap: user.nama_lengkap },
       ACCESS_TOKEN_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '10s' }
     );
 
     const refreshToken = jwt.sign(
@@ -193,7 +193,7 @@ exports.refreshToken = async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: user.id, role: user.role, namaLengkap: user.nama_lengkap },
       ACCESS_TOKEN_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '10s' }
     );
     res.json({ accessToken: newAccessToken });
   } catch (err) {
@@ -209,4 +209,55 @@ exports.logout = async (req, res) => {
   }
   res.clearCookie('refreshToken').sendStatus(204);
 };
+
+exports.resetPass = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { oldPassword, newPassword } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password_hash);
+    if (oldPassword === newPassword) {
+      return res.status(400).json({ message: 'Password baru tidak boleh sama dengan password lama' });
+    }
+    else if (!isMatch) {
+      return res.status(400).json({ message: 'Password lama tidak cocok' });
+    }
+
+    const saltRounds = 10;
+    const newHashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [newHashedPassword, userId]);
+
+    return res.json({ message: 'Password berhasil diubah' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+exports.resetForce = async (req, res) => {
+  try {
+    const { username, newPassword } = req.body;
+
+    const user = await User.findByUsername(username);
+    if (!user) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+
+    const saltRounds = 10;
+    const newHashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [newHashedPassword, user.id])
+
+    return res.json({ message: 'Password berhasil direset secara paksa' });
+  } catch (error) {
+    console.error('Reset force error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 

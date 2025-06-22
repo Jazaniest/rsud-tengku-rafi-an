@@ -3729,11 +3729,14 @@ h6 {
 }
 
 /* contoh styling tombol-tombol di dalam dropdown */
-.profile-dropdown .input {
+/* .profile-dropdown {
+  display: none;
+}
+.profile-dropdown {
   display: flex;
   flex-direction: column;
 }
-.profile-dropdown .value {
+.profile-dropdown {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -3743,11 +3746,8 @@ h6 {
   padding: 8px 16px;
   cursor: pointer;
   font-size: 0.95rem;
-  color: #333;
-}
-.profile-dropdown .value:hover {
-  background: #f5f5f5;
-}
+  color: #7a6767;
+} */
 
 #profileBtn {
   outline: none;
