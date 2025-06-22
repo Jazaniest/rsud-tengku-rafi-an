@@ -207,27 +207,35 @@ async function inputUserDelete(chatId) {
 bot.onText(/\/start(?:\s+(.+))?/, async (msg) => {
   const chatId = msg.chat.id;
 
-  await bot.sendMessage(chatId, 'Selamat datang di sistem notifikasi RSUD Tengku Rafi`an');
+  try {
+    await bot.sendMessage(chatId, 'Selamat datang di sistem notifikasi RSUD Tengku Rafi`an');
 
-  const linkRows = await pool.query(
-    'SELECT * FROM user_telegram WHERE telegram_id = ?',
-    [chatId]
-  );
-
-  const usernameId = linkRows[0]?.[0]?.user_id || null;
-
-  if (usernameId != null ) {
-    await bot.sendMessage(chatId, 'Akun anda sudah terdaftar di bot ini');
-
-  } else {
-    await bot.sendMessage(chatId, 
-      'Akun anda belum terdaftar di bot ini, silahkan ketik <code>/register link:(username anda di website)</code> untuk mendaftar ke bot ini', 
-      { parse_mode: 'HTML' }
+    const linkRows = await pool.query(
+      'SELECT * FROM user_telegram WHERE telegram_id = ?',
+      [chatId]
     );
-    await bot.sendMessage(chatId, 
-      'Contoh : <code>/register link:itsmeahsan</code>',
-      { parse_mode: 'HTML'}
-    );
+
+    const usernameId = linkRows[0]?.[0]?.user_id || null;
+
+    if (usernameId != null ) {
+      await bot.sendMessage(chatId, 'Akun anda sudah terdaftar di bot ini');
+
+    } else {
+      await bot.sendMessage(chatId, 
+        'Akun anda belum terdaftar di bot ini, silahkan ketik <code>/register link:(username anda di website)</code> untuk mendaftar ke bot ini', 
+        { parse_mode: 'HTML' }
+      );
+      await bot.sendMessage(chatId, 
+        'Contoh : <code>/register link:itsmeahsan</code>',
+        { parse_mode: 'HTML'}
+      );
+    }
+  } catch (error) {
+    if(error.response && error.response.statusCode === 403) {
+      console.warn(`Gagal kirim pesan: Bot di blokir oleh user ${chatId}`);
+    } else {
+      console.error('Terjadi kesalahan : ', error);
+    }
   }
 
 })
