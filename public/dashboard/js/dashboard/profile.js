@@ -14,189 +14,129 @@ export function renderProfileHeader(profile) {
 export function initRoleBasedUI(profile) {
     const container = document.getElementById('logbook');
     const profileRole = document.getElementById('role').textContent;
+
+    const profileButtonMobile = `<li class="nav-item profile-mobile"><a class="nav-link" href="profile/profile.html">My profile</a></li>`;
+    const logbookButtonMobile = `<li class="nav-item profile-mobile"><a class="nav-link" href="logbook.html">Logbook</a></li>`;
+    const dataButtonMobile = `<li class="nav-item profile-mobile"><a class="nav-link" href="user.html">Data user</a></li>`;
+    const registerButtonMobile = `<li class="nav-item profile-mobile"><a class="nav-link" href="../login-form/register.html">Register user</a></li>`;
+    const resetAdminMobile = `<li class="nav-item profile-mobile"><a class="nav-link" id="btnOpenResetAdminModal" data-bs-toggle="modal" data-bs-target="#modalResetAdmin">Reset Password User</a></li>`;
+    const resetButtonMobile = `<li class="nav-item profile-mobile"><a class="nav-link" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetUser">Ganti Password</a></li>`;
+    const logoutButtonMobile = `
+      <li class="nav-item profile-mobile">
+        <a class="nav-link" href="../login-form/index.html" id="logoutLink">Logout</a>
+      </li>
+    `;
+    const profileButtonDesktop = `
+      <button class="value" id="profile-button">
+        <i class="bi bi-person" style="color: #626c77;"></i>
+        My profile
+      </button>
+    `;
+    const logbookButtonDesktop = `
+      <button class="value" id="logbook-button">
+        <i class="bi bi-book" style="color: #626c77;"></i>
+        Logbook
+      </button>
+    `;
+    const dataButtonDesktop = `
+      <button class="value" id="user-data-button">
+        <i class="bi bi-card-list" style="color: #626c77;"></i>
+        Data user
+      </button>
+    `;
+    const registerButtonDesktop = `
+      <button class="value" id="register-button">
+        <i class="bi bi-plus-circle" style="color: #626c77;"></i>
+        Register user
+      </button> 
+    `;
+    const resetAdminDesktop = `
+      <button class="value" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetAdmin">
+        <i class="bi bi-key" style="color: #626c77;"></i>
+        Reset Password User
+      </button> 
+    `;
+    const resetButtonDesktop = `
+      <button class="value" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetUser">
+        <i class="bi bi-key" style="color: #626c77;"></i>
+        Ganti Password
+      </button>
+    `;
+    const buttonDesktopMode = `
+      <button id="profileBtn" class="btn p-0 border-0 bg-transparent">
+        <img src="img/profile-icon.png" alt="profile" style="width: 180%; height:180%">
+      </button>
+    `;
+    const logoutButtonDesktop = `
+      <li class="nav-item profile-desktop">
+        <button class="Btn-logout mt-3" id="logoutLink">
+          <div class="sign">
+            <svg viewBox="0 0 512 512">
+              <path
+                d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"
+              ></path>
+            </svg>
+          </div>
+          <div class="text">Logout</div>
+        </button>
+      </li>
+    `;
+
+
     if (profileRole === 'Staff') {
         container.innerHTML = `
-        <li class="nav-item profile-mobile"><a class="nav-link" href="profile/profile.html">My profile</a></li>
-        <li class="nav-item profile-mobile"><a class="nav-link" href="logbook.html">Logbook</a></li>
-        <li class="nav-item profile-mobile"><a class="nav-link" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetUser">Ganti Password</a></li>
+        ${profileButtonMobile}${logbookButtonMobile}${resetButtonMobile}
         <li class="nav-item mr-3 profile-desktop" style="position: relative; width:80px; height:80px">
-          <button id="profileBtn" class="btn p-0 border-0 bg-transparent">
-            <img src="img/profile-icon.png" alt="profile" style="width: 180%; height:180%">
-          </button>
-
+          ${buttonDesktopMode}
           <div class="profile-dropdown" id="profileDropdown">
             <div class="input-profile">
-              <button class="value" id="profile-button">
-                <i class="bi bi-person" style="color: #626c77;"></i>
-                My profile
-              </button>
-              <button class="value" id="logbook-button">
-                <i class="bi bi-book" style="color: #626c77;"></i>
-                Logbook
-              </button>
-              <button class="value" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetUser">
-                <i class="bi bi-key" style="color: #626c77;"></i>
-                Ganti Password
-              </button>
+              ${profileButtonDesktop}${logbookButtonDesktop}${resetButtonDesktop}
             </div>
           </div>
         </li>
-        <li class="nav-item profile-desktop">
-          <button class="Btn-logout mt-3" id="logoutLink">
-            <div class="sign">
-              <svg viewBox="0 0 512 512">
-                <path
-                  d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"
-                ></path>
-              </svg>
-            </div>
-            <div class="text">Logout</div>
-          </button>
-        </li>
-
-        <li class="nav-item profile-mobile">
-          <a class="nav-link" href="../login-form/index.html" id="logoutLink">Logout</a>
-        </li>
+        ${logoutButtonDesktop}${logoutButtonMobile}
         `;
     } 
     else if (profileRole === 'super admin') {
         container.innerHTML = `
-        <li class="nav-item profile-mobile"><a class="nav-link" href="profile/profile.html">My profile</a></li>
-        <li class="nav-item profile-mobile"><a class="nav-link" href="user.html">Data user</a></li>
-        <li class="nav-item profile-mobile"><a class="nav-link" href="../login-form/register.html">Register user</a></li>
-        <li class="nav-item profile-mobile"><a class="nav-link" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetUser">Ganti Password</a></li>
-        <li class="nav-item profile-mobile"><a class="nav-link" id="btnOpenResetAdminModal" data-bs-toggle="modal" data-bs-target="#modalResetAdmin">Reset Password User</a></li>
+        ${profileButtonMobile}${dataButtonMobile}${registerButtonMobile}${resetButtonMobile}${resetAdminMobile}
         <li class="nav-item mr-3 profile-desktop" style="position: relative; width:80px; height:80px">
-          <button id="profileBtn" class="btn p-0 border-0 bg-transparent">
-            <img src="img/profile-icon.png" alt="profile" style="width: 180%; height:180%">
-          </button>
-
+          ${buttonDesktopMode}
           <div class="profile-dropdown" id="profileDropdown">
             <div class="input-profile">
-              <button class="value" id="profile-button">
-                <i class="bi bi-person" style="color: #626c77;"></i>
-                My profile
-              </button>
-              <button class="value" id="user-data-button">
-                <i class="bi bi-card-list" style="color: #626c77;"></i>
-                Data user
-              </button>
-              <button class="value" id="register-button">
-                <i class="bi bi-plus-circle" style="color: #626c77;"></i>
-                Register user
-              </button> 
-              <button class="value" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetUser">
-                <i class="bi bi-key" style="color: #626c77;"></i>
-                Ganti Password
-              </button>
-              <button class="value" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetAdmin">
-                <i class="bi bi-key" style="color: #626c77;"></i>
-                Reset Password User
-              </button> 
+              ${profileButtonDesktop}${dataButtonDesktop}${registerButtonDesktop}${resetButtonDesktop}${resetAdminDesktop}
             </div>
           </div>
         </li>
-        <li class="nav-item profile-desktop">
-          <button class="Btn-logout mt-3" id="logoutLink">
-            <div class="sign">
-              <svg viewBox="0 0 512 512">
-                <path
-                  d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"
-                ></path>
-              </svg>
-            </div>
-            <div class="text">Logout</div>
-          </button>
-        </li>
-
-        <li class="nav-item profile-mobile">
-          <a class="nav-link" href="../login-form/index.html" id="logoutLink">Logout</a>
-        </li>
+        ${logoutButtonDesktop}${logbookButtonMobile}
         `;
     } 
     else if (profileRole === 'Kepala Ruangan') {
         container.innerHTML = `
-        <li class="nav-item profile-mobile"><a class="nav-link" href="profile/profile.html">My profile</a></li>
-        <li class="nav-item profile-mobile"><a class="nav-link" href="logbook.html">Logbook</a></li>
-        <li class="nav-item profile-mobile"><a class="nav-link" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetUser">Ganti Password</a></li>
+        ${profileButtonMobile}${logbookButtonMobile}${resetButtonMobile}
         <li class="nav-item mr-3 profile-desktop" style="position: relative; width:80px; height:80px">
-          <button id="profileBtn" class="btn p-0 border-0 bg-transparent">
-            <img src="img/profile-icon.png" alt="profile" style="width: 180%; height:180%">
-          </button>
-
+          ${buttonDesktopMode}
           <div class="profile-dropdown" id="profileDropdown">
             <div class="input-profile">
-              <button class="value" id="profile-button">
-                <i class="bi bi-person" style="color: #626c77;"></i>
-                My profile
-              </button>
-              <button class="value" id="logbook-button">
-                <i class="bi bi-book" style="color: #626c77;"></i>
-                Logbook
-              </button>
-              <button class="value" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetUser">
-                <i class="bi bi-key" style="color: #626c77;"></i>
-                Ganti Password
-              </button>
+              ${profileButtonDesktop}${logbookButtonDesktop}${resetButtonDesktop}
             </div>
           </div>
         </li>
-        <li class="nav-item profile-desktop">
-          <button class="Btn-logout mt-3" id="logoutLink">
-            <div class="sign">
-              <svg viewBox="0 0 512 512">
-                <path
-                  d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"
-                ></path>
-              </svg>
-            </div>
-            <div class="text">Logout</div>
-          </button>
-        </li>
-
-        <li class="nav-item profile-mobile">
-          <a class="nav-link" href="../login-form/index.html" id="logoutLink">Logout</a>
-        </li>
+        ${logoutButtonDesktop}${logoutButtonMobile}
         `;
     } 
     else {
         container.innerHTML = `
-        <li class="nav-item profile-mobile"><a class="nav-link" href="profile/profile.html">My profile</a></li>
-        <li class="nav-item profile-mobile"><a class="nav-link" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetUser">Ganti Password</a></li>
+        ${profileButtonMobile}${resetButtonMobile}
         <li class="nav-item mr-3 profile-desktop" style="position: relative; width:80px; height:80px">
-          <button id="profileBtn" class="btn p-0 border-0 bg-transparent">
-            <img src="img/profile-icon.png" alt="profile" style="width: 180%; height:180%">
-          </button>
-
+          ${buttonDesktopMode}
           <div class="profile-dropdown" id="profileDropdown">
             <div class="input-profile">
-              <button class="value" id="profile-button">
-                <i class="bi bi-person" style="color: #626c77;"></i>
-                My profile
-              </button>
-              <button class="value" id="btnOpenResetUserModal" data-bs-toggle="modal" data-bs-target="#modalResetUser">
-                <i class="bi bi-key" style="color: #626c77;"></i>
-                Ganti Password
-              </button>
+              ${profileButtonDesktop}${resetButtonDesktop}
             </div>
           </div>
         </li>
-        <li class="nav-item profile-desktop">
-          <button class="Btn-logout mt-3" id="logoutLink">
-            <div class="sign">
-              <svg viewBox="0 0 512 512">
-                <path
-                  d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"
-                ></path>
-              </svg>
-            </div>
-            <div class="text">Logout</div>
-          </button>
-        </li>
-
-        <li class="nav-item profile-mobile">
-          <a class="nav-link" href="../login-form/index.html" id="logoutLink">Logout</a>
-        </li>
+        ${logoutButtonDesktop}${logoutButtonMobile}
         `;
     }
 

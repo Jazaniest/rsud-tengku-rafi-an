@@ -1,15 +1,27 @@
-import { requireAuth, logout } from '../auth.js';
-import { fetchProfile, renderProfileHeader, initSwitchButton, initRoleBasedUI } from './profile.js';
+import {
+  requireAuth,
+  logout
+} from '../auth.js';
+import {
+  fetchProfile,
+  renderProfileHeader,
+  initSwitchButton,
+  initRoleBasedUI
+} from './profile.js';
 import './ui/dropdown.js';
 import './ui/modals.js';
-// import { validateFileInput } from './ui/fileValidation.js';
-import { fetchTasks, verifUser } from './tasks/fetchTask.js';
+import {
+  fetchTasks,
+  verifUser
+} from './tasks/fetchTask.js';
 import './tasks/displayInitiated.js';
 import './tasks/displayAssigned.js';
 import './tasks/displayRecent.js';
 import './tasks/displayVerification.js';
 import './templates.js';
-import { fetchAvailableTemplates } from './templates.js';
+import {
+  fetchAvailableTemplates
+} from './templates.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const token = localStorage.getItem('accessToken');
