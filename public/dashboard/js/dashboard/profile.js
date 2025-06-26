@@ -200,9 +200,6 @@ export function initRoleBasedUI(profile) {
         `;
     }
 
-    // if (profile.role === 'super admin') {
-    //   await initSwitchButton();
-    // }
     const profileBtn     = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');
 
@@ -369,7 +366,7 @@ export async function initSwitchButton() {
   try {
     const registerButton = document.getElementById('register');
     const profile = document.getElementById('role').textContent;
-    console.log('isi profile : ', profile);
+    // console.log('isi profile : ', profile);
 
     if(profile === 'super admin') {
         registerButton.innerHTML = `
@@ -384,10 +381,7 @@ export async function initSwitchButton() {
     }
 
     const switchButton = document.getElementById('cb3-8');
-    if (!switchButton) {
-        console.error('Switch button tidak ditemukan.');
-        return;
-    }
+    if (!switchButton) return;
 
     const response = await fetch('/api/switch/status-get');
     if (!response.ok) throw new Error('Gagal mengambil status switch dari server');
@@ -446,3 +440,15 @@ export async function fetchKaruProfiles() {
         return [];
     }
 }
+
+export async function fetchAllProfiles() {
+  try {
+    const res = await fetchWithAuth('/api/auth/all');
+    if (!res.ok) throw new Error('Gagal mengambil data seluruh staff');
+    const profiles = await res.json();
+    return profiles;
+  }catch (error) {
+    console.error('Error fetching all staff profiles:', error);
+    return[];
+  }
+} 

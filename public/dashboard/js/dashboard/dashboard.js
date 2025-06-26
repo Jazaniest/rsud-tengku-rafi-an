@@ -1,4 +1,4 @@
-import { requireAuth, logout } from './auth.js';
+import { requireAuth, logout } from '../auth.js';
 import { fetchProfile, renderProfileHeader, initSwitchButton, initRoleBasedUI } from './profile.js';
 import './ui/dropdown.js';
 import './ui/modals.js';

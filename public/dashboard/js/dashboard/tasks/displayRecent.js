@@ -26,7 +26,7 @@ export async function displayRecentTasks(tasks) {
 
     tasks.forEach((task, i) => {
       const fileCell = task.file_path
-        ? `<a href="/api/workflow/instance-steps/${task.step_id}/file" target="_blank">Download</a>`
+        ? `<a href="/api/workflow/instance-steps/${task.step_id}/file" target="_blank" class="btn btn-primary btn-sm">Download</a>`
         : 'No File';
 
       const row = document.createElement('tr');

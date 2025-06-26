@@ -1509,6 +1509,11 @@ ul {
     @media (max-width: 1199px) {
       .appointment-area .card .btn-link.collapsed {
         font-size: 14px; } }
+    @media (max-width: 990px) and (min-width: 770px) {
+      .card {
+        width: 150%;
+      }
+    }
   .appointment-area .card .card-body {
     font-weight: 300;
     font-size: 14px;

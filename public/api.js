@@ -13,7 +13,9 @@ window.fetchWithAuth = async (url, options = {}) => {
     let payload;
     try {
       payload = await response.json();
-    } catch (_) { /* gagal parse */ }
+    } catch (error) {
+      console.error('gagal parsing data dengan error : ', error)
+    }
 
     if (payload && payload.expired) {
       const refreshRes = await fetch('/api/auth/token', {
@@ -26,7 +28,6 @@ window.fetchWithAuth = async (url, options = {}) => {
         localStorage.setItem('accessToken', newToken);
         response = await makeRequest();
         location.reload();
-        console.log('berhasil retoken dan reload')
       } else {
         alert('sesi telah berakhir, silahkan login ulang!');
         window.location.href = '/index.html';

@@ -47,6 +47,18 @@ router.get('/karu', async (req, res) => {
   }
 });
 
+router.get('/all', async (req, res) => {
+  try {
+    const allUsers = await sequelize.query(
+      "SELECT nama_lengkap FROM users",
+      { type: QueryTypes.SELECT }
+    );
+    res.json(allUsers);
+  } catch (error) {
+    console.error
+  }
+})
+
 // Gunakan middleware upload.single('fotoProfile') di route editProfile
 router.put('/editProfile', authMiddleware, upload.single('fotoProfile'), authController.editProfile);
 

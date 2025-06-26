@@ -22,6 +22,6 @@ export function logout() {
   fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
     .finally(() => {
       localStorage.removeItem('accessToken');
-      window.location.href = '../login-form/index.html';
+      window.location.href = '../index.html';
     });
 }

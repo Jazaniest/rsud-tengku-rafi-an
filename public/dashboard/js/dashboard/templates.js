@@ -1,5 +1,5 @@
 // import { fetchWithAuth } from './auth.js';
-import { fetchKaruProfiles, fetchStaffProfiles } from './profile.js';
+import { fetchKaruProfiles, fetchStaffProfiles, fetchAllProfiles } from './profile.js';
 import { fetchTasks } from './tasks/fetchTask.js';
 
 export async function fetchAvailableTemplates() {
@@ -20,6 +20,7 @@ export async function displayAvailableTemplates(templates) {
 
       const staffProfiles = await fetchStaffProfiles();
       const karuProfiles = await fetchKaruProfiles();
+      const allProfiles = await fetchAllProfiles();
 
       if (!templates || templates.length === 0) {
         container.innerHTML = '<p>Tidak ada tugas yang dapat diinisiasi untuk peran Anda.</p>';
@@ -58,17 +59,19 @@ export async function displayAvailableTemplates(templates) {
                 <div class="autocomplete-results" id="results-${template.workflow_id}" style="position: absolute; z-index: 1000; background: white; width: 100%; border: 1px solid #ccc;"></div>
               </div>
             `;
+            } else {
+              dropdownInitiate = `<div class="mb-3" style="height: 40px;"></div>`;
             }
 
 
             const templateEl = document.createElement('div');
-            templateEl.className = 'col-md-4 task-item';
+            templateEl.className = 'col-md-3 task-item';
             templateEl.innerHTML = `
-              <div class="card mb-3" style="color: #767676">
+              <div class="card mb-3" style="color: #767676;">
                 <div class="card-body">
                   <h5 class="card-title">${template.title} (${template.code})</h5>
                   <p class="card-text">${template.description}</p>
-                  <p class="card-text"><small>Aksi: ${template.action_description}</small></p>
+                  <p class="card-text mb-5"><small>Aksi: ${template.action_description}</small></p>
                   <form class="mb-2" id="template-form-${template.workflow_id}" enctype="multipart/form-data">
                     <input type="hidden" name="instanceId" value="${template.workflow_id}">
                     ${dropdownInitiate}
@@ -98,55 +101,57 @@ export async function displayAvailableTemplates(templates) {
 
               if (!allowedTypes.includes(file.type)) {
                 alert('Tipe file tidak diizinkan. Hanya PDF, DOC, DOCX, XLS, XLSX yang diperbolehkan.');
-                e.target.value = '';  // reset input
-                return;
-              }
+                  e.target.value = '';  // reset input
+                  return;
+                }
 
-              // batas maksimal 5MB
-              const maxSize = 5 * 1024 * 1024; // 5MB dalam bytes
-              if (file.size > maxSize) {
-                alert('Ukuran file terlalu besar. Maksimum 5 MB.');
-                e.target.value = '';  // reset input
-                return;
-              }
-            });
+                // batas maksimal 5MB
+                const maxSize = 5 * 1024 * 1024; // 5MB dalam bytes
+                if (file.size > maxSize) {
+                  alert('Ukuran file terlalu besar. Maksimum 5 MB.');
+                  e.target.value = '';  // reset input
+                  return;
+                }
+              });
 
-            const input = templateEl.querySelector('.staff-search');
-            const resultsBox = templateEl.querySelector('.autocomplete-results');
+              if(toRole.includes('Kepala Ruangan', 'Staff')) {
+                const input = templateEl.querySelector('.staff-search');
+                const resultsBox = templateEl.querySelector('.autocomplete-results');
 
-            input.addEventListener('input', () => {
-              const query = input.value.toLowerCase();
-              const role = input.dataset.role;
-              const sourceList = role === 'staff' ? staffProfiles : karuProfiles;
+                input.addEventListener('input', () => {
+                  const query = input.value.toLowerCase();
+                  const role = input.dataset.role;
+                  const sourceList = role === 'staff' ? staffProfiles : allProfiles;
 
-              const filtered = sourceList
-                .filter(item => item.nama_lengkap.toLowerCase().includes(query))
-                .slice(0, 5); 
+                  const filtered = sourceList
+                    .filter(item => item.nama_lengkap.toLowerCase().includes(query))
+                    .slice(0, 5); 
 
-              resultsBox.innerHTML = '';
-              if (query.length === 0 || filtered.length === 0) return;
-
-              filtered.forEach(item => {
-                const div = document.createElement('div');
-                div.classList.add('autocomplete-item');
-                div.style.padding = '6px 12px';
-                div.style.cursor = 'pointer';
-                div.textContent = item.nama_lengkap;
-
-                div.addEventListener('click', () => {
-                  input.value = item.nama_lengkap;
                   resultsBox.innerHTML = '';
+                  if (query.length === 0 || filtered.length === 0) return;
+
+                  filtered.forEach(item => {
+                    const div = document.createElement('div');
+                    div.classList.add('autocomplete-item');
+                    div.style.padding = '6px 12px';
+                    div.style.cursor = 'pointer';
+                    div.textContent = item.nama_lengkap;
+
+                    div.addEventListener('click', () => {
+                      input.value = item.nama_lengkap;
+                      resultsBox.innerHTML = '';
+                    });
+
+                    resultsBox.appendChild(div);
+                  });
                 });
 
-                resultsBox.appendChild(div);
-              });
-            });
-
-            document.addEventListener('click', (e) => {
-              if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
-                resultsBox.innerHTML = '';
-              }
-            });
+                document.addEventListener('click', (e) => {
+                  if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
+                    resultsBox.innerHTML = '';
+                  }
+                });
+            }
 
 
 
@@ -155,31 +160,46 @@ export async function displayAvailableTemplates(templates) {
             btn.addEventListener('click', async () => {
               try {
                 const formElement = document.getElementById(`template-form-${template.workflow_id}`);
-                const formData = new FormData(formElement);
+                const formData    = new FormData(formElement);
 
+                // Ambil value assigned_user_name (bisa null jika input tidak ada)
                 const assignedInput = formElement.querySelector('input[name="assigned_user_name"]');
-                formData.set('assigned_user_name', assignedInput?.value || '');
-                const res = await fetchWithAuth('/api/workflow/instances', {
+                const assignedName  = assignedInput?.value?.trim() || '';
+
+                // Validasi: jika ada input assigned_user_name, cek apakah kosong atau tidak terdaftar
+                if (assignedInput) {
+                  // Pilih list yang sesuai
+                  const list = assignedInput.dataset.role === 'staff' ? staffProfiles : karuProfiles;
+                  // Extract nama lengkap saja
+                  const names = list.map(u => u.nama_lengkap);
+
+                  if (assignedName === '') {
+                    // boleh kosong (terima default penugasan berikutnya)
+                  } else if (!names.includes(assignedName)) {
+                    // Nama tidak valid → tampilkan alert dan stop
+                    return alert(`"${assignedName}" tidak terdaftar. Mohon pilih user yang tersedia dari daftar.`);
+                  }
+                }
+
+                // Semua valid → tambahkan ke formData
+                formData.set('assigned_user_name', assignedName);
+
+                const res    = await fetchWithAuth('/api/workflow/instances', {
                   method: 'POST',
-                  body: formData
+                  body:   formData
                 });
                 const result = await res.json();
 
+                alert(result.message);
                 if (res.ok) {
-                  alert(result.message);
-                  // untuk refresh tasklist
-                  fetchTasks();
-                } else {
-                  alert(result.message);
+                  fetchTasks();  // refresh
                 }
               } catch (error) {
                 console.error('Error initiating task:', error);
                 alert('Terjadi kesalahan saat menginisiasi tugas.');
                 location.reload();
               }
-
-              
-          });
+            });
         })
       });
 }

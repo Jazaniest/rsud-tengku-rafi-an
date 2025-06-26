@@ -8,6 +8,7 @@ let staffProfiles = [];
 let karuProfiles = [];
 
 export async function displayAssignedTasks(tasks) {
+  // console.log('isi tasks : ', tasks);
   const container = document.getElementById('tasksList');
   container.innerHTML = '';
   if (!tasks || tasks.length === 0) {
@@ -23,48 +24,70 @@ export async function displayAssignedTasks(tasks) {
 
   tasks.forEach(task => {
     const taskEl = document.createElement('div');
-    taskEl.className = 'col-md-4 task-item';
+    taskEl.className = 'col-md-3 task-item';
 
     // Tombol aksi
     let buttonsHTML = '';
     if (task.next_step_if_approved === null && task.next_step_if_rejected === null) {
-      buttonsHTML = `<button class="btn btn-warning btn-sm" onclick="processTask(${task.id}, 'stop', ${task.acted_by}, ${task.initiated_by})">Selesaikan</button>`;
+      buttonsHTML = `<button class="btn btn-warning btn-sm mt-1" onclick="processTask(${task.id}, 'stop', ${task.acted_by}, ${task.initiated_by})">Selesaikan</button>`;
     } else {
-      buttonsHTML = `<button class="btn btn-success btn-sm" onclick="processTask(${task.id}, 'approve', ${task.acted_by}, ${task.initiated_by})">Setuju</button>`;
+      buttonsHTML = `<button class="btn btn-success btn-sm mt-1" onclick="processTask(${task.id}, 'approve', ${task.acted_by}, ${task.initiated_by})">Setuju</button>`;
       if (task.next_step_if_rejected !== null) {
-        buttonsHTML += `<button class="btn btn-danger btn-sm ml-1" onclick="processTask(${task.id}, 'reject', ${task.acted_by}, ${task.initiated_by})">Tolak</button>`;
+        buttonsHTML += `<button class="btn btn-danger btn-sm ml-1 mt-1" onclick="processTask(${task.id}, 'reject', ${task.acted_by}, ${task.initiated_by})">Tolak</button>`;
       }
       if (task.no_need_next_step) {
-        buttonsHTML += `<button class="btn btn-warning btn-sm ml-1" onclick="processTask(${task.id}, 'stop', ${task.acted_by}, ${task.initiated_by})">Selesaikan</button>`;
+        buttonsHTML += `<button class="btn btn-warning btn-sm ml-1 mt-1" onclick="processTask(${task.id}, 'stop', ${task.acted_by}, ${task.initiated_by})">Selesaikan</button>`;
       }
     }
 
     // Link download
     const fileDownloadHTML = task.file_path && task.last_step_id
-      ? `<a href="/api/workflow/instance-steps/${task.last_step_id}/file" target="_blank" class="btn btn-info btn-sm">Download File</a>`
+      ? `<a href="/api/workflow/instance-steps/${task.last_step_id}/file" target="_blank" class="btn btn-primary btn-sm">Download File</a>`
       : '';
 
+    const baseHTML = `
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">${task.title} (${task.code})</h5>
+          <p class="card-text">${task.description}</p>
+          <p class="card-text"><small>Status: ${task.status}</small></p>
+          <p class="card-text"><small>Langkah: ${task.current_step_order}</small></p>
+          <form class="mb-2" id="task-form-${task.id}" enctype="multipart/form-data">
+            <input type="hidden" name="instanceId" value="${task.id}">
+            <label for="fileInput-${task.id}">Upload file:</label>
+            <input class="form-control" type="file" id="fileInput-${task.id}" accept=".pdf,.doc,.docx,.xls,.xlsx">
+          </form>
+          ${buttonsHTML}
+          ${fileDownloadHTML}
+        </div>
+      </div>
+    `;
+    
     // Cari role selanjutnya
-    const nextStepOrder = task.step_order + 1;
+    const nextStepOrder = task.next_step_if_approved;
     fetchWithAuth(`/api/workflow/steps/${task.workflow_id}/${nextStepOrder}`)
       .then(res => res.ok ? res.json() : Promise.reject())
       .then(nextStep => {
+        if(!nextStep) return;
         const toRole = nextStep.to_role;
         let dropdownHTML = '';
+        // console.log('isi to role : ', toRole)
         if (toRole === 'Staff') {
           dropdownHTML = `
-            <p class="card-text"><small>Kirim ke</small></p>
+            <p class="card-text mb-1"><small>Kirim ke</small></p>
             <div class="autocomplete-container" style="position: relative;">
-              <input type="text" class="form-control staff-search" placeholder="Cari staff..." data-role="staff" data-task-id="${task.id}" autocomplete="off">
+              <input name="assigned_user_name" type="text" class="form-control staff-search" placeholder="Cari staff..." data-role="staff" data-task-id="${task.id}" autocomplete="off">
               <div class="autocomplete-results" id="results-${task.id}"></div>
             </div>`;
         } else if (toRole === 'Kepala Ruangan') {
           dropdownHTML = `
-            <p class="card-text"><small>Kirim ke</small></p>
+            <p class="card-text mb-1"><small>Kirim ke</small></p>
             <div class="autocomplete-container" style="position: relative;">
-              <input type="text" class="form-control staff-search" placeholder="Cari kepala ruangan..." data-role="karu" data-task-id="${task.id}" autocomplete="off">
+              <input name="assigned_user_name" type="text" class="form-control staff-search" placeholder="Cari kepala ruangan..." data-role="karu" data-task-id="${task.id}" autocomplete="off">
               <div class="autocomplete-results" id="results-${task.id}"></div>
             </div>`;
+        } else {
+          dropdownHTML = `<div style="height: 40px; margin-bottom: 34px"></div>`;
         }
 
         taskEl.innerHTML = `
@@ -86,23 +109,6 @@ export async function displayAssignedTasks(tasks) {
           </div>`;
         container.appendChild(taskEl);
 
-        const baseHTML = `
-          <div class="card mb-3">
-            <div class="card-body">
-              <h5 class="card-title">${task.title} (${task.code})</h5>
-              <p class="card-text">${task.description}</p>
-              <p class="card-text"><small>Status: ${task.status}</small></p>
-              <p class="card-text"><small>Langkah: ${task.current_step_order}</small></p>
-              <form class="mb-2" id="task-form-${task.id}" enctype="multipart/form-data">
-                <input type="hidden" name="instanceId" value="${task.id}">
-                <label for="fileInput-${task.id}">Upload file:</label>
-                <input class="form-control" type="file" id="fileInput-${task.id}" accept=".pdf,.doc,.docx,.xls,.xlsx">
-              </form>
-              ${buttonsHTML}
-              ${fileDownloadHTML}
-            </div>
-          </div>
-        `;
 
         taskEl.innerHTML = baseHTML.replace(
           '</form>',
@@ -115,6 +121,7 @@ export async function displayAssignedTasks(tasks) {
 
         // Autocomplete
         const inputEl = taskEl.querySelector('.staff-search');
+        if(!inputEl) return;
         const resultsBox = taskEl.querySelector('.autocomplete-results');
         inputEl.addEventListener('input', () => {
           const query = inputEl.value.toLowerCase();
@@ -138,8 +145,8 @@ export async function displayAssignedTasks(tasks) {
           }
         });
       })
-      .catch(() => {
-        // Jika step berikutnya tidak ada
+      .catch((error) => {
+        console.error(('tugas selanjutnya tidak tersedia: ', error))
         taskEl.innerHTML = baseHTML;
       });
   });
@@ -171,7 +178,7 @@ export async function displayAssignedTasks(tasks) {
           ? staffProfiles.map(u => u.nama_lengkap)
           : karuProfiles.map(u => u.nama_lengkap);
 
-        console.log('isi assigned name : ', assignedName);
+        // console.log('isi assigned name : ', assignedName);
 
         if(!assignedName || assignedName.trim() === '') {}
         else if(!arr.includes(assignedName)) {

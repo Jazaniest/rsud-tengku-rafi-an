@@ -46,6 +46,7 @@
 						<span class="label-input100">Password</span>
 						<input class="input100" type="password" name="password" placeholder="Type your password" id="password">
 						<span class="focus-input100" data-symbol="&#xf190;"></span>
+						<span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password" style="position:absolute; top:55%; right:15px; cursor:pointer; display:none;"></span>
 					</div>
 					
 					<div class="text-right p-t-8 p-b-31">
@@ -96,6 +97,33 @@
 
 		inputUsername.addEventListener("input", function(e) {
 			e.target.setCustomValidity("");
+		});
+
+
+		document.addEventListener('DOMContentLoaded', function () {
+			const togglePassword = document.querySelector('.toggle-password');
+			const passwordInput = document.querySelector('#password');
+
+			// Tampilkan/hidden ikon mata saat user mengetik
+			passwordInput.addEventListener('input', function () {
+				if (passwordInput.value.length > 0) {
+					togglePassword.style.display = 'block';
+				} else {
+					togglePassword.style.display = 'none';
+					// Reset ke mode tersembunyi saat kosong
+					passwordInput.setAttribute('type', 'password');
+					togglePassword.classList.remove('fa-eye-slash');
+					togglePassword.classList.add('fa-eye');
+				}
+			});
+
+			// Toggle icon dan tipe input
+			togglePassword.addEventListener('click', function () {
+				const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+				passwordInput.setAttribute('type', type);
+				this.classList.toggle('fa-eye');
+				this.classList.toggle('fa-eye-slash');
+			});
 		});
 	</script>
 
