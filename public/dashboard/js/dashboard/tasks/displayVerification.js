@@ -31,6 +31,7 @@ export function displayVerificationUser(tasks) {
     const taskEl = document.createElement('div');
     taskEl.className = 'col-md-4 task-item';
     taskEl.innerHTML = `
+      <h4>Tugas Admin</h4>
       <div class="card mb-3">
         <div class="card-body">
           <h5>${task.title} (${task.code})</h5>
@@ -45,4 +46,24 @@ export function displayVerificationUser(tasks) {
       </div>`;
     container.appendChild(taskEl);
   });
+
+  window.processValid = async function(taskId, action) {
+    try {
+      const res = await fetchWithAuth(`/api/workflow/tasks/${taskId}/step`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: action })
+      });
+
+      if (!res.ok) throw new Error('Gagal memproses tugas');
+      const result = await res.json();
+      // console.log('Tugas berhasil diproses:', result);
+      await verifUser();
+    } catch (error) {
+      console.error('Error processing task:', error);
+      location.reload();
+    }
+  };
 }

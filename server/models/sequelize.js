@@ -11,7 +11,6 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-// Import model User (sesuaikan dengan struktur model)
 db.User = require('./User');
 
 module.exports = db;

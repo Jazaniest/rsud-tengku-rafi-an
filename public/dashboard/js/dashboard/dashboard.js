@@ -6,7 +6,8 @@ import {
   fetchProfile,
   renderProfileHeader,
   initSwitchButton,
-  initRoleBasedUI
+  initRoleBasedUI,
+  initTelegram
 } from './profile.js';
 import './ui/dropdown.js';
 import './ui/modals.js';
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   requireAuth();
   const profile = await fetchProfile();
   renderProfileHeader(profile);
+  initTelegram();
   initSwitchButton();
   initRoleBasedUI();
 

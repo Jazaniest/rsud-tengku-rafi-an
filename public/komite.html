@@ -17,17 +17,29 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/responsive.css">
     <!-- bootstrap -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.rtl.min.css" integrity="sha384-Xbg45MqvDIk1e563NLpGEulpX6AvL404DP+/iCgW9eFa2BqztiwTexswJo2jLMue" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <!-- Treant.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/treant-js/1.0/Treant.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/treant-js/1.0/vendor/perfect-scrollbar.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/treant-js/1.0/Treant.min.js"></script>
 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
     <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
         /* Ukuran fix kotak node */
+        #tree-simple {
+            width: 100%;
+            overflow-x: auto;
+            padding: 10px;
+        }
+
         .node {
-            width: 335px;
+            width: 250px;
             min-height: 100px;
             text-align: center;
             padding: 10px;
@@ -38,30 +50,46 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            border: 2px solid #3541ac;
         }
 
-        /* Biar gambar bulat dan proporsional */
         .node img {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             object-fit: cover;
             border-radius: 50%;
-            display: block;
             margin-bottom: 8px;
         }
 
-        /* Nama dan title */
         .node .node-name {
             font-weight: bold;
             color: #1e1e1e;
             font-size: 16px;
-            line-height: 1.2;
         }
 
         .node .node-title {
             font-size: 14px;
             color: #555;
-            line-height: 1.2;
+        }
+
+        @media (max-width: 768px) {
+            .node {
+            width: 180px;
+            padding: 8px;
+            }
+
+            .node img {
+            width: 55px;
+            height: 55px;
+            }
+
+            .node .node-name {
+            font-size: 14px;
+            }
+
+            .node .node-title {
+            font-size: 12px;
+            }
         }
 
         /* Untuk container biar scroll kalau melebar */
@@ -79,6 +107,27 @@
         .Treant .collapse-switch {
             width: 14px;
             height: 14px;
+        }
+
+        .card-fungsi {
+        background: linear-gradient(135deg, #acc0e4, #fff);
+        border: 2px solid #3541ac;
+        border-radius: 16px;
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .card-fungsi ol li {
+            margin-bottom: 8px;
+        }
+        .card-fungsi:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        .card-fungsi .card-title,
+        .icon-fungsi {
+        color: #3541ac;
+        }
+        .icon-fungsi {
+        font-size: 48px;
         }
 
     </style>
@@ -181,47 +230,120 @@
 <div id="chart-container"></div>
 
 <!-- Start Latar Belakang Area -->
-<section class="sample-text-area">
+<section class="py-5" style="background: linear-gradient(135deg, #f0f4ff, #ffffff);">
     <div class="container">
-        <h3 class="text-heading title_color fs-2" style="display: flex; justify-content: center; align-items: center;">Latar Belakang</h3>
-        <p class="fs-4" style="font-family: sans-serif; text-align: center;">Komite Keperawatan dibentuk sebagai badan independen di lingkungan RSUD Tengku Rafi'an untuk memastikan mutu, keselamatan, dan etika praktik keperawatan. Komite ini menjadi forum evaluasi, koordinasi, dan rekomendasi terkait standar asuhan keperawatan di seluruh unit pelayanan.</p>
+        <h3 class="text-center fw-bold mb-4 text-primary">
+            <i class="bi bi-info-circle"></i> Latar Belakang
+        </h3>
+        <p class="fs-5 text-center" style="max-width: 800px; margin: 0 auto; font-family: 'Segoe UI', sans-serif;">
+            Komite Keperawatan dibentuk sebagai badan independen di lingkungan RSUD Tengku Rafi'an untuk memastikan mutu, keselamatan, dan etika praktik keperawatan. Komite ini menjadi forum evaluasi, koordinasi, dan rekomendasi terkait standar asuhan keperawatan di seluruh unit pelayanan.
+        </p>
     </div>
 </section>
-<!-- End Latar Belakang Area -->
-<!-- Start Tujuan -->
-<section class="button-area">
-    <div class="container border-top-generic">
-        <h3 class="text-heading title_color fs-2" style="display: flex; justify-content: center; align-items: center;">Tujuan</h3>
-        <ol class="fs-4" style="font-family: sans-serif;">
-            <li>Menjamin penerapan standar praktik keperawatan berbasis bukti.</li>
-            <li>Memonitor dan mengevaluasi indikator mutu serta keselamatan pasien.</li>
-            <li>Memberikan rekomendasi kebijakan dan prosedur baru untuk peningkatan layanan keperawatan.</li>
-            <li>Mendorong pengembangan kompetensi melalui program pelatihan dan penelitian.</li>
-        </li>
-    </div>
-</section>
-<!-- End Tujuan -->
-<!-- Start Tujuan utama & Fungsi -->
-<section class="button-area">
-    <div class="container border-top-generic">
-        <h3 class="text-heading title_color fs-2" style="display: flex; justify-content: center; align-items: center;">Tujuan utama & Fungsi</h3>
-        <h3 class="text-heading title_color fs-3">Tujuan Utama</h3>
-        <ol class="fs-4" style="font-family: sans-serif;">
-            <li>Menyusun, mengkaji ulang, dan menetapkan Pedoman Praktik Keperawatan (PPK).</li>
-            <li>Melakukan audit klinis keperawatan berkala dan insiden pelaporan.</li>
-            <li>Menyelenggarakan rapat komite minimal setiap triwulan untuk membahas temuan audit, laporan insiden, dan tindak lanjut</li>
-            <li>Merekomendasikan perbaikan prosedur kerja berdasarkan hasil audit dan umpan balik pasien.</li>
-            <li>Mengidentifikasi kebutuhan pelatihan dan riset keperawatan.</li>
-        </ol>
 
-        <h3 class="text-heading title_color fs-3 mt-5">Fungsi</h3>
-        <ol class="fs-4" style="font-family: sans-serif;">
-            <li>Fasilitasi koordinasi antar unit keperawatan.</li>
-            <li>Publikasi hasil temuan dan best practice keperawatan.</li>
-            <li>Menjadi mediator saat terjadi perbedaan interpretasi kebijakan keperawatan.</li>
-        </ol>
+<!-- End Latar Belakang Area -->
+<!-- Start fungsi -->
+<section class="py-5">
+  <div class="container">
+    <h3 class="text-center fw-bold mb-5">Fungsi Komite Keperawatan</h3>
+    <div class="row g-4">
+      <!-- Card 1 -->
+      <div class="col-md-4">
+        <div class="card card-fungsi h-100 text-center p-3">
+          <div class="icon-fungsi"><i class="bi bi-person-badge"></i></div>
+          <div class="card-body">
+            <h5 class="card-title">Kredensial</h5>
+            <p class="card-text">
+              Melakukan kredensial bagi seluruh tenaga keperawatan yang memberikan pelayanan di rumah sakit.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="col-md-4">
+        <div class="card card-fungsi h-100 text-center p-3">
+          <div class="icon-fungsi"><i class="bi bi-award"></i></div>
+          <div class="card-body">
+            <h5 class="card-title">Pemeliharaan Mutu Profesi</h5>
+            <p class="card-text">
+              Memelihara mutu profesi tenaga keperawatan demi menjaga kualitas pelayanan yang optimal.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="col-md-4">
+        <div class="card card-fungsi h-100 text-center p-3">
+          <div class="icon-fungsi"><i class="bi bi-shield-check"></i></div>
+          <div class="card-body">
+            <h5 class="card-title">Penegakan Disiplin dan Etika Profesi</h5>
+            <p class="card-text">
+              Menjaga disiplin, etika, dan perilaku profesi perawat dan bidan agar sesuai standar profesi.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </section>
+<!-- End fungsi -->
+<!-- Start Tujuan utama & Fungsi -->
+<section class="py-5">
+  <div class="container">
+    <h3 class="text-center fw-bold mb-5">Tugas Komite Keperawatan</h3>
+    <div class="row g-4">
+      <!-- Card 1: Kredensial -->
+      <div class="col-md-4">
+        <div class="card card-fungsi h-100 text-center p-4">
+          <div class="icon-fungsi"><i class="bi bi-person-vcard"></i></div>
+          <div class="card-body">
+            <h5 class="card-title">Fungsi Kredensial</h5>
+            <ol class="text-start">
+              <li>Menyusun daftar rincian Kewenangan Klinis dan Buku Putih.</li>
+              <li>Melakukan verifikasi persyaratan Kredensial.</li>
+              <li>Memberikan rekomendasi Kewenangan Klinis tenaga keperawatan.</li>
+              <li>Memberikan rekomendasi pemulihan Kewenangan Klinis.</li>
+              <li>Melakukan kredensial ulang secara berkala.</li>
+              <li>Melaporkan seluruh proses kredensial kepada Ketua Komite.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2: Mutu Profesi -->
+      <div class="col-md-4">
+        <div class="card card-fungsi h-100 text-center p-4">
+          <div class="icon-fungsi"><i class="bi bi-award-fill"></i></div>
+          <div class="card-body">
+            <h5 class="card-title">Fungsi Pemeliharaan Mutu Profesi</h5>
+            <ol class="text-start">
+              <li>Menyusun data dasar profil tenaga keperawatan.</li>
+              <li>Memberikan rekomendasi pengembangan profesional berkelanjutan.</li>
+              <li>Melakukan audit keperawatan dan kebidanan.</li>
+              <li>Memfasilitasi proses pendampingan sesuai kebutuhan.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <!-- Card 3: Disiplin & Etika -->
+      <div class="col-md-4">
+        <div class="card card-fungsi h-100 text-center p-4">
+          <div class="icon-fungsi"><i class="bi bi-shield-lock"></i></div>
+          <div class="card-body">
+            <h5 class="card-title">Fungsi Disiplin dan Etika Profesi</h5>
+            <ol class="text-start">
+              <li>Melakukan sosialisasi kode etik profesi.</li>
+              <li>Melakukan pembinaan etika dan disiplin profesi.</li>
+              <li>Memberikan rekomendasi penyelesaian pelanggaran disiplin dan etik.</li>
+              <li>Memberikan rekomendasi pencabutan Kewenangan Klinis.</li>
+              <li>Memberikan pertimbangan etis dalam pengambilan keputusan asuhan.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- End Tujuan utama & Fungsi -->
 
 <!-- Start Bagan -->
@@ -344,12 +466,12 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
                     collapsable: true,
                     HTMLclass: 'node'
                 },
-                animation: {
-                    nodeAnimation: "easeOutBounce",
-                    nodeSpeed: 700,
-                    connectorsAnimation: "bounce",
-                    connectorsSpeed: 700
-                },
+                // animation: {
+                //     nodeAnimation: "easeOutBounce",
+                //     nodeSpeed: 700,
+                //     connectorsAnimation: "bounce",
+                //     connectorsSpeed: 700
+                // },
                 levelSeparation: 50, // jarak antar level
                 siblingSeparation: 30, // jarak antar sibling
                 subTeeSeparation: 50  // jarak antar subtree

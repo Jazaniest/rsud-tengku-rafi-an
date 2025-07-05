@@ -6,7 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const User = require('../models/User');
 const { Op, QueryTypes } = require('sequelize');
-const { sequelize } = require('../models');
+const { sequelize } = require('../models/sequelize');
 const { auth } = require('firebase-admin');
 
 // Konfigurasi storage untuk Multer
