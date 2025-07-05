@@ -260,4 +260,38 @@ exports.resetForce = async (req, res) => {
   }
 };
 
+exports.karuDatauser = async (req, res) => {
+  try {
+    const [karuUsers] = await pool.query(
+      "SELECT nama_lengkap FROM users WHERE LOWER(role) = 'kepala ruangan'"
+    );
+    res.json(karuUsers);
+  } catch (error) {
+    console.error('Error fetching karu users:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat mengambil data karu' });
+  }
+}
+
+exports.staffDatauser = async (req, res) => {
+  try {
+    const [staffUsers] = await pool.query(
+      "SELECT nama_lengkap FROM users WHERE LOWER(role) = 'staff'"
+    );
+    res.json(staffUsers);
+  } catch (error) {
+    console.error('Error fetching staff users:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat mengambil data staff' });
+  }
+}
+
+exports.allDatauser = async (req, res) => {
+  try {
+    const [allUsers] = await pool.query("SELECT nama_lengkap FROM users");
+    res.json(allUsers);
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat mengambil data semua pengguna' });
+  }
+}
+
 

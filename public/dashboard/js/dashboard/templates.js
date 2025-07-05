@@ -20,7 +20,6 @@ export async function displayAvailableTemplates(templates) {
 
       const staffProfiles = await fetchStaffProfiles();
       const karuProfiles = await fetchKaruProfiles();
-      const allProfiles = await fetchAllProfiles();
 
       if (!templates || templates.length === 0) {
         container.innerHTML = '<p>Tidak ada tugas yang dapat diinisiasi untuk peran Anda.</p>';
@@ -121,7 +120,7 @@ export async function displayAvailableTemplates(templates) {
                 input.addEventListener('input', () => {
                   const query = input.value.toLowerCase();
                   const role = input.dataset.role;
-                  const sourceList = role === 'staff' ? staffProfiles : allProfiles;
+                  const sourceList = role === 'staff' ? staffProfiles : karuProfiles;
 
                   const filtered = sourceList
                     .filter(item => item.nama_lengkap.toLowerCase().includes(query))
