@@ -3758,3 +3758,8 @@ h6 {
   outline: none;
   box-shadow: none;
 }
+
+.navbar-toggler:focus, .navbar-toggler:active {
+  outline: none;
+  box-shadow: none;
+}

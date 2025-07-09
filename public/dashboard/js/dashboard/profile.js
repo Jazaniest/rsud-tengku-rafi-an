@@ -61,8 +61,8 @@ export function initRoleBasedUI(profile) {
       </button>
     `;
   const buttonDesktopMode = `
-      <button id="profileBtn" class="btn p-0 border-0 bg-transparent">
-        <img src="img/profile-icon.png" alt="profile" style="width: 180%; height:180%">
+      <button id="profileBtn" class="btn p-0 border-0 bg-transparent" style="margin-top: 5px;">
+        <i class="bi bi-person-circle" style="font-size: 2.75rem;"></i>
       </button>
     `;
   const logoutButtonDesktop = `
